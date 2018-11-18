@@ -23,7 +23,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
@@ -50,7 +50,7 @@ import fr.simon.marquis.preferencesmanager.model.XmlFontSize;
 import fr.simon.marquis.preferencesmanager.util.Ui;
 import fr.simon.marquis.preferencesmanager.util.Utils;
 
-public class FileEditorActivity extends ActionBarActivity implements TextWatcher {
+public class FileEditorActivity extends AppCompatActivity implements TextWatcher {
 
     private XmlFontSize mXmlFontSize;
     private ColorThemeEnum mColorTheme;
@@ -91,7 +91,7 @@ public class FileEditorActivity extends ActionBarActivity implements TextWatcher
             finish();
             return;
         }
-        Picasso.with(this).load(b.<Uri>getParcelable(PreferencesFragment.ARG_ICON_URI)).error(R.drawable.ic_launcher).into((android.widget.ImageView) findViewById(android.R.id.home));
+        Picasso.get().load(b.<Uri>getParcelable(PreferencesFragment.ARG_ICON_URI)).error(R.drawable.ic_launcher).into((android.widget.ImageView) findViewById(android.R.id.home));
 
         mFile = b.getString(PreferencesFragment.ARG_FILE);
         mTitle = Utils.extractFileName(mFile);

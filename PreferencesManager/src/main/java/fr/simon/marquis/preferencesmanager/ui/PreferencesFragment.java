@@ -25,7 +25,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SearchView.OnQueryTextListener;
 import android.text.Html;
@@ -273,7 +273,7 @@ public class PreferencesFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CODE_EDIT_FILE && resultCode == ActionBarActivity.RESULT_OK) {
+        if (requestCode == CODE_EDIT_FILE && resultCode == AppCompatActivity.RESULT_OK) {
             loadingView.setVisibility(View.VISIBLE);
             gridView.setVisibility(View.GONE);
 

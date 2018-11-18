@@ -21,7 +21,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
+
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SearchView.OnQueryTextListener;
 import android.text.TextUtils;
@@ -40,7 +41,7 @@ import fr.simon.marquis.preferencesmanager.util.Ui;
 import fr.simon.marquis.preferencesmanager.util.Utils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-public class AppListActivity extends ActionBarActivity {
+public class AppListActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_PREFERENCES_ACTIVITY = 123;
 
