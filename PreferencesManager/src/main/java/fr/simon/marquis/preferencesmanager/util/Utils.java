@@ -249,9 +249,11 @@ public class Utils {
 
     private static void saveVersionCode(Context ctx, SharedPreferences sp) {
         try {
-            sp.edit().putInt(VERSION_CODE_KEY, (int) ctx.getPackageManager()
+            //Ignoring for older devices
+            //noinspection deprecation
+            sp.edit().putInt(VERSION_CODE_KEY, ctx.getPackageManager()
                     .getPackageInfo(ctx.getPackageName(), 0)
-                    .getLongVersionCode())
+                    .versionCode)
                     .apply();
         } catch (Exception e) {
             Log.e(TAG, "Error trying to save the version code", e);
