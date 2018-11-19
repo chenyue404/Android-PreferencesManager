@@ -42,7 +42,7 @@ import fr.simon.marquis.preferencesmanager.util.MyComparator;
 import fr.simon.marquis.preferencesmanager.util.Ui;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
-public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter, Filterable {
+class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter, Filterable {
     private final LayoutInflater layoutInflater;
     private final Context context;
     private final ArrayList<AppEntry> applications;

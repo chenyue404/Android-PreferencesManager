@@ -38,7 +38,7 @@ import fr.simon.marquis.preferencesmanager.R;
 import fr.simon.marquis.preferencesmanager.model.PreferenceType;
 import fr.simon.marquis.preferencesmanager.util.Ui;
 
-public class PreferenceAdapter extends BaseAdapter implements Filterable {
+class PreferenceAdapter extends BaseAdapter implements Filterable {
 
     private final LayoutInflater layoutInflater;
     private final PreferencesFragment mPreferencesFragment;

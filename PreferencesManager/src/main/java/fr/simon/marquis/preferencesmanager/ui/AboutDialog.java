@@ -46,7 +46,7 @@ public class AboutDialog extends DialogFragment {
         newFragment.show(fm, TAG);
     }
 
-    public static AboutDialog newInstance(boolean exit) {
+    private static AboutDialog newInstance(boolean exit) {
         AboutDialog frag = new AboutDialog();
         Bundle args = new Bundle();
         args.putBoolean(ARG_EXIT, exit);

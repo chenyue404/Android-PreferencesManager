@@ -48,7 +48,7 @@ public final class FloatLabelLayout extends FrameLayout {
     private static final float DEFAULT_PADDING_LEFT_RIGHT_DP = 12f;
 
     private EditText mEditText;
-    private TextView mLabel;
+    private final TextView mLabel;
 
     public FloatLabelLayout(Context context) {
         this(context, null);
@@ -141,12 +141,12 @@ public final class FloatLabelLayout extends FrameLayout {
         mLabel.setText(mEditText.getHint());
     }
 
-    /**
-     * @return the {@link android.widget.EditText} text input
-     */
-    public EditText getEditText() {
-        return mEditText;
-    }
+    ///**
+    // * @return the {@link android.widget.EditText} text input
+    // */
+    //public EditText getEditText() {
+    //    return mEditText;
+    //}
 
     ///**
     // * @return the {@link android.widget.TextView} label

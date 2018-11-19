@@ -263,7 +263,7 @@ public class AppListActivity extends AppCompatActivity {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class GetApplicationsTask extends AsyncTask<Void, Void, ArrayList<AppEntry>> {
+    class GetApplicationsTask extends AsyncTask<Void, Void, ArrayList<AppEntry>> {
         private final Context mContext;
 
         GetApplicationsTask(Context ctx) {

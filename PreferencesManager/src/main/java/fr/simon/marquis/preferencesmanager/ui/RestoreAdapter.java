@@ -30,7 +30,7 @@ import java.util.List;
 
 import fr.simon.marquis.preferencesmanager.R;
 
-public class RestoreAdapter extends BaseAdapter {
+class RestoreAdapter extends BaseAdapter {
 
     private final Context ctx;
     private final String fullPath;

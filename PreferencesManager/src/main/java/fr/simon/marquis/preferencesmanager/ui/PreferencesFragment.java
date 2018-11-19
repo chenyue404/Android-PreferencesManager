@@ -439,7 +439,7 @@ public class PreferencesFragment extends Fragment {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class ParsingTask extends AsyncTask<Void, Void, PreferenceFile> {
+    class ParsingTask extends AsyncTask<Void, Void, PreferenceFile> {
         private final String mFile;
 
         ParsingTask(String file) {

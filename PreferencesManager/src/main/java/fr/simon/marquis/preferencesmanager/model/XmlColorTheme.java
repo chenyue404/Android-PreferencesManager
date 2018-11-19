@@ -26,7 +26,7 @@ public class XmlColorTheme {
     }
 
     public enum ColorTagEnum {
-        TAG, ATTR_NAME, ATTR_VALUE, COMMENT, VALUE, DEFAULT
+        TAG, ATTR_NAME, ATTR_VALUE, COMMENT, VALUE
     }
 
     private final int tag;

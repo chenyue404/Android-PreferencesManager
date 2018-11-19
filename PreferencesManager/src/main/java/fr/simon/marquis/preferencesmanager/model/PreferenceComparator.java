@@ -21,7 +21,7 @@ import java.util.Map.Entry;
 
 final class PreferenceComparator implements Comparator<Entry<String, Object>> {
 
-    private PreferenceSortType mType;
+    private final PreferenceSortType mType;
 
     PreferenceComparator(PreferenceSortType type) {
         mType = type;

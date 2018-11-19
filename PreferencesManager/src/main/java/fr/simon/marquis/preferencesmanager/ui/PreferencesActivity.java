@@ -296,8 +296,8 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         backupContainer = b;
     }
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-        private List<String> mFiles;
+    class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private final List<String> mFiles;
 
         SectionsPagerAdapter(FragmentManager fm, List<String> files) {
             super(fm);
@@ -321,7 +321,7 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class FindFilesAndBackupsTask extends AsyncTask<Void, Void, Pair<List<String>, BackupContainer>> {
+    class FindFilesAndBackupsTask extends AsyncTask<Void, Void, Pair<List<String>, BackupContainer>> {
         private final String mPackageName;
 
         FindFilesAndBackupsTask(String packageName) {

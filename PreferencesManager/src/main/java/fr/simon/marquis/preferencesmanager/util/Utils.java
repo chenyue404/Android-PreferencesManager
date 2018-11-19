@@ -284,6 +284,7 @@ public class Utils {
         ed.apply();
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean backupFile(String backup, String fileName, Context ctx) {
         Log.d(TAG, String.format("backupFile(%s, %s)", backup, fileName));
         File destination = new File(ctx.getFilesDir(), backup);
@@ -315,12 +316,12 @@ public class Utils {
         return s.substring(s.lastIndexOf(FILE_SEPARATOR) + 1);
     }
 
-    public static String extractFilePath(String s) {
-        if (TextUtils.isEmpty(s)) {
-            return null;
-        }
-        return s.substring(0, Math.max(s.length(), s.lastIndexOf(FILE_SEPARATOR)));
-    }
+    //public static String extractFilePath(String s) {
+    //    if (TextUtils.isEmpty(s)) {
+    //        return null;
+    //    }
+    //    return s.substring(0, Math.max(s.length(), s.lastIndexOf(FILE_SEPARATOR)));
+    //}
 
     public static boolean savePreferences(PreferenceFile preferenceFile, String file, String packageName, Context ctx) {
         Log.d(TAG, String.format("savePreferences(%s, %s)", file, packageName));
