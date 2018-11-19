@@ -36,7 +36,7 @@ public enum PreferenceType {
     private final int mCardBackgroundLight;
     private final int mCardBackgroundDark;
 
-    private PreferenceType(int dialogLayoutAdd, int dialogLayoutEdit, int dialogTitleAdd, int dialogTitleEdit, int cardBackgroundLight, int cardBackgroundDark) {
+    PreferenceType(int dialogLayoutAdd, int dialogLayoutEdit, int dialogTitleAdd, int dialogTitleEdit, int cardBackgroundLight, int cardBackgroundDark) {
         this.mDialogLayoutAdd = dialogLayoutAdd;
         this.mDialogLayoutEdit = dialogLayoutEdit;
         this.mDialogTitleAdd = dialogTitleAdd;

@@ -15,9 +15,11 @@
  */
 package fr.simon.marquis.preferencesmanager.ui;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
@@ -69,7 +71,7 @@ public class RestoreDialogFragment extends DialogFragment implements AdapterView
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mFullPath = getArguments().getString(ARG_FULL_PATH);
-            backups = new ArrayList<String>();
+            backups = new ArrayList<>();
             try {
                 JSONArray array = new JSONArray(getArguments().getString(ARG_BACKUPS));
                 for (int i = 0; i < array.length(); i++) {
@@ -84,18 +86,20 @@ public class RestoreDialogFragment extends DialogFragment implements AdapterView
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getActivity() == null) {
             return null;
         }
+        @SuppressLint("InflateParams")
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_restore, null);
         assert view != null;
-        ListView listView = (ListView) view.findViewById(R.id.listView);
+        ListView listView = view.findViewById(R.id.listView);
         listView.setAdapter(new RestoreAdapter(getActivity(), this, backups, listener, mFullPath));
         listView.setOnItemClickListener(this);
         return view;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
@@ -104,12 +108,12 @@ public class RestoreDialogFragment extends DialogFragment implements AdapterView
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            listener = (OnRestoreFragmentInteractionListener) activity;
+            listener = (OnRestoreFragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnRestoreFragmentInteractionListener");
+            throw new ClassCastException(context.toString() + " must implement OnRestoreFragmentInteractionListener");
         }
     }
 
@@ -146,15 +150,15 @@ public class RestoreDialogFragment extends DialogFragment implements AdapterView
     public void noMoreBackup() {
         dismiss(getFragmentManager());
         PreferencesFragment fragment = (PreferencesFragment) getTargetFragment();
-        if (fragment != null) {
+        if (fragment != null && fragment.getActivity() != null) {
             fragment.getActivity().invalidateOptionsMenu();
         }
     }
 
 
     public interface OnRestoreFragmentInteractionListener {
-        public String onRestoreFile(String backup, String fullPath);
+        String onRestoreFile(String backup, String fullPath);
 
-        public List<String> onDeleteBackup(String backup, String fullPath);
+        List<String> onDeleteBackup(String backup, String fullPath);
     }
 }

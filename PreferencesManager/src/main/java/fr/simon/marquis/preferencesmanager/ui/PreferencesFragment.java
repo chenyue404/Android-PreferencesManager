@@ -15,16 +15,16 @@
  */
 package fr.simon.marquis.preferencesmanager.ui;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SearchView.OnQueryTextListener;
@@ -41,8 +41,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView.MultiChoiceModeListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,17 +104,17 @@ public class PreferencesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_preferences, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadingView = view.findViewById(R.id.loadingView);
         emptyView = view.findViewById(R.id.emptyView);
-        emptyViewText = (TextView) view.findViewById(R.id.emptyViewText);
-        gridView = (GridView) view.findViewById(R.id.gridView);
+        emptyViewText = view.findViewById(R.id.emptyViewText);
+        gridView = view.findViewById(R.id.gridView);
         gridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
 
         updateFilter(null);
@@ -138,7 +136,7 @@ public class PreferencesFragment extends Fragment {
         inflater.inflate(R.menu.preferences_fragment, menu);
 
         MenuItem searchItem = menu.findItem(R.id.menu_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setQueryHint(getString(R.string.action_search_preference));
         mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
 
@@ -155,7 +153,7 @@ public class PreferencesFragment extends Fragment {
             }
         });
 
-        MenuItemCompat.setOnActionExpandListener(searchItem, new OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem arg0) {
                 return true;
@@ -166,6 +164,7 @@ public class PreferencesFragment extends Fragment {
                 return updateFilter(null);
             }
         });
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -261,7 +260,7 @@ public class PreferencesFragment extends Fragment {
             PreferencesActivity.preferenceSortType = type;
             if (getActivity() != null) {
                 getActivity().invalidateOptionsMenu();
-                PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal()).commit();
+                PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal()).apply();
             }
 
             if (gridView.getAdapter() != null && preferenceFile != null) {
@@ -324,12 +323,12 @@ public class PreferencesFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mListener = (OnPreferenceFragmentInteractionListener) activity;
+            mListener = (OnPreferenceFragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnPreferenceFragmentInteractionListener");
+            throw new ClassCastException(context.toString() + " must implement OnPreferenceFragmentInteractionListener");
         }
     }
 
@@ -339,6 +338,7 @@ public class PreferencesFragment extends Fragment {
         mListener = null;
     }
 
+    @SuppressWarnings("unchecked")
     void updateListView(PreferenceFile p, boolean animate) {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;
@@ -367,18 +367,14 @@ public class PreferencesFragment extends Fragment {
 
         gridView.setAdapter(new PreferenceAdapter(getActivity(), this));
         gridView.setEmptyView(emptyView);
-        gridView.setOnItemClickListener(new OnItemClickListener() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+        gridView.setOnItemClickListener((arg0, arg1, arg2, arg3) -> {
 
-                Entry<String, Object> item = (Entry<String, Object>) gridView.getAdapter().getItem(arg2);
-                PreferenceType type = PreferenceType.fromObject(item.getValue());
-                if (type == PreferenceType.UNSUPPORTED) {
-                    Toast.makeText(getActivity(), R.string.preference_unsupported, Toast.LENGTH_SHORT).show();
-                } else {
-                    showPrefDialog(type, true, item.getKey(), item.getValue());
-                }
+            Entry<String, Object> item = (Entry<String, Object>) gridView.getAdapter().getItem(arg2);
+            PreferenceType type = PreferenceType.fromObject(item.getValue());
+            if (type == PreferenceType.UNSUPPORTED) {
+                Toast.makeText(getActivity(), R.string.preference_unsupported, Toast.LENGTH_SHORT).show();
+            } else {
+                showPrefDialog(type, true, item.getKey(), item.getValue());
             }
         });
         gridView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
@@ -435,17 +431,18 @@ public class PreferencesFragment extends Fragment {
 
     public interface OnPreferenceFragmentInteractionListener {
 
-        public void onBackupFile(String fullPath);
+        void onBackupFile(String fullPath);
 
-        public boolean canRestoreFile(String fullPath);
+        boolean canRestoreFile(String fullPath);
 
-        public List<String> getBackups(String fullPath);
+        List<String> getBackups(String fullPath);
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class ParsingTask extends AsyncTask<Void, Void, PreferenceFile> {
         private final String mFile;
 
-        public ParsingTask(String file) {
+        ParsingTask(String file) {
             super();
             this.mFile = file;
         }

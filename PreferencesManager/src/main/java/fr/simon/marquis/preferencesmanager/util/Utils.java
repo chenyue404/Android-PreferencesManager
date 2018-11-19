@@ -51,16 +51,16 @@ public class Utils {
     public static final String TAG = Utils.class.getSimpleName();
     private static final String FAVORITES_KEY = "FAVORITES_KEY";
     private static final String VERSION_CODE_KEY = "VERSION_CODE";
-    public static final String BACKUP_PREFIX = "BACKUP_";
+    private static final String BACKUP_PREFIX = "BACKUP_";
     private static final String TAG_ROOT_DIALOG = "RootDialog";
     private static final String PREF_SHOW_SYSTEM_APPS = "SHOW_SYSTEM_APPS";
-    public static final String CMD_FIND_XML_FILES = "find /data/data/%s -type f -name \\*.xml";
-    public static final String CMD_CHOWN = "chown %s.%s \"%s\"";
-    public static final String CMD_CAT_FILE = "cat \"%s\"";
-    public static final String CMD_CP = "cp \"%s\" \"%s\"";
-    public static final String TMP_FILE = ".temp";
-    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final String CMD_FIND_XML_FILES = "find /data/data/%s -type f -name \\*.xml";
+    private static final String CMD_CHOWN = "chown %s.%s \"%s\"";
+    private static final String CMD_CAT_FILE = "cat \"%s\"";
+    private static final String CMD_CP = "cp \"%s\" \"%s\"";
+    private static final String TMP_FILE = ".temp";
+    private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     private static final String PACKAGE_NAME_PATTERN = "^[a-zA-Z_\\$][\\w\\$]*(?:\\.[a-zA-Z_\\$][\\w\\$]*)*$";
 
     private static ArrayList<AppEntry> applications;
@@ -77,15 +77,15 @@ public class Utils {
     public static ArrayList<AppEntry> getApplications(Context ctx) {
         PackageManager pm = ctx.getPackageManager();
         if (pm == null) {
-            applications = new ArrayList<AppEntry>();
+            applications = new ArrayList<>();
         } else {
             boolean showSystemApps = isShowSystemApps(ctx);
             List<ApplicationInfo> appsInfo = pm.getInstalledApplications(0);
             if (appsInfo == null) {
-                appsInfo = new ArrayList<ApplicationInfo>();
+                appsInfo = new ArrayList<>();
             }
 
-            List<AppEntry> entries = new ArrayList<AppEntry>(appsInfo.size());
+            List<AppEntry> entries = new ArrayList<>(appsInfo.size());
             for (ApplicationInfo a : appsInfo) {
                 if (showSystemApps || (a.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                     entries.add(new AppEntry(a, ctx));
@@ -93,7 +93,7 @@ public class Utils {
             }
 
             Collections.sort(entries, new MyComparator());
-            applications = new ArrayList<AppEntry>(entries);
+            applications = new ArrayList<>(entries);
         }
         Log.d(TAG, "Applications: " + Arrays.toString(applications.toArray()));
         return applications;
@@ -137,7 +137,7 @@ public class Utils {
 
     private static void initFavorites(Context ctx) {
         if (favorites == null) {
-            favorites = new HashSet<String>();
+            favorites = new HashSet<>();
 
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
 
@@ -162,7 +162,7 @@ public class Utils {
         Log.d(TAG, String.format("setShowSystemApps(%s)", show));
         Editor e = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
         e.putBoolean(PREF_SHOW_SYSTEM_APPS, show);
-        e.commit();
+        e.apply();
     }
 
     public static List<String> findXmlFiles(final String packageName) {
@@ -223,7 +223,7 @@ public class Utils {
                             container.put("FILE", FILE_SEPARATOR + file);
                         }
                         JSONArray backups = container.getJSONArray("BACKUPS");
-                        ArrayList<String> values = new ArrayList<String>(backups.length());
+                        ArrayList<String> values = new ArrayList<>(backups.length());
                         for (int j = 0; j < backups.length(); j++) {
                             values.add(String.valueOf(backups.getJSONObject(j).getLong("TIME")));
                         }
@@ -239,7 +239,7 @@ public class Utils {
             }
         }
 
-        editor.commit();
+        editor.apply();
     }
 
     private static boolean needToBackport(SharedPreferences sp) {
@@ -249,7 +249,10 @@ public class Utils {
 
     private static void saveVersionCode(Context ctx, SharedPreferences sp) {
         try {
-            sp.edit().putInt(VERSION_CODE_KEY, ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionCode).commit();
+            sp.edit().putInt(VERSION_CODE_KEY, (int) ctx.getPackageManager()
+                    .getPackageInfo(ctx.getPackageName(), 0)
+                    .getLongVersionCode())
+                    .apply();
         } catch (Exception e) {
             Log.e(TAG, "Error trying to save the version code", e);
         }
@@ -285,7 +288,7 @@ public class Utils {
         Log.d(TAG, String.format("backupFile(%s, %s)", backup, fileName));
         File destination = new File(ctx.getFilesDir(), backup);
         Shell.SU.run(String.format(CMD_CP, fileName, destination.getAbsolutePath()));
-        Log.d(TAG, String.format("backupFile --> " + destination));
+        Log.d(TAG, "backupFile --> " + destination);
         return true;
     }
 
@@ -301,7 +304,7 @@ public class Utils {
 
         ((ActivityManager)ctx.getSystemService(Context.ACTIVITY_SERVICE)).killBackgroundProcesses(packageName);
 
-        Log.d(TAG, String.format("restoreFile --> " + fileName));
+        Log.d(TAG, "restoreFile --> " + fileName);
         return true;
     }
 
@@ -372,6 +375,7 @@ public class Utils {
      * @param packageName The packageName of the app
      * @return true if success
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean fixUserAndGroupId(Context ctx, String file, String packageName) {
         Log.d(TAG, String.format("fixUserAndGroupId(%s, %s)", file, packageName));
         String uid;

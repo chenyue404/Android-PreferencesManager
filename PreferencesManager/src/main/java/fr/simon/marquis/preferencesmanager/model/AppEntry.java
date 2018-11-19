@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.io.File;
@@ -90,6 +91,7 @@ public class AppEntry {
         return mIconUri;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return mLabel;

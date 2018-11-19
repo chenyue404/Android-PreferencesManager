@@ -15,14 +15,15 @@
  */
 package fr.simon.marquis.preferencesmanager.roboto;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.widget.EditText;
+
 import fr.simon.marquis.preferencesmanager.R;
 
-public class RobotoEditText extends EditText {
+public class RobotoEditText extends android.support.v7.widget.AppCompatEditText {
 
 	public RobotoEditText(Context context) {
 		super(context);
@@ -46,6 +47,7 @@ public class RobotoEditText extends EditText {
 
 		int typefaceValue = 0;
 		if (attrs != null) {
+			@SuppressLint("CustomViewStyleable")
 			TypedArray values = context.obtainStyledAttributes(attrs, R.styleable.RobotoTextView, defStyle, 0);
 			typefaceValue = values.getInt(R.styleable.RobotoTextView_typeface, 0);
 			values.recycle();

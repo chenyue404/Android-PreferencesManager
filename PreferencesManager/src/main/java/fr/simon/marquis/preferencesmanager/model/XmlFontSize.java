@@ -20,7 +20,7 @@ public enum XmlFontSize {
 
     private final int mSize;
 
-    private XmlFontSize(int size) {
+    XmlFontSize(int size) {
         this.mSize = size;
     }
 

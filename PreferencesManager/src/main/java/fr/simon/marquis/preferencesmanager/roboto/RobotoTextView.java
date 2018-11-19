@@ -19,10 +19,10 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.widget.TextView;
+
 import fr.simon.marquis.preferencesmanager.R;
 
-public class RobotoTextView extends TextView {
+public class RobotoTextView extends android.support.v7.widget.AppCompatTextView {
 
 	public RobotoTextView(Context context) {
 		super(context);
@@ -44,7 +44,7 @@ public class RobotoTextView extends TextView {
 			return;
 		}
 
-		int typefaceValue = 0;
+		int typefaceValue;
 		if (attrs != null) {
 			TypedArray values = context.obtainStyledAttributes(attrs, R.styleable.RobotoTextView, defStyle, 0);
             if(values != null) {

@@ -53,7 +53,7 @@ public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter,
     private Pattern pattern;
     private ArrayList<AppEntry> applicationsToDisplay;
 
-    public AppAdapter(Context ctx, ArrayList<AppEntry> applications, View emptyView) {
+    AppAdapter(Context ctx, ArrayList<AppEntry> applications, View emptyView) {
         this.context = ctx;
         this.applications = applications;
         this.applicationsToDisplay = applications;
@@ -93,8 +93,8 @@ public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter,
             convertView = layoutInflater.inflate(R.layout.row_application, parent, false);
             assert convertView != null;
             holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.item_text);
-            holder.imageView = (ImageView) convertView.findViewById(R.id.item_image);
+            holder.textView = convertView.findViewById(R.id.item_text);
+            holder.imageView = convertView.findViewById(R.id.item_image);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -125,7 +125,7 @@ public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter,
             holder = new HeaderViewHolder();
             convertView = layoutInflater.inflate(R.layout.row_header, parent, false);
             assert convertView != null;
-            holder.text = (TextView) convertView.findViewById(R.id.text_header);
+            holder.text = convertView.findViewById(R.id.text_header);
             convertView.setTag(holder);
         } else {
             holder = (HeaderViewHolder) convertView.getTag();
@@ -145,7 +145,7 @@ public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter,
         return applicationsToDisplay.get(position).getHeaderChar();
     }
 
-    public void setFilter(String filter) {
+    void setFilter(String filter) {
         if (TextUtils.isEmpty(filter)) {
             pattern = null;
         } else {
@@ -181,7 +181,7 @@ public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter,
                     }
                 } else {
                     String prefixString = charSequence.toString().toLowerCase(Locale.getDefault()).trim();
-                    ArrayList<AppEntry> filterResultsData = new ArrayList<AppEntry>();
+                    ArrayList<AppEntry> filterResultsData = new ArrayList<>();
                     synchronized (mLock) {
                         for (AppEntry data : applications) {
                             Pattern p = Pattern.compile(prefixString, Pattern.CASE_INSENSITIVE);

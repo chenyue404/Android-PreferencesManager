@@ -15,6 +15,7 @@
  */
 package fr.simon.marquis.preferencesmanager.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -90,6 +91,9 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Bundle b = getIntent().getExtras();
         if (b == null) {
             finish();
@@ -99,7 +103,7 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         int index = PreferenceManager.getDefaultSharedPreferences(this).getInt(KEY_SORT_TYPE, 0);
         preferenceSortType = PreferenceSortType.values()[index];
 
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = findViewById(R.id.pager);
         mLoadingView = findViewById(R.id.loadingView);
         mEmptyView = findViewById(R.id.emptyView);
 
@@ -135,7 +139,7 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
             findFilesAndBackupsTask.execute();
         } else {
             try {
-                ArrayList<String> tmp = new ArrayList<String>();
+                ArrayList<String> tmp = new ArrayList<>();
                 JSONArray array = new JSONArray(savedInstanceState.getString(KEY_FILES));
                 for (int i = 0; i < array.length(); i++) {
                     tmp.add(array.getString(i));
@@ -295,7 +299,7 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         private List<String> mFiles;
 
-        public SectionsPagerAdapter(FragmentManager fm, List<String> files) {
+        SectionsPagerAdapter(FragmentManager fm, List<String> files) {
             super(fm);
             this.mFiles = files;
         }
@@ -316,10 +320,11 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class FindFilesAndBackupsTask extends AsyncTask<Void, Void, Pair<List<String>, BackupContainer>> {
         private final String mPackageName;
 
-        public FindFilesAndBackupsTask(String packageName) {
+        FindFilesAndBackupsTask(String packageName) {
             this.mPackageName = packageName;
         }
 

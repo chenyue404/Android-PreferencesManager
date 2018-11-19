@@ -17,7 +17,6 @@ package fr.simon.marquis.preferencesmanager.ui;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,11 +48,11 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
     private Pattern pattern;
     private List<Entry<String, Object>> mListToDisplay;
 
-    public PreferenceAdapter(Context ctx, PreferencesFragment f) {
+    PreferenceAdapter(Context ctx, PreferencesFragment f) {
         this.layoutInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.mPreferencesFragment = f;
         this.color = ctx.getResources().getColor(R.color.blue);
-        this.mCheckedPositions = new HashMap<Entry<String, Object>, Boolean>();
+        this.mCheckedPositions = new HashMap<>();
         this.mListToDisplay = mPreferencesFragment.preferenceFile.getList();
     }
 
@@ -80,9 +79,9 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
             assert convertView != null;
             holder = new ViewHolder();
             holder.background = convertView;
-            holder.name = (TextView) convertView.findViewById(R.id.item_name);
-            holder.value = (TextView) convertView.findViewById(R.id.item_value);
-            holder.selector = (LinearLayout) convertView.findViewById(R.id.item_selector);
+            holder.name = convertView.findViewById(R.id.item_name);
+            holder.value = convertView.findViewById(R.id.item_value);
+            holder.selector = convertView.findViewById(R.id.item_selector);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -92,7 +91,7 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
         Boolean checked = mCheckedPositions.get(item);
         holder.background.setBackgroundResource(PreferenceType.getDialogLayout(item.getValue()));
         holder.name.setText(Ui.createSpannable(pattern, color, item.getKey()));
-        holder.value.setText((item.getValue() == null ? null : Ui.createSpannable(pattern, color, truncate(item.getValue().toString(), 100))));
+        holder.value.setText((item.getValue() == null ? null : Ui.createSpannable(pattern, color, truncate(item.getValue().toString()))));
         holder.selector.setBackgroundResource((checked != null && checked) ? R.drawable.list_focused : R.drawable.selectable_background);
 
         return convertView;
@@ -105,11 +104,11 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
         private LinearLayout selector;
     }
 
-    public static String truncate(String str, int length) {
-        return str != null && str.length() > length ? str.substring(0, length) : str;
+    private static String truncate(String str) {
+        return str != null && str.length() > 100 ? str.substring(0, 100) : str;
     }
 
-    public void setFilter(String filter) {
+    void setFilter(String filter) {
         pattern = TextUtils.isEmpty(filter) ? null : Pattern.compile(filter, Pattern.CASE_INSENSITIVE);
     }
 
@@ -126,7 +125,7 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
                     }
                 } else {
                     String prefixString = charSequence.toString().toLowerCase(Locale.getDefault()).trim();
-                    ArrayList<Entry<String, Object>> filterResultsData = new ArrayList<Entry<String, Object>>();
+                    ArrayList<Entry<String, Object>> filterResultsData = new ArrayList<>();
                     synchronized (mLock) {
                         for (Entry<String, Object> data : mPreferencesFragment.preferenceFile.getList()) {
                             Pattern p = Pattern.compile(prefixString, Pattern.CASE_INSENSITIVE);
@@ -153,18 +152,18 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
         };
     }
 
-    public void resetSelection() {
+    void resetSelection() {
         mCheckedPositions.clear();
         notifyDataSetChanged();
     }
 
-    public void itemCheckedStateChanged(int position, boolean checked) {
+    void itemCheckedStateChanged(int position, boolean checked) {
         mCheckedPositions.put(mListToDisplay.get(position), checked);
         super.notifyDataSetChanged();
     }
 
-    public void deleteSelection() {
-        ArrayList<Entry<String, Object>> temp = new ArrayList<Entry<String, Object>>();
+    void deleteSelection() {
+        ArrayList<Entry<String, Object>> temp = new ArrayList<>();
         for (Entry<String, Object> item : mListToDisplay) {
             if (!mCheckedPositions.containsKey(item) || !mCheckedPositions.get(item)) {
                 mCheckedPositions.remove(item);
@@ -175,11 +174,11 @@ public class PreferenceAdapter extends BaseAdapter implements Filterable {
         mListToDisplay = temp;
     }
 
-    public void setSelection(SparseBooleanArray checkedItemPositions) {
-        mCheckedPositions.clear();
-        for (int i = 0; i < checkedItemPositions.size(); i++) {
-            mCheckedPositions.put(mListToDisplay.get(checkedItemPositions.keyAt(i)), checkedItemPositions.valueAt(i));
-        }
-        super.notifyDataSetChanged();
-    }
+    //public void setSelection(SparseBooleanArray checkedItemPositions) {
+    //    mCheckedPositions.clear();
+    //    for (int i = 0; i < checkedItemPositions.size(); i++) {
+    //        mCheckedPositions.put(mListToDisplay.get(checkedItemPositions.keyAt(i)), checkedItemPositions.valueAt(i));
+    //    }
+    //    super.notifyDataSetChanged();
+    //}
 }

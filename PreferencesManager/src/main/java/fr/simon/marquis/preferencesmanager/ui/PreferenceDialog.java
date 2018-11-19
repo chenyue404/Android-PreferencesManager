@@ -15,17 +15,18 @@
  */
 package fr.simon.marquis.preferencesmanager.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -53,7 +54,7 @@ public class PreferenceDialog extends DialogFragment {
     private String mEditKey;
     private Object mEditValue;
 
-    private Button mBtnOK, mBtnKO, mBtnSuppr, mBtnAddEntrySet;
+    private Button mBtnOK;
 
     @SuppressWarnings("unchecked")
     public static PreferenceDialog newInstance(PreferenceType type, boolean editMode, String editKey, Object editValue) {
@@ -134,7 +135,7 @@ public class PreferenceDialog extends DialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // remove the background of the regular Dialog
         Dialog dialog = getDialog();
         if (dialog != null) {
@@ -198,28 +199,26 @@ public class PreferenceDialog extends DialogFragment {
 
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LinearLayout layout = ((LinearLayout) mValue);
+        @SuppressLint("InflateParams")
         final LinearLayout item = (LinearLayout) inflater.inflate(R.layout.row_stringset, null);
         assert item != null;
         layout.addView(item);
         EditText editText = (EditText) ((ViewGroup) item.getChildAt(0)).getChildAt(1);
         View child = item.getChildAt(1);
         if (child != null) {
-            child.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (((LinearLayout) mValue).getChildCount() > 0) {
-                        ((LinearLayout) mValue).removeView(item);
-                    } else {
-                        View childRoot = ((ViewGroup) mValue).getChildAt(0);
-                        if (childRoot != null) {
-                            EditText childEditText = (EditText) ((ViewGroup) childRoot).getChildAt(0);
-                            if (childEditText != null) {
-                                childEditText.setText(null);
-                            }
+            child.setOnClickListener(v -> {
+                if (((LinearLayout) mValue).getChildCount() > 0) {
+                    ((LinearLayout) mValue).removeView(item);
+                } else {
+                    View childRoot = ((ViewGroup) mValue).getChildAt(0);
+                    if (childRoot != null) {
+                        EditText childEditText = (EditText) ((ViewGroup) childRoot).getChildAt(0);
+                        if (childEditText != null) {
+                            childEditText.setText(null);
                         }
                     }
-                    validate();
                 }
+                validate();
             });
         }
         if (editText != null) {
@@ -277,43 +276,27 @@ public class PreferenceDialog extends DialogFragment {
         assert view != null;
         view.setBackgroundResource(mPreferenceType.getCardBackground());
 
-        mKey = (EditText) view.findViewById(R.id.key);
+        mKey = view.findViewById(R.id.key);
         mValue = view.findViewById(R.id.value);
         ((TextView) view.findViewById(R.id.title)).setText(generateTitle());
 
-        mBtnKO = (Button) view.findViewById(R.id.btnKO);
-        mBtnKO.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
-        mBtnOK = (Button) view.findViewById(R.id.btnOK);
-        mBtnOK.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                performOK();
-                dismiss();
-            }
+        Button mBtnKO = view.findViewById(R.id.btnKO);
+        mBtnKO.setOnClickListener(v -> dismiss());
+        mBtnOK = view.findViewById(R.id.btnOK);
+        mBtnOK.setOnClickListener(v -> {
+            performOK();
+            dismiss();
         });
         if (mEditMode) {
-            mBtnSuppr = (Button) view.findViewById(R.id.btnSUPPR);
-            mBtnSuppr.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    performSuppr();
-                    dismiss();
-                }
+            Button mBtnSuppr = view.findViewById(R.id.btnSUPPR);
+            mBtnSuppr.setOnClickListener(v -> {
+                performSuppr();
+                dismiss();
             });
         }
         if (mPreferenceType == PreferenceType.STRINGSET) {
-            mBtnAddEntrySet = (Button) view.findViewById(R.id.action_add_stringset_entry);
-            mBtnAddEntrySet.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    addStringSetEntry(true, null);
-                }
-            });
+            Button mBtnAddEntrySet = view.findViewById(R.id.action_add_stringset_entry);
+            mBtnAddEntrySet.setOnClickListener(v -> addStringSetEntry(true, null));
         }
         return view;
     }
@@ -357,7 +340,7 @@ public class PreferenceDialog extends DialogFragment {
                     value = Long.valueOf(((EditText) mValue).getText().toString());
                     break;
                 case STRINGSET:
-                    Set<String> set = new HashSet<String>();
+                    Set<String> set = new HashSet<>();
                     LinearLayout container = (LinearLayout) mValue;
                     for (int i = 0; i < container.getChildCount(); i++) {
                         set.add(((EditText) ((ViewGroup) ((ViewGroup) container.getChildAt(i)).getChildAt(0)).getChildAt(1)).getText().toString());

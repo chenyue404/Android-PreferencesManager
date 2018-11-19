@@ -34,7 +34,6 @@ import fr.simon.marquis.preferencesmanager.roboto.RobotoTypefaceManager;
 
 public class Ui {
 
-
     public static void hideSoftKeyboard(Context context, View view) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);

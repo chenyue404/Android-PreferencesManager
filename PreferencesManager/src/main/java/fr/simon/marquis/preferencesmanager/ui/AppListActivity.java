@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SearchView.OnQueryTextListener;
@@ -29,8 +28,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -70,16 +67,13 @@ public class AppListActivity extends AppCompatActivity {
 
         loadingView = findViewById(R.id.loadingView);
         emptyView = findViewById(R.id.emptyView);
-        listView = (StickyListHeadersListView) findViewById(R.id.listView);
+        listView = findViewById(R.id.listView);
         listView.setDrawingListUnderStickyHeader(false);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                if (isRootAccessGiven) {
-                    startPreferencesActivity((AppEntry) mAdapter.getItem(arg2));
-                } else {
-                    checkRoot();
-                }
+        listView.setOnItemClickListener((arg0, arg1, arg2, arg3) -> {
+            if (isRootAccessGiven) {
+                startPreferencesActivity((AppEntry) mAdapter.getItem(arg2));
+            } else {
+                checkRoot();
             }
         });
 
@@ -180,7 +174,7 @@ public class AppListActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.app_list_activity, menu);
 
         MenuItem searchItem = menu.findItem(R.id.menu_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setQueryHint(getString(R.string.action_search));
         mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
 
@@ -197,17 +191,18 @@ public class AppListActivity extends AppCompatActivity {
             }
         });
 
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
-            public boolean onMenuItemActionExpand(MenuItem menuItem) {
+            public boolean onMenuItemActionExpand(MenuItem item) {
                 return true;
             }
 
             @Override
-            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+            public boolean onMenuItemActionCollapse(MenuItem item) {
                 return updateFilter(null);
             }
         });
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -267,10 +262,11 @@ public class AppListActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class GetApplicationsTask extends AsyncTask<Void, Void, ArrayList<AppEntry>> {
         private final Context mContext;
 
-        public GetApplicationsTask(Context ctx) {
+        GetApplicationsTask(Context ctx) {
             this.mContext = ctx;
         }
 

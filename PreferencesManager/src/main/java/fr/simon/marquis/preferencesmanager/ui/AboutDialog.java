@@ -15,10 +15,10 @@
  */
 package fr.simon.marquis.preferencesmanager.ui;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -77,7 +77,7 @@ public class AboutDialog extends DialogFragment {
         if (getActivity() == null || getActivity().getPackageManager() == null) {
             return null;
         }
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(TAG, true).commit();
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(TAG, true).apply();
         PackageManager pm = getActivity().getPackageManager();
         String packageName = getActivity().getPackageName();
         String versionName;
@@ -89,21 +89,20 @@ public class AboutDialog extends DialogFragment {
         }
 
         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+        @SuppressLint("InflateParams")
         View rootView = layoutInflater.inflate(R.layout.dialog_about, null);
         assert rootView != null;
-        TextView nameAndVersionView = (TextView) rootView.findViewById(R.id.app_name_and_version);
+        TextView nameAndVersionView = rootView.findViewById(R.id.app_name_and_version);
         nameAndVersionView.setText(Html.fromHtml(getString(R.string.app_name_and_version, versionName)));
-        TextView aboutBodyView = (TextView) rootView.findViewById(R.id.about_body);
+        TextView aboutBodyView = rootView.findViewById(R.id.about_body);
         aboutBodyView.setText(Html.fromHtml(getString(R.string.about_body)));
         aboutBodyView.setMovementMethod(new LinkMovementMethod());
 
         return new AlertDialog.Builder(getActivity()).setView(rootView)
-                .setPositiveButton(mExit ? R.string.exit : R.string.close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();
-                        if (mExit) {
-                            getActivity().finish();
-                        }
+                .setPositiveButton(mExit ? R.string.exit : R.string.close, (dialog, whichButton) -> {
+                    dialog.dismiss();
+                    if (mExit) {
+                        getActivity().finish();
                     }
                 }).create();
     }

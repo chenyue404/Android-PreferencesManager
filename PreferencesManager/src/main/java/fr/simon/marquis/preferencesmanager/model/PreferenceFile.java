@@ -42,7 +42,7 @@ public class PreferenceFile {
 
     private PreferenceFile() {
         super();
-        mPreferences = new HashMap<String, Object>();
+        mPreferences = new HashMap<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -63,8 +63,7 @@ public class PreferenceFile {
                 preferenceFile.setPreferences(map);
                 return preferenceFile;
             }
-        } catch (XmlPullParserException ignored) {
-        } catch (IOException ignored) {
+        } catch (XmlPullParserException | IOException ignored) {
         }
 
         preferenceFile.isValidPreferenceFile = false;
@@ -73,7 +72,7 @@ public class PreferenceFile {
 
     private void setPreferences(Map<String, Object> map) {
         mPreferences = map;
-        mList = new ArrayList<Entry<String, Object>>(mPreferences.entrySet());
+        mList = new ArrayList<>(mPreferences.entrySet());
         updateSort();
     }
 
@@ -81,22 +80,21 @@ public class PreferenceFile {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             XmlUtils.writeMapXml(mPreferences, out);
-        } catch (XmlPullParserException ignored) {
-        } catch (IOException ignored) {
+        } catch (XmlPullParserException | IOException ignored) {
         }
         return out.toString();
     }
 
     public List<Entry<String, Object>> getList() {
         if (mList == null) {
-            mList = new ArrayList<Entry<String, Object>>();
+            mList = new ArrayList<>();
         }
         return mList;
     }
 
     public void setList(List<Entry<String, Object>> mList) {
         this.mList = mList;
-        this.mPreferences = new HashMap<String, Object>();
+        this.mPreferences = new HashMap<>();
         for (Entry<String, Object> entry : mList) {
             mPreferences.put(entry.getKey(), entry.getValue());
         }
@@ -126,7 +124,7 @@ public class PreferenceFile {
     }
 
     private void createAndAddValue(String key, Object value) {
-        mList.add(0, new AbstractMap.SimpleEntry<String, Object>(key, value));
+        mList.add(0, new AbstractMap.SimpleEntry<>(key, value));
         mPreferences.put(key, value);
         updateSort();
     }

@@ -43,7 +43,7 @@ public class App extends Application {
 
     public void switchTheme() {
         theme = theme == AppTheme.DARK ? AppTheme.LIGHT : AppTheme.DARK;
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(AppTheme.APP_THEME_KEY, theme.name()).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(AppTheme.APP_THEME_KEY, theme.name()).apply();
     }
 
 }

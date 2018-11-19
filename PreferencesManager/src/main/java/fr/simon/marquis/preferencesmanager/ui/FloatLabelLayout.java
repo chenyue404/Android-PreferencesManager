@@ -66,7 +66,7 @@ public final class FloatLabelLayout extends FrameLayout {
 
         final int sidePadding = a.getDimensionPixelSize(
                 R.styleable.FloatLabelLayout_floatLabelSidePadding,
-                dipsToPix(DEFAULT_PADDING_LEFT_RIGHT_DP));
+                dipsToPix());
         mLabel = new TextView(context);
         mLabel.setPadding(sidePadding, 0, sidePadding, 0);
         mLabel.setVisibility(INVISIBLE);
@@ -136,12 +136,7 @@ public final class FloatLabelLayout extends FrameLayout {
 
         // Add focus listener to the EditText so that we can notify the label that it is activated.
         // Allows the use of a ColorStateList for the text color on the label
-        mEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean focused) {
-                mLabel.setActivated(focused);
-            }
-        });
+        mEditText.setOnFocusChangeListener((view, focused) -> mLabel.setActivated(focused));
 
         mLabel.setText(mEditText.getHint());
     }
@@ -153,12 +148,12 @@ public final class FloatLabelLayout extends FrameLayout {
         return mEditText;
     }
 
-    /**
-     * @return the {@link android.widget.TextView} label
-     */
-    public TextView getLabel() {
-        return mLabel;
-    }
+    ///**
+    // * @return the {@link android.widget.TextView} label
+    // */
+    //public TextView getLabel() {
+    //    return mLabel;
+    //}
 
     /**
      * Show the label using an animation
@@ -195,8 +190,8 @@ public final class FloatLabelLayout extends FrameLayout {
     /**
      * Helper method to convert dips to pixels.
      */
-    private int dipsToPix(float dps) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dps,
+    private int dipsToPix() {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, FloatLabelLayout.DEFAULT_PADDING_LEFT_RIGHT_DP,
                 getResources().getDisplayMetrics());
     }
 }
