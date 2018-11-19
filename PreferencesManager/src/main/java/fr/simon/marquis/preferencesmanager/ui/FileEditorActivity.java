@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
@@ -33,10 +34,15 @@ import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,14 +90,33 @@ public class FileEditorActivity extends AppCompatActivity implements TextWatcher
         super.onCreate(arg0);
         setContentView(R.layout.activity_file_editor);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         Bundle b = getIntent().getExtras();
         if (b == null) {
             finish();
             return;
         }
-        Picasso.get().load(b.<Uri>getParcelable(PreferencesFragment.ARG_ICON_URI)).error(R.drawable.ic_launcher).into((android.widget.ImageView) findViewById(android.R.id.home));
+
+        //Custom Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        LinearLayout appName = findViewById(R.id.toolbar_app_name);
+        appName.setVisibility(View.VISIBLE);
+
+        ImageView image = findViewById(R.id.toolbar_icon);
+
+        TextView name = findViewById(R.id.appName);
+        name.setSelected(true);
+
+        Glide.with(this)
+                .load(b.<Uri>getParcelable(PreferencesFragment.ARG_ICON_URI))
+                .apply(new RequestOptions()
+                        .error(R.drawable.ic_action_settings)
+                )
+                .into(image);
 
         mFile = b.getString(PreferencesFragment.ARG_FILE);
         mTitle = Utils.extractFileName(mFile);

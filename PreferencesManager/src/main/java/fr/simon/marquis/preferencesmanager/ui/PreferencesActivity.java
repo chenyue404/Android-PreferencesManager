@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -32,9 +33,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import org.json.JSONArray;
 
@@ -82,7 +87,8 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         Bundle b = getIntent().getExtras();
         if (b == null) {
@@ -102,9 +108,27 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         title = b.getString(EXTRA_TITLE);
         launchedFromShortcut = b.getBoolean(EXTRA_SHORTCUT, false);
 
-        getSupportActionBar().setTitle(Ui.applyCustomTypeFace(title, this));
-        getSupportActionBar().setSubtitle(Ui.applyCustomTypeFace(packageName, this));
-        Picasso.get().load(iconUri).error(R.drawable.ic_launcher).into((android.widget.ImageView) findViewById(android.R.id.home));
+        //Custom toolbar
+        TextView toolbarTitle = findViewById(R.id.toolbar_package_name);
+        TextView toolbarSubTitle = findViewById(R.id.toolbar_package);
+        ImageView image = findViewById(R.id.toolbar_icon);
+
+        LinearLayout appName = findViewById(R.id.toolbar_app_name);
+        appName.setVisibility(View.GONE);
+
+        toolbarTitle.setSelected(true);
+        toolbarSubTitle.setSelected(true);
+
+        toolbarTitle.setText(Ui.applyCustomTypeFace(title, this));
+        toolbarSubTitle.setText(Ui.applyCustomTypeFace(packageName, this));
+
+        Glide.with(this)
+                .load(iconUri)
+                .apply(new RequestOptions()
+                        .placeholder(R.drawable.ic_launcher)
+                )
+                .into(image);
+
 
         if (savedInstanceState == null) {
             findFilesAndBackupsTask = new FindFilesAndBackupsTask(packageName);

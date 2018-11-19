@@ -28,7 +28,8 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,7 +103,12 @@ public class AppAdapter extends BaseAdapter implements StickyListHeadersAdapter,
         AppEntry item = applicationsToDisplay.get(position);
         holder.textView.setText(Ui.createSpannable(pattern, color, item.getLabel()));
 
-        Picasso.get().load(item.getIconUri()).error(R.drawable.ic_action_settings).into(holder.imageView);
+        Glide.with(context)
+                .load(item.getIconUri())
+                .apply(new RequestOptions()
+                        .error(R.drawable.ic_action_settings)
+                )
+                .into(holder.imageView);
 
         return convertView;
     }

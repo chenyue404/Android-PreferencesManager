@@ -15,22 +15,23 @@
  */
 package fr.simon.marquis.preferencesmanager.ui;
 
-import android.app.ActionBar;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SearchView.OnQueryTextListener;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
@@ -59,10 +60,13 @@ public class AppListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_list);
         Utils.checkBackups(getApplicationContext());
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(Ui.applyCustomTypeFace(getString(R.string.app_name), this));
-        }
+
+        //Custom Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        LinearLayout appName = findViewById(R.id.toolbar_app_name);
+        appName.setVisibility(View.VISIBLE);
 
         loadingView = findViewById(R.id.loadingView);
         emptyView = findViewById(R.id.emptyView);
@@ -91,6 +95,7 @@ public class AppListActivity extends AppCompatActivity {
     }
 
     private void checkRoot() {
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, Boolean> checking = new AsyncTask<Void, Void, Boolean>() {
 
             @Override

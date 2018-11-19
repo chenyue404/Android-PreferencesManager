@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -18,20 +17,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.AppListActivity" >
+    tools:context=".ui.AppListActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:elevation="4dp">
+
+        <include layout="@layout/toolbar" />
+
+    </android.support.v7.widget.Toolbar>
 
     <se.emilsjolander.stickylistheaders.StickyListHeadersListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/toolbar"
         android:fastScrollEnabled="true"
+        android:listSelector="@drawable/selectable_background"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
+        android:saveEnabled="false"
         android:scrollbarStyle="outsideOverlay"
-        android:listSelector="@drawable/selectable_background"
-        android:visibility="gone" >
-    </se.emilsjolander.stickylistheaders.StickyListHeadersListView>
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/loadingView"
@@ -40,7 +50,8 @@
         android:layout_centerInParent="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="gone"
+        tools:visibility="visible" >
 
         <ProgressBar
             android:layout_width="wrap_content"
@@ -64,7 +75,7 @@
         android:layout_centerInParent="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="wrap_content"

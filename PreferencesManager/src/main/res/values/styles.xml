@@ -14,7 +14,7 @@
 -->
 <resources>
 
-    <style name="AppThemeDark" parent="@style/Theme.AppCompat">
+    <style name="AppThemeDark" parent="@style/Theme.AppCompat.NoActionBar">
         <item name="android:actionOverflowButtonStyle">@style/OverFlowStyle</item>
 
         <item name="ic_action_cancel">@drawable/ic_action_cancel_dark</item>
@@ -28,7 +28,7 @@
         <item name="card_unknown">@drawable/card_unknown_dark</item>
     </style>
 
-    <style name="AppThemeLight" parent="@style/Theme.AppCompat.Light">
+    <style name="AppThemeLight" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="android:actionOverflowButtonStyle">@style/OverFlowStyle</item>
 
         <item name="ic_action_cancel">@drawable/ic_action_cancel_light</item>
