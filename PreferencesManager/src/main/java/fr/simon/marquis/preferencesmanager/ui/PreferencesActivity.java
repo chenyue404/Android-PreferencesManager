@@ -123,8 +123,8 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
         toolbarTitle.setSelected(true);
         toolbarSubTitle.setSelected(true);
 
-        toolbarTitle.setText(Ui.applyCustomTypeFace(title, this));
-        toolbarSubTitle.setText(Ui.applyCustomTypeFace(packageName, this));
+        toolbarTitle.setText(title);
+        toolbarSubTitle.setText(packageName);
 
         Glide.with(this)
                 .load(iconUri)
@@ -316,7 +316,7 @@ public class PreferencesActivity extends AppCompatActivity implements OnPreferen
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return Ui.applyCustomTypeFace(Utils.extractFileName(mFiles.get(position)), PreferencesActivity.this);
+            return Utils.extractFileName(mFiles.get(position));
         }
     }
 

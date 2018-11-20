@@ -329,7 +329,7 @@ public class FileEditorActivity extends AppCompatActivity implements TextWatcher
         Spanned str = Html.fromHtml((mHasContentChanged ? "<font color='#33b5e5'><b>&#9679;</b></font> " : "") + mTitle);
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(Ui.applyCustomTypeFace(str, this));
+            actionBar.setTitle(str);
         }
     }
 

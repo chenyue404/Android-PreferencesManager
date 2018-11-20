@@ -36,15 +36,6 @@ public class Ui {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public static SpannableString applyCustomTypeFace(CharSequence src, Context ctx) {
-        //SpannableString span = new SpannableString(src);
-
-        //span.setSpan(new CustomTypefaceSpan("", RobotoTypefaceManager.obtainTypeface(ctx, RobotoTypefaceManager.ROBOTOSLAB_REGULAR)), 0,
-        //        span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        //return span;
-        return new SpannableString(src);
-    }
-
     public static SpannableStringBuilder createSpannable(Pattern pattern, int color, String s) {
         final SpannableStringBuilder spannable = new SpannableStringBuilder(s);
         if (pattern == null)

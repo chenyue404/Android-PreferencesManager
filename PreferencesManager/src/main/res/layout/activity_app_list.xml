@@ -68,31 +68,17 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <TextView
         android:id="@+id/emptyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:drawableTop="@drawable/empty_view"
+        android:drawablePadding="10dp"
+        android:text="@string/empty_apps"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@android:color/tertiary_text_light"
         android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:src="@drawable/empty_view"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/empty_apps"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@android:color/tertiary_text_light" />
-
-    </LinearLayout>
+        tools:visibility="visible"/>
 
 </RelativeLayout>

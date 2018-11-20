@@ -73,7 +73,7 @@ public class PreferencesFragment extends Fragment {
     private OnPreferenceFragmentInteractionListener mListener;
 
     private GridView gridView;
-    private View loadingView, emptyView;
+    private View loadingView;
     private TextView emptyViewText;
 
     public static PreferencesFragment newInstance(String paramFile, String paramPackageName, Uri paramIconUri) {
@@ -112,8 +112,7 @@ public class PreferencesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadingView = view.findViewById(R.id.loadingView);
-        emptyView = view.findViewById(R.id.emptyView);
-        emptyViewText = view.findViewById(R.id.emptyViewText);
+        emptyViewText = view.findViewById(R.id.emptyView);
         gridView = view.findViewById(R.id.gridView);
         gridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -366,7 +365,7 @@ public class PreferencesFragment extends Fragment {
         }
 
         gridView.setAdapter(new PreferenceAdapter(getActivity(), this));
-        gridView.setEmptyView(emptyView);
+        gridView.setEmptyView(emptyViewText);
         gridView.setOnItemClickListener((arg0, arg1, arg2, arg3) -> {
 
             Entry<String, Object> item = (Entry<String, Object>) gridView.getAdapter().getItem(arg2);
