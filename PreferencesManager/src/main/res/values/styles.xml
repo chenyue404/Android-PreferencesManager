@@ -60,7 +60,6 @@
         <item name="android:layout_marginTop">10dp</item>
         <item name="android:layout_marginBottom">10dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-        <item name="typeface">robotoslab_light</item>
     </style>
 
     <style name="PreferenceDialogBtn">
@@ -69,7 +68,6 @@
         <item name="android:layout_margin">4dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:background">?custom_btn_drawable</item>
-        <item name="typeface">robotoslab_regular</item>
     </style>
 
     <style name="FloatLabelContainerKey">
@@ -98,7 +96,6 @@
         <item name="android:gravity">left</item>
         <item name="android:hint">@string/hint_key</item>
         <item name="android:inputType">textNoSuggestions</item>
-        <item name="typeface">robotoslab_regular</item>
     </style>
 
     <style name="EditTextValue">
@@ -107,7 +104,6 @@
         <item name="android:ems">10</item>
         <item name="android:gravity">left</item>
         <item name="android:hint">@string/hint_value</item>
-        <item name="typeface">robotoslab_regular</item>
     </style>
 
     <style name="TextAppearance.PreferencesManager.FloatLabel" parent="android:TextAppearance.Small">

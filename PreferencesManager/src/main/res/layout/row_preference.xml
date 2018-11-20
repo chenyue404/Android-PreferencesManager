@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,7 +14,6 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/item_background"
     android:layout_width="match_parent"
@@ -28,32 +28,33 @@
         android:orientation="vertical"
         tools:ignore="UselessParent">
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+        <TextView
             android:id="@+id/item_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="2dp"
             android:ellipsize="end"
             android:lines="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            app:typeface="robotoslab_regular" />
+            tools:text="Item Name" />
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+        <TextView
             android:id="@+id/item_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="2dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
             android:ellipsize="end"
             android:lines="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/tertiary_text_light"
-            app:typeface="robotoslab_light" />
+            tools:text="Item Value" />
+
     </LinearLayout>
 
 </LinearLayout>

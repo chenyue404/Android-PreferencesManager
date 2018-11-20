@@ -16,7 +16,6 @@
 package fr.simon.marquis.preferencesmanager.util;
 
 import android.content.Context;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -30,8 +29,6 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fr.simon.marquis.preferencesmanager.roboto.RobotoTypefaceManager;
-
 public class Ui {
 
     public static void hideSoftKeyboard(Context context, View view) {
@@ -40,11 +37,12 @@ public class Ui {
     }
 
     public static SpannableString applyCustomTypeFace(CharSequence src, Context ctx) {
-        SpannableString span = new SpannableString(src);
+        //SpannableString span = new SpannableString(src);
 
-        span.setSpan(new CustomTypefaceSpan("", RobotoTypefaceManager.obtainTypeface(ctx, RobotoTypefaceManager.ROBOTOSLAB_REGULAR)), 0,
-                span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return span;
+        //span.setSpan(new CustomTypefaceSpan("", RobotoTypefaceManager.obtainTypeface(ctx, RobotoTypefaceManager.ROBOTOSLAB_REGULAR)), 0,
+        //        span.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        //return span;
+        return new SpannableString(src);
     }
 
     public static SpannableStringBuilder createSpannable(Pattern pattern, int color, String s) {

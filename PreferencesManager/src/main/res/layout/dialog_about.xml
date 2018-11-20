@@ -14,14 +14,14 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:divider="@android:drawable/divider_horizontal_bright"
     android:orientation="vertical"
-    android:showDividers="middle" >
+    android:showDividers="middle">
 
-    <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+    <TextView
         android:id="@+id/app_name_and_version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,18 +29,18 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
-        android:drawableLeft="@drawable/ic_launcher"
+        android:drawableStart="@drawable/ic_launcher"
         android:drawablePadding="8dp"
         android:gravity="center_vertical"
         android:textSize="24sp"
-        app:typeface="robotoslab_bold" />
+        tools:text="@string/app_name"/>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" >
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+        <TextView
             android:id="@+id/about_body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
             android:padding="16dp"
             android:textIsSelectable="true"
             android:textSize="16sp"
-            app:typeface="robotoslab_regular" />
+            tools:text="About Text"/>
     </ScrollView>
 
 </LinearLayout>

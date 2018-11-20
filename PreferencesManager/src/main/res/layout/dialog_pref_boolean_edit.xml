@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,9 +15,10 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/PreferenceDialogContainer">
 
-    <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+    <TextView
         android:id="@+id/title"
         style="@style/PreferenceDialogTitle" />
 
@@ -24,7 +26,7 @@
         style="@style/FloatLabelContainerKey"
         app:floatLabelTextAppearance="@style/TextAppearance.PreferencesManager.FloatLabel.Purple">
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoEditText
+        <EditText
             android:id="@+id/key"
             style="@style/EditTextKey"
             android:background="@drawable/edittext_purple_edit_text_holo_light" />
@@ -35,13 +37,14 @@
         android:id="@+id/value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
         android:layout_marginTop="5dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
         android:checked="true"
         android:textOff="false"
-        android:textOn="true" />
+        android:textOn="true"
+        tools:ignore="HardcodedText" />
 
     <include layout="@layout/dialog_pref_btn_bar_edit" />
 

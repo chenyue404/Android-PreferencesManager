@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,17 +15,19 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/PreferenceDialogContainer">
 
-    <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+    <TextView
         android:id="@+id/title"
-        style="@style/PreferenceDialogTitle" />
+        style="@style/PreferenceDialogTitle"
+        tools:text="Title" />
 
     <fr.simon.marquis.preferencesmanager.ui.FloatLabelLayout
         style="@style/FloatLabelContainerKey"
         app:floatLabelTextAppearance="@style/TextAppearance.PreferencesManager.FloatLabel.Navy">
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoEditText
+        <EditText
             android:id="@+id/key"
             style="@style/EditTextKey"
             android:background="@drawable/edittext_red_edit_text_holo_light" />
@@ -35,11 +38,11 @@
         style="@style/FloatLabelContainerValue"
         app:floatLabelTextAppearance="@style/TextAppearance.PreferencesManager.FloatLabel.Navy">
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoEditText
+        <EditText
             android:id="@+id/value"
             style="@style/EditTextValue"
-            android:inputType="numberSigned|numberDecimal"
-            android:background="@drawable/edittext_red_edit_text_holo_light" />
+            android:background="@drawable/edittext_red_edit_text_holo_light"
+            android:inputType="numberSigned|numberDecimal" />
 
     </fr.simon.marquis.preferencesmanager.ui.FloatLabelLayout>
 

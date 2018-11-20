@@ -15,17 +15,19 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/PreferenceDialogContainer" >
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/PreferenceDialogContainer">
 
-    <fr.simon.marquis.preferencesmanager.roboto.RobotoTextView
+    <TextView
         android:id="@+id/title"
-        style="@style/PreferenceDialogTitle" />
+        style="@style/PreferenceDialogTitle"
+        tools:text="Title" />
 
     <fr.simon.marquis.preferencesmanager.ui.FloatLabelLayout
         style="@style/FloatLabelContainerKey"
         app:floatLabelTextAppearance="@style/TextAppearance.PreferencesManager.FloatLabel.Green">
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoEditText
+        <EditText
             android:id="@+id/key"
             style="@style/EditTextKey"
             android:background="@drawable/edittext_green_edit_text_holo_light" />
@@ -36,13 +38,13 @@
         style="@style/FloatLabelContainerValue"
         app:floatLabelTextAppearance="@style/TextAppearance.PreferencesManager.FloatLabel.Green">
 
-        <fr.simon.marquis.preferencesmanager.roboto.RobotoEditText
+        <EditText
             android:id="@+id/value"
             style="@style/EditTextValue"
+            android:background="@drawable/edittext_green_edit_text_holo_light"
             android:ems="10"
             android:inputType="textMultiLine"
-            android:maxLines="5"
-            android:background="@drawable/edittext_green_edit_text_holo_light" />
+            android:maxLines="5" />
 
     </fr.simon.marquis.preferencesmanager.ui.FloatLabelLayout>
 
