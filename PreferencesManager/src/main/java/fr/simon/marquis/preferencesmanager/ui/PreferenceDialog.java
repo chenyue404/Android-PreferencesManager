@@ -365,10 +365,12 @@ public class PreferenceDialog extends DialogFragment {
         try {
             switch (mPreferenceType) {
                 case BOOLEAN:
+                case STRINGSET:
+                case STRING:
                     valueValid = true;
                     break;
                 case FLOAT:
-                    Float f = Float.parseFloat(((EditText) mValue).getText().toString().trim());
+                    float f = Float.parseFloat(((EditText) mValue).getText().toString().trim());
                     valueValid = !Float.isInfinite(f) && !Float.isNaN(f);
                     break;
                 case LONG:
@@ -377,12 +379,6 @@ public class PreferenceDialog extends DialogFragment {
                     break;
                 case INT:
                     Integer.parseInt(((EditText) mValue).getText().toString().trim());
-                    valueValid = true;
-                    break;
-                case STRING:
-                    valueValid = true;
-                    break;
-                case STRINGSET:
                     valueValid = true;
                     break;
                 case UNSUPPORTED:

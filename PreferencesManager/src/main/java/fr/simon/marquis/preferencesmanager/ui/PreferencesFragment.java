@@ -167,7 +167,6 @@ public class PreferencesFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         menu.findItem(R.id.action_add).setEnabled(preferenceFile != null && preferenceFile.isValidPreferenceFile());

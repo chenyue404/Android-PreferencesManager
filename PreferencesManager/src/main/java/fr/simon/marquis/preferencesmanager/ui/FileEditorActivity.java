@@ -54,6 +54,7 @@ import fr.simon.marquis.preferencesmanager.model.XmlFontSize;
 import fr.simon.marquis.preferencesmanager.util.Ui;
 import fr.simon.marquis.preferencesmanager.util.Utils;
 
+@SuppressWarnings("RegExpRedundantEscape")
 public class FileEditorActivity extends AppCompatActivity implements TextWatcher {
 
     private XmlFontSize mXmlFontSize;
@@ -179,7 +180,6 @@ public class FileEditorActivity extends AppCompatActivity implements TextWatcher
         super.onBackPressed();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.findItem(R.id.action_save).setEnabled(mHasContentChanged).setIcon(mHasContentChanged ? R.drawable.ic_action_save : R.drawable.ic_action_save_disabled);

@@ -46,6 +46,7 @@ import fr.simon.marquis.preferencesmanager.model.BackupContainer;
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile;
 import fr.simon.marquis.preferencesmanager.ui.RootDialog;
 
+@SuppressWarnings("RegExpRedundantEscape")
 public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
@@ -250,7 +251,6 @@ public class Utils {
     private static void saveVersionCode(Context ctx, SharedPreferences sp) {
         try {
             //Ignoring for older devices
-            //noinspection deprecation
             sp.edit().putInt(VERSION_CODE_KEY, ctx.getPackageManager()
                     .getPackageInfo(ctx.getPackageName(), 0)
                     .versionCode)

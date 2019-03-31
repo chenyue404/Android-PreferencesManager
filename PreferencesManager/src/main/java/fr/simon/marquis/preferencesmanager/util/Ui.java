@@ -16,7 +16,6 @@
 package fr.simon.marquis.preferencesmanager.util;
 
 import android.content.Context;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;

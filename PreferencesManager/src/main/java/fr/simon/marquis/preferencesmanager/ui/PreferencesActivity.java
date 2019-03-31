@@ -52,7 +52,6 @@ import fr.simon.marquis.preferencesmanager.R;
 import fr.simon.marquis.preferencesmanager.model.BackupContainer;
 import fr.simon.marquis.preferencesmanager.model.PreferenceSortType;
 import fr.simon.marquis.preferencesmanager.ui.PreferencesFragment.OnPreferenceFragmentInteractionListener;
-import fr.simon.marquis.preferencesmanager.util.Ui;
 import fr.simon.marquis.preferencesmanager.util.Utils;
 
 public class PreferencesActivity extends AppCompatActivity implements OnPreferenceFragmentInteractionListener, RestoreDialogFragment.OnRestoreFragmentInteractionListener {
