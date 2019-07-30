@@ -30,9 +30,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
+import com.topjohnwu.superuser.Shell;
+
 import java.util.ArrayList;
 
-import eu.chainfire.libsuperuser.Shell;
 import fr.simon.marquis.preferencesmanager.R;
 import fr.simon.marquis.preferencesmanager.model.AppEntry;
 import fr.simon.marquis.preferencesmanager.util.Ui;
@@ -94,7 +95,7 @@ public class AppListActivity extends AppCompatActivity {
 
             @Override
             protected Boolean doInBackground(Void... params) {
-                return Shell.SU.available();
+                return Shell.rootAccess();
             }
 
             @Override
@@ -115,7 +116,7 @@ public class AppListActivity extends AppCompatActivity {
      * @param app to browse
      */
     private void startPreferencesActivity(AppEntry app) {
-        if (!Shell.SU.available()) {
+        if (!Shell.rootAccess()) {
             Utils.displayNoRoot(getSupportFragmentManager());
         } else {
             Intent i = new Intent(AppListActivity.this, PreferencesActivity.class);
