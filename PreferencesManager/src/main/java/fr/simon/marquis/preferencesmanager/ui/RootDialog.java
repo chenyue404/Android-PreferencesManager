@@ -3,8 +3,10 @@ package fr.simon.marquis.preferencesmanager.ui;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
+
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
 import fr.simon.marquis.preferencesmanager.R;
 
