@@ -14,11 +14,12 @@
 -->
 <resources>
 
-    <style name="AppThemeDark" parent="@style/Theme.AppCompat.NoActionBar">
+    <style name="AppThemeDark" parent="@style/Theme.MaterialComponents.NoActionBar">
         <item name="android:actionOverflowButtonStyle">@style/OverFlowStyle</item>
 
         <item name="ic_action_cancel">@drawable/ic_action_cancel_dark</item>
         <item name="custom_btn_drawable">@drawable/custom_btn_dark</item>
+        <!--
         <item name="card_purple">@drawable/card_purpleborder_dark</item>
         <item name="card_green">@drawable/card_greenborder_dark</item>
         <item name="card_red">@drawable/card_redborder_dark</item>
@@ -26,11 +27,19 @@
         <item name="card_teal">@drawable/card_tealborder_dark</item>
         <item name="card_gold">@drawable/card_goldborder_dark</item>
         <item name="card_unknown">@drawable/card_unknown_dark</item>
+        -->
+
+        <item name="md_corner_radius">16dp</item>
+        <item name="md_color_title">@color/white</item>
+        <item name="md_color_content">@color/white</item>
+        <item name="md_color_button_text">@color/white</item>
+
     </style>
 
-    <style name="AppThemeLight" parent="@style/Theme.AppCompat.Light.NoActionBar">
+    <style name="AppThemeLight" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:actionOverflowButtonStyle">@style/OverFlowStyle</item>
 
+        <!--
         <item name="ic_action_cancel">@drawable/ic_action_cancel_light</item>
         <item name="custom_btn_drawable">@drawable/custom_btn_light</item>
         <item name="card_purple">@drawable/card_purpleborder_light</item>
@@ -40,9 +49,19 @@
         <item name="card_teal">@drawable/card_tealborder_light</item>
         <item name="card_gold">@drawable/card_goldborder_light</item>
         <item name="card_unknown">@drawable/card_unknown_light</item>
+        -->
+
+        <item name="md_corner_radius">16dp</item>
+        <item name="md_background_color">@color/gray</item>
+        <item name="md_color_title">@color/white</item>
+        <item name="md_color_content">@color/white</item>
+        <item name="md_color_button_text">@color/white</item>
+
+        <item name="colorSurface">@color/gray</item>
+
     </style>
 
-    <style name="OverFlowStyle" parent="Widget.AppCompat.ActionButton.Overflow">
+    <style name="OverFlowStyle" parent="Widget.AppCompat.Light.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_action_overflow_round</item>
     </style>
 
@@ -51,6 +70,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">center_horizontal</item>
         <item name="android:orientation">vertical</item>
+        <item name="backgroundColor">@color/gray</item>
         <item name="android:padding">8dp</item>
     </style>
 

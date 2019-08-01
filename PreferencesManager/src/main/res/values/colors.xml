@@ -32,7 +32,12 @@
     <color name="pref_gold_normal">#66f4b400</color>
     <color name="pref_gold_focused">#f4b400</color>
 
+    <color name="header_blue">#33b5e5</color>
+
     <color name="blue">#33b5e5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray">#444444</color>
 
     <!-- Button colors -->
     <color name="btn_background_light_normal">#ffffff</color>

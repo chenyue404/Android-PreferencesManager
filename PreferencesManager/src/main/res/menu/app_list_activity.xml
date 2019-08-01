@@ -28,12 +28,12 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
-        android:id="@+id/switch_theme"
+        android:id="@+id/menu_switch_theme"
         android:orderInCategory="2"
         android:title="@string/show_popup"
         app:showAsAction="never" />
     <item
-        android:id="@+id/show_popup"
+        android:id="@+id/menu_about"
         android:icon="@drawable/ic_action_info"
         android:orderInCategory="3"
         android:title="@string/show_popup"

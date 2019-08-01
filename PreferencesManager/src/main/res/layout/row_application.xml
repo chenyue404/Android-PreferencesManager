@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,7 +15,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="horizontal">
 
     <ImageView
@@ -24,7 +23,8 @@
         android:layout_width="48dip"
         android:layout_height="48dip"
         android:padding="4dp"
-        tools:ignore="ContentDescription" />
+        tools:ignore="ContentDescription"
+        tools:src="@mipmap/ic_launcher_round" />
 
     <TextView
         android:id="@+id/item_text"

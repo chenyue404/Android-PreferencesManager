@@ -13,12 +13,18 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/item_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
+
+    <View
+        android:id="@+id/item_border"
+        android:layout_width="wrap_content"
+        android:layout_height="5dp"
+        tools:background="@drawable/card_goldborder"/>
 
     <LinearLayout
         android:id="@+id/item_selector"
@@ -57,4 +63,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView >

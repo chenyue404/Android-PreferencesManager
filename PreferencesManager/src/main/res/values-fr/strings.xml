@@ -27,7 +27,7 @@
 
     <string name="no_root_title">Problème détecté</string>
     <string name="no_root_message">"Votre appareil ne semble pas être rooté !\n\n • Votre appareil est-il rooté ?\n • La requête a-t-elle était autorisée ?"</string>
-    <string name="no_root_button">Continuer</string>
+    <string name="no_root_button">Quitter</string>
 
     <string name="popup_edit_message">Ce fichier a été modifié.\nSouhaitez-vous sauvegarder ces changements ?</string>
     <string name="toast_shortcut">Raccourci créé</string>
