@@ -42,7 +42,7 @@ internal class AppAdapter(private val context: Context, private val applications
     init {
         this.applicationsToDisplay = applications
         this.layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        this.color = context.resources.getColor(R.color.blue, null)
+        this.color = context.resources.getColor(R.color.header_blue, null)
         updateEmptyView()
     }
 

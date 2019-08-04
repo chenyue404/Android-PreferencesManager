@@ -26,14 +26,16 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
+import android.widget.*
 import android.widget.AbsListView.MultiChoiceModeListener
-import android.widget.GridView
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
+import com.google.android.material.textfield.TextInputEditText
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.PreferenceSortType
@@ -253,16 +255,146 @@ class PreferencesFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun showPrefDialog(type: PreferenceType, editMode: Boolean = false, key: String? = null, obj: Any? = null) {
-        val newFragment = PreferenceDialog.newInstance(type, editMode, key, obj)
-        newFragment.setTargetFragment(this, ("Fragment:" + mFile!!).hashCode())
-        val fm = fragmentManager
-        if (fm != null) {
-            newFragment.show(fm, "$mFile#$key")
+    private fun showPrefDialog(type: PreferenceType, editMode: Boolean = false, editKey: String? = null, obj: Any? = null) {
+
+        //This is hacky :(
+        //TODO StringSet
+
+        val mPreferenceType = PreferenceType.valueOf(type.name)
+        var keyValue: Any? = null
+        var mEditValue: Any? = null
+
+        if (editMode) {
+            when (type) {
+                PreferenceType.BOOLEAN -> keyValue = obj as Boolean
+                PreferenceType.FLOAT -> keyValue = obj as Float
+                PreferenceType.INT -> keyValue = obj as Int
+                PreferenceType.LONG -> keyValue = obj as Long
+                PreferenceType.STRING -> keyValue = obj as String
+                PreferenceType.STRINGSET -> {
+                    val objArray = (keyValue as Set<String>).toTypedArray()
+                    val stringArray = arrayOfNulls<String>(objArray.size)
+                    for (i in stringArray.indices) {
+                        stringArray[i] = objArray[i]
+                    }
+                    keyValue = stringArray
+                }
+                PreferenceType.UNSUPPORTED -> {
+                    //Nothing
+                }
+            }
         }
+
+        when (mPreferenceType) {
+            PreferenceType.BOOLEAN -> mEditValue = keyValue
+            PreferenceType.FLOAT -> mEditValue = keyValue
+            PreferenceType.INT -> mEditValue = keyValue
+            PreferenceType.LONG -> mEditValue = keyValue
+            PreferenceType.STRING -> mEditValue = keyValue
+            PreferenceType.STRINGSET -> mEditValue = keyValue
+            PreferenceType.UNSUPPORTED -> {
+            }
+        }
+
+        val dialog = MaterialDialog(context!!)
+                .title(if (editMode) type.dialogTitleEdit else type.dialogTitleAdd)
+                .customView(R.layout.dialog_layout)
+                .positiveButton(if (editMode) R.string.dialog_update else R.string.dialog_add) {
+
+                    val editable = it.getCustomView().findViewById<TextInputEditText>(R.id.key_edit_text)
+                    var key = ""
+                    if (editable != null) {
+                        key = editable.text.toString()
+                    }
+
+                    var value: Any? = null
+
+                    when (mPreferenceType) {
+                        PreferenceType.BOOLEAN -> value = it.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked
+                        PreferenceType.INT -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString().toInt()
+                        PreferenceType.STRING -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString()
+                        PreferenceType.FLOAT -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString().toFloat()
+                        PreferenceType.LONG -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString().toLong()
+                        PreferenceType.STRINGSET -> {
+                            //val set = HashSet<String>()
+                            //val container = mValue as LinearLayout?
+                            //for (i in 0 until container!!.childCount) {
+                            //    set.add((((container.getChildAt(i) as ViewGroup).getChildAt(0) as ViewGroup).getChildAt(1) as EditText).text.toString())
+                            //}
+                            //value = set
+                        }
+                        PreferenceType.UNSUPPORTED -> {
+                        }
+                    }
+
+                    addPrefKeyValue(editKey, key, value, editMode)
+
+                }
+                .negativeButton(R.string.dialog_cancel)
+
+        //Init Values
+        if (editMode) {
+            dialog.getCustomView().findViewById<TextInputEditText>(R.id.key_edit_text).setText(editKey)
+
+            when (mPreferenceType) {
+                PreferenceType.BOOLEAN -> {
+                    dialog.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).visibility = View.GONE
+                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).visibility = View.VISIBLE
+                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked = mEditValue as Boolean
+                }
+                PreferenceType.FLOAT,
+                PreferenceType.INT,
+                PreferenceType.LONG,
+                PreferenceType.STRING -> {
+                    dialog.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).setText(mEditValue.toString())
+                }
+                PreferenceType.STRINGSET -> {
+                    //    val array = mEditValue as Array<String>?
+                    //    for (anArray in array!!) {
+                    //        addStringSetEntry(false, anArray)
+                    //    }
+                }
+                PreferenceType.UNSUPPORTED -> {
+                }
+            }
+
+        } else {
+            when (mPreferenceType) {
+                PreferenceType.BOOLEAN -> {
+                    dialog.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).visibility = View.GONE
+                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).visibility = View.VISIBLE
+                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked = true
+                }
+                //PreferenceType.STRINGSET -> if ((mValue as LinearLayout).childCount == 0) {
+                //    addStringSetEntry(false, null)
+                //}
+                else -> {
+                }
+            }
+        }
+
+        if (editMode) {
+            @Suppress("DEPRECATION")
+            dialog.neutralButton(R.string.dialog_suppr) {
+                deletePref(editKey!!)
+            }
+        }
+
+        if (mPreferenceType == PreferenceType.STRINGSET) {
+            dialog.getCustomView()
+                    .findViewById<Button>(R.id.dialog_add).apply {
+                        this.visibility = View.VISIBLE
+                        this.setOnClickListener {
+                            //addStringSetEntry(true, null)
+                        }
+                    }
+
+        }
+
+        dialog.show()
     }
 
-    fun addPrefKeyValue(previousKey: String?, newKey: String?, value: Any?, editMode: Boolean) {
+    private fun addPrefKeyValue(previousKey: String?, newKey: String?, value: Any?, editMode: Boolean) {
         if (preferenceFile == null) {
             return
         }
@@ -271,7 +403,7 @@ class PreferencesFragment : Fragment() {
         (gridView!!.adapter as PreferenceAdapter).notifyDataSetChanged()
     }
 
-    fun deletePref(key: String) {
+    private fun deletePref(key: String) {
         if (preferenceFile == null) {
             return
         }

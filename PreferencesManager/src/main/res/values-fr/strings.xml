@@ -118,4 +118,7 @@
 
     <string name="pick_restore">Sélectionnez une version</string>
     <string name="file_restored">Fichier restauré</string>
+
+    <string name="switch_theme">TODO THEME</string>
+    <string name="switch_text">TODO SWITCH</string>
 </resources>

@@ -71,7 +71,7 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
     private var launchedFromShortcut = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(App.theme.theme)
+        //setTheme(App.theme.theme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preferences)
 

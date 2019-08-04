@@ -122,4 +122,6 @@
 
     <string name="pick_restore">Select a revision</string>
     <string name="file_restored">Backup restored</string>
+    <string name="switch_theme">Switch Theme</string>
+    <string name="switch_text">False / True</string>
 </resources>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/key_input_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/hint_key"
+        android:textColorHint="@color/white"
+        app:boxStrokeColor="@color/white">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/key_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/white" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/value_input_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/hint_value"
+        android:textColorHint="@color/white"
+        app:boxStrokeColor="@color/white">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/value_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Switch
+        android:id="@+id/value_boolean"
+        style="@style/Widget.MaterialComponents.CompoundButton.Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/switch_text"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/dialog_add"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dialog_add"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+</LinearLayout>

@@ -31,11 +31,6 @@
     limitations under the License.
     -->
 
-    <declare-styleable name="FloatLabelLayout">
-        <attr name="floatLabelTextAppearance" format="reference" />
-        <attr name="floatLabelSidePadding" format="reference|dimension" />
-    </declare-styleable>
-
     <attr name="color_btn_background_normal" format="color" />
     <attr name="color_btn_background_pressed" format="color" />
     <attr name="color_btn_shadow" format="color" />

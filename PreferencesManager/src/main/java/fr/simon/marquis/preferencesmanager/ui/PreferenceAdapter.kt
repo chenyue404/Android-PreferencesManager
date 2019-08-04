@@ -29,7 +29,7 @@ import java.util.regex.Pattern
 class PreferenceAdapter(context: Context, private val mPreferencesFragment: PreferencesFragment) : BaseAdapter(), Filterable {
 
     private val layoutInflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    private val color: Int = context.resources.getColor(R.color.blue, null)
+    private val color: Int = context.resources.getColor(R.color.header_blue, null)
     private val mLock = Any()
     private val mCheckedPositions: MutableMap<MutableMap.MutableEntry<Any, Any>, Boolean>
     private var pattern: Pattern? = null

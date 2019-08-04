@@ -34,10 +34,15 @@
 
     <color name="header_blue">#33b5e5</color>
 
-    <color name="blue">#33b5e5</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="gray">#444444</color>
+
+    <color name="colorSurface">@color/white</color>
+
+    <color name="md_title">@color/white</color>
+    <color name="md_content">@color/white</color>
+    <color name="md_button">@color/white</color>
 
     <!-- Button colors -->
     <color name="btn_background_light_normal">#ffffff</color>

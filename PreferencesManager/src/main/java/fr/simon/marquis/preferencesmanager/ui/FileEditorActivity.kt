@@ -57,7 +57,7 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
     private var mNeedUpdateOnActivityFinish = false
 
     override fun onCreate(arg0: Bundle?) {
-        setTheme(App.theme.theme)
+        //setTheme(App.theme.theme)
         super.onCreate(arg0)
         setContentView(R.layout.activity_file_editor)
 

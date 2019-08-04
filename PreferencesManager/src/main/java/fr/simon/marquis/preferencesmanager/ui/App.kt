@@ -16,42 +16,43 @@
 package fr.simon.marquis.preferencesmanager.ui
 
 import android.app.Application
-import android.util.Log
+import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
-
-import fr.simon.marquis.preferencesmanager.model.AppTheme
-
-//TODO floating dialog inputs need work
-//TODO in light theme, menu options colors are wrong
-//TODO restore dialog
-//TODO in light theme, editing a pref crashes
 
 class App : Application() {
 
     override fun onCreate() {
-        initTheme()
-        setTheme(App.theme.theme)
         super.onCreate()
+
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val themePref = sharedPreferences.getString("themePref", DEFAULT_MODE)
+        applyTheme(themePref!!)
     }
-
-    private fun initTheme() {
-        App.theme = try {
-            AppTheme.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(AppTheme.APP_THEME_KEY, AppTheme.DEFAULT_THEME.name)!!)
-        } catch (iae: IllegalArgumentException) {
-            Log.d(App::class.java.simpleName, "No theme specified, using the default one")
-            AppTheme.DEFAULT_THEME
-        }
-
-    }
-
-    fun switchTheme() {
-        App.theme = if (App.theme == AppTheme.DARK) AppTheme.LIGHT else AppTheme.DARK
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(AppTheme.APP_THEME_KEY, App.theme.name).apply()
-    }
-
 
     companion object {
-        var theme = AppTheme.DEFAULT_THEME
-    }
+        const val LIGHT_MODE = "light"
+        const val DARK_MODE = "dark"
+        const val DEFAULT_MODE = "default"
 
+        private fun isAtLeast(): Boolean {
+            return Build.VERSION.SDK_INT >= 29
+        }
+
+        fun applyTheme(themePref: String) {
+            when (themePref) {
+                LIGHT_MODE ->
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                DARK_MODE ->
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                else -> {
+                    if (isAtLeast()) {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    } else {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
+                    }
+                }
+            }
+        }
+    }
 }

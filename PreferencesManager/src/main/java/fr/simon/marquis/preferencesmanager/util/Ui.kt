@@ -16,6 +16,7 @@
 package fr.simon.marquis.preferencesmanager.util
 
 import android.content.Context
+import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -23,6 +24,7 @@ import android.text.style.StyleSpan
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.AttrRes
 import java.util.regex.Pattern
 
 fun Context.hideSoftKeyboard(view: View) {
@@ -53,4 +55,3 @@ fun Context.animateView(view: View, show: Boolean, animate: Boolean) {
         }
     }
 }
-

@@ -55,10 +55,10 @@ object Utils {
 
     var previousApps: ArrayList<AppEntry>? = null
         private set
+
     private var favorites: HashSet<String>? = null
 
     fun displayNoRoot(activity: Activity) {
-        //fm.beginTransaction().add(RootDialog.newInstance(), TAG_ROOT_DIALOG).commitAllowingStateLoss()
         activity.rootDialog()
     }
 

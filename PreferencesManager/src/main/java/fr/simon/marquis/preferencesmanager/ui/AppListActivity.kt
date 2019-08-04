@@ -27,6 +27,9 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.preference.PreferenceManager
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
@@ -44,7 +47,7 @@ class AppListActivity : AppCompatActivity() {
     private var task: GetApplicationsTask? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(App.theme.theme)
+        //setTheme(App.theme.theme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_list)
         Utils.checkBackups(applicationContext)
@@ -182,14 +185,12 @@ class AppListActivity : AppCompatActivity() {
             showItem.setTitle(if (show) R.string.hide_system_apps else R.string.show_system_apps)
             showItem.setIcon(if (show) R.drawable.ic_action_show else R.drawable.ic_action_hide)
         }
-        val themeItem = menu.findItem(R.id.menu_switch_theme)
-        themeItem?.setTitle(App.theme.title)
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_about -> aboutDialog()//AboutDialog.show(supportFragmentManager, false)
+            R.id.menu_about -> aboutDialog()
             R.id.show_system_apps -> {
                 Utils.setShowSystemApps(this, !Utils.isShowSystemApps(this))
                 if (!startTask()) {
@@ -198,8 +199,7 @@ class AppListActivity : AppCompatActivity() {
                 invalidateOptionsMenu()
             }
             R.id.menu_switch_theme -> {
-                (application as App).switchTheme()
-                recreate()
+                switchThemeDialog()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -245,9 +245,24 @@ class AppListActivity : AppCompatActivity() {
 
     }
 
+    private fun switchThemeDialog() {
+
+        val theme = arrayOf(App.LIGHT_MODE, App.DARK_MODE, App.DEFAULT_MODE)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = prefs.edit()
+        val themePref = prefs.getString("themePref", App.DEFAULT_MODE)
+
+        MaterialDialog(this).show {
+            title(text = "Switch Theme")
+            listItemsSingleChoice(R.array.themeListArray, initialSelection = theme.indexOf(themePref)) { _, index, _ ->
+                App.applyTheme(theme[index])
+                editor.putString("themePref", theme[index]).apply()
+            }
+            positiveButton(text = "Select")
+        }
+    }
 
     companion object {
-
         private val TAG = AppListActivity::class.java.simpleName
 
         private const val REQUEST_CODE_PREFERENCES_ACTIVITY = 123
