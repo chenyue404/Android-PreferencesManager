@@ -24,7 +24,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 
-class PreferenceFile private constructor() {
+class PreferenceFile {
 
     var isValidPreferenceFile = true
         private set
@@ -149,9 +149,9 @@ class PreferenceFile private constructor() {
             }
 
             try {
-                val `in` = ByteArrayInputStream(xml.toByteArray())
-                val map = XmlUtils.readMapXml(`in`)
-                `in`.close()
+                val bais = ByteArrayInputStream(xml.toByteArray())
+                val map = XmlUtils.readMapXml(bais)
+                bais.close()
 
                 preferenceFile.setPreferences(map)
 

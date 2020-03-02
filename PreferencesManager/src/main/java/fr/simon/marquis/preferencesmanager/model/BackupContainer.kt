@@ -75,13 +75,9 @@ class BackupContainer {
         }
     }
 
-    operator fun contains(key: String): Boolean {
-        return backups.containsKey(key)
-    }
+    operator fun contains(key: String): Boolean = backups.containsKey(key)
 
-    operator fun get(key: String): List<String>? {
-        return backups[key]
-    }
+    operator fun get(key: String): List<String>? = backups[key]
 
     companion object {
 

@@ -26,23 +26,25 @@ import com.bumptech.glide.request.RequestOptions
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.MyComparator
-import fr.simon.marquis.preferencesmanager.util.createSpannable
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter
 import java.util.*
 import java.util.regex.Pattern
 
-internal class AppAdapter(private val context: Context, private val applications: ArrayList<AppEntry>, private val emptyView: View) : BaseAdapter(), StickyListHeadersAdapter, Filterable {
-    private val layoutInflater: LayoutInflater
-    private val color: Int
+internal class AppAdapter(
+        private val context: Context,
+        private val applications: ArrayList<AppEntry>,
+        private val emptyView: View
+) : BaseAdapter(), StickyListHeadersAdapter, Filterable {
+
+    private val layoutInflater: LayoutInflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private val color: Int = context.resources.getColor(R.color.header_blue, null)
     private val mLock = Any()
 
     private var pattern: Pattern? = null
-    private var applicationsToDisplay: ArrayList<AppEntry>? = null
+    private var applicationsToDisplay: ArrayList<AppEntry>? = applications
 
     init {
-        this.applicationsToDisplay = applications
-        this.layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        this.color = context.resources.getColor(R.color.header_blue, null)
         updateEmptyView()
     }
 
@@ -62,9 +64,9 @@ internal class AppAdapter(private val context: Context, private val applications
                     emptyView.startAnimation(animation)
                 }
             }
-            emptyView.visibility = View.VISIBLE
+            emptyView.show()
         } else {
-            emptyView.visibility = View.GONE
+            emptyView.hide()
         }
     }
 
@@ -73,7 +75,6 @@ internal class AppAdapter(private val context: Context, private val applications
         val holder: ViewHolder
         if (view == null) {
             view = layoutInflater.inflate(R.layout.row_application, parent, false)
-            assert(view != null)
             holder = ViewHolder()
             holder.textView = view!!.findViewById(R.id.item_text)
             holder.imageView = view.findViewById(R.id.item_image)
@@ -87,9 +88,7 @@ internal class AppAdapter(private val context: Context, private val applications
 
         Glide.with(context)
                 .load(item.iconUri)
-                .apply(RequestOptions()
-                        .error(R.drawable.ic_action_settings)
-                )
+                .apply(RequestOptions().error(R.drawable.ic_action_settings))
                 .into(holder.imageView!!)
 
         return view
@@ -106,7 +105,6 @@ internal class AppAdapter(private val context: Context, private val applications
         if (view == null) {
             holder = HeaderViewHolder()
             view = layoutInflater.inflate(R.layout.row_header, parent, false)
-            assert(view != null)
             holder.text = view!!.findViewById(R.id.text_header)
             view.tag = holder
         } else {
@@ -122,29 +120,22 @@ internal class AppAdapter(private val context: Context, private val applications
         internal var text: TextView? = null
     }
 
-    override fun getHeaderId(position: Int): Long {
-        return applicationsToDisplay!![position].headerChar.toLong()
-    }
+    override fun getHeaderId(position: Int): Long =
+            applicationsToDisplay!![position].headerChar.toLong()
 
     fun setFilter(filter: String?) {
-        if (filter.isNullOrEmpty()) {
-            pattern = null
+        pattern = if (filter.isNullOrEmpty()) {
+            null
         } else {
-            pattern = Pattern.compile(filter, Pattern.CASE_INSENSITIVE)
+            Pattern.compile(filter, Pattern.CASE_INSENSITIVE)
         }
     }
 
-    override fun getCount(): Int {
-        return applicationsToDisplay!!.size
-    }
+    override fun getCount(): Int = applicationsToDisplay!!.size
 
-    override fun getItem(position: Int): Any {
-        return applicationsToDisplay!![position]
-    }
+    override fun getItem(position: Int): Any = applicationsToDisplay!![position]
 
-    override fun getItemId(position: Int): Long {
-        return 0
-    }
+    override fun getItemId(position: Int): Long = 0
 
     override fun getFilter(): Filter {
         return object : Filter() {

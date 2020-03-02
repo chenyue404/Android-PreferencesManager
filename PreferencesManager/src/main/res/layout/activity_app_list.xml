@@ -23,11 +23,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
-        android:elevation="4dp">
-
-        <include layout="@layout/toolbar" />
-
-    </androidx.appcompat.widget.Toolbar>
+        android:elevation="4dp" />
 
     <se.emilsjolander.stickylistheaders.StickyListHeadersListView
         android:id="@+id/listView"

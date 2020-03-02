@@ -34,7 +34,6 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_about"
-        android:icon="@drawable/ic_action_info"
         android:orderInCategory="3"
         android:title="@string/show_popup"
         app:showAsAction="never" />

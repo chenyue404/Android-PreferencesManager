@@ -22,7 +22,6 @@ import android.view.ViewGroup
 import android.widget.*
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceType
-import fr.simon.marquis.preferencesmanager.util.createSpannable
 import java.util.*
 import java.util.regex.Pattern
 
@@ -59,10 +58,10 @@ class PreferenceAdapter(context: Context, private val mPreferencesFragment: Pref
             convertView = layoutInflater.inflate(R.layout.row_preference, parent, false)
             holder = ViewHolder()
             holder.background = convertView
-            holder.name = convertView!!.findViewById<TextView>(R.id.item_name)
-            holder.border = convertView.findViewById<View>(R.id.item_border)
-            holder.value = convertView.findViewById<TextView>(R.id.item_value)
-            holder.selector = convertView.findViewById<LinearLayout>(R.id.item_selector)
+            holder.name = convertView!!.findViewById(R.id.item_name)
+            holder.border = convertView.findViewById(R.id.item_border)
+            holder.value = convertView.findViewById(R.id.item_value)
+            holder.selector = convertView.findViewById(R.id.item_selector)
             convertView.tag = holder
         } else {
             holder = convertView.tag as ViewHolder

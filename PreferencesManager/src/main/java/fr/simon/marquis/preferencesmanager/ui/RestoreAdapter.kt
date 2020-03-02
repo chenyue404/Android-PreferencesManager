@@ -27,30 +27,29 @@ import android.widget.TextView
 import fr.simon.marquis.preferencesmanager.R
 import java.util.*
 
-internal class RestoreAdapter(private val ctx: Context, private val dialog: RestoreDialogFragment, private var backups: List<String>?, private val listener: RestoreDialogFragment.OnRestoreFragmentInteractionListener, private val fullPath: String) : BaseAdapter() {
+internal class RestoreAdapter(
+        private val ctx: Context,
+        private val dialog: RestoreDialogFragment,
+        private var backups: List<String>?,
+        private val listener: RestoreDialogFragment.OnRestoreFragmentInteractionListener,
+        private val fullPath: String
+) : BaseAdapter() {
 
     init {
         backups?.sorted()
     }
 
-    override fun getCount(): Int {
-        return backups!!.size
-    }
+    override fun getCount(): Int = backups!!.size
 
-    override fun getItem(position: Int): Any {
-        return backups!![position]
-    }
+    override fun getItem(position: Int): Any = backups!![position]
 
-    override fun getItemId(position: Int): Long {
-        return 0
-    }
+    override fun getItemId(position: Int): Long = 0
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var view = convertView
         val holder: ViewHolder
         if (view == null) {
             view = LayoutInflater.from(ctx).inflate(R.layout.row_restore, parent, false)
-            assert(view != null)
             holder = ViewHolder()
             holder.label = view!!.findViewById(R.id.item_label)
             holder.delete = view.findViewById(R.id.item_delete)
@@ -79,18 +78,35 @@ internal class RestoreAdapter(private val ctx: Context, private val dialog: Rest
     }
 
     private fun getDisplayLabel(ctx: Context, time: Long): String {
-        return upperFirstLetter(DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY)) + " (" + lowerFirstLetter(DateUtils.getRelativeTimeSpanString(time, Date().time, DateUtils.SECOND_IN_MILLIS).toString()) + ")"
+        return upperFirstLetter(
+                DateUtils.formatDateTime(
+                        ctx,
+                        time,
+                        DateUtils.FORMAT_SHOW_DATE or
+                                DateUtils.FORMAT_SHOW_TIME or
+                                DateUtils.FORMAT_SHOW_WEEKDAY
+                )
+        ) + " (" + lowerFirstLetter(
+                DateUtils.getRelativeTimeSpanString(
+                        time,
+                        Date().time,
+                        DateUtils.SECOND_IN_MILLIS
+                ).toString()) + ")"
     }
 
     private fun upperFirstLetter(original: String): String {
         return if (original.isEmpty()) {
             original
-        } else original.substring(0, 1).toUpperCase(Locale.getDefault()) + original.substring(1)
+        } else {
+            original.substring(0, 1).toUpperCase(Locale.getDefault()) + original.substring(1)
+        }
     }
 
     private fun lowerFirstLetter(original: String): String {
         return if (original.isEmpty()) {
             original
-        } else original.substring(0, 1).toLowerCase(Locale.getDefault()) + original.substring(1)
+        } else {
+            original.substring(0, 1).toLowerCase(Locale.getDefault()) + original.substring(1)
+        }
     }
 }

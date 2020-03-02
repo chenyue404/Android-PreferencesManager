@@ -22,11 +22,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
-        android:elevation="4dp">
-
-        <include layout="@layout/toolbar" />
-
-    </androidx.appcompat.widget.Toolbar>
+        android:elevation="4dp" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -49,7 +45,8 @@
             android:inputType="textMultiLine|textNoSuggestions|none"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            tools:text="Edit Text Items"/>
+            tools:text="Edit Text Items"
+            tools:ignore="Autofill,LabelFor" />
 
     </ScrollView>
 

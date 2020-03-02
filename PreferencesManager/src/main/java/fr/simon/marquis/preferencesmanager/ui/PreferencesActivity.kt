@@ -26,34 +26,26 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
-
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-
-import org.json.JSONArray
-
-import java.util.ArrayList
-import java.util.Date
-
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceSortType
 import fr.simon.marquis.preferencesmanager.ui.PreferencesFragment.OnPreferenceFragmentInteractionListener
 import fr.simon.marquis.preferencesmanager.util.Utils
 import kotlinx.android.synthetic.main.activity_preferences.*
+import org.json.JSONArray
+import java.util.*
 
-class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteractionListener, RestoreDialogFragment.OnRestoreFragmentInteractionListener {
+class PreferencesActivity :
+        AppCompatActivity(),
+        OnPreferenceFragmentInteractionListener,
+        RestoreDialogFragment.OnRestoreFragmentInteractionListener {
 
     private var mViewPager: ViewPager? = null
     private var mLoadingView: View? = null
@@ -71,13 +63,10 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
     private var launchedFromShortcut = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //setTheme(App.theme.theme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preferences)
 
         setSupportActionBar(toolbar)
-
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val intent = intent.extras
         if (intent == null) {
@@ -97,27 +86,9 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
         title = intent.getString(EXTRA_TITLE)
         launchedFromShortcut = intent.getBoolean(EXTRA_SHORTCUT, false)
 
-        //Custom toolbar
-        val toolbarTitle = findViewById<TextView>(R.id.toolbar_package_name)
-        val toolbarSubTitle = findViewById<TextView>(R.id.toolbar_package)
-        val image = findViewById<ImageView>(R.id.toolbar_icon)
-
-        val appName = findViewById<LinearLayout>(R.id.toolbar_app_name)
-        appName.visibility = View.GONE
-
-        toolbarTitle.isSelected = true
-        toolbarSubTitle.isSelected = true
-
-        toolbarTitle.text = title
-        toolbarSubTitle.text = pkgName
-
-        Glide.with(this)
-                .load(iconUri)
-                .apply(RequestOptions()
-                        .placeholder(R.drawable.ic_launcher)
-                )
-                .into(image)
-
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = title
+        supportActionBar?.subtitle = pkgName
 
         if (savedInstanceState == null) {
             findFilesAndBackupsTask = FindFilesAndBackupsTask(pkgName!!)
@@ -158,7 +129,16 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val fav = Utils.isFavorite(pkgName!!, this)
         val itemFav = menu.findItem(R.id.action_fav)
-        itemFav?.setIcon(if (fav) R.drawable.ic_action_star_10 else R.drawable.ic_action_star_0)?.setTitle(if (fav) R.string.action_unfav else R.string.action_fav)
+        itemFav?.setIcon(
+                if (fav)
+                    R.drawable.ic_action_star_10
+                else
+                    R.drawable.ic_action_star_0
+        )?.setTitle(
+                if (fav)
+                    R.string.action_unfav
+                else R.string.action_fav
+        )
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -166,10 +146,10 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
         when (item.itemId) {
             android.R.id.home -> {
                 if (launchedFromShortcut) {
-                    val i = Intent(this, AppListActivity::class.java)
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(i)
+                    startActivity(Intent(this, AppListActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    })
                 }
                 finish()
                 return true
@@ -189,18 +169,24 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
     }
 
     private fun createShortcut() {
-        val shortcutIntent = Intent(this, PreferencesActivity::class.java)
-        shortcutIntent.putExtra(EXTRA_PACKAGE_NAME, pkgName)
-        shortcutIntent.putExtra(EXTRA_TITLE, title)
-        shortcutIntent.putExtra(EXTRA_SHORTCUT, true)
-        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val shortcutIntent = Intent(this, PreferencesActivity::class.java).apply {
+            putExtra(EXTRA_PACKAGE_NAME, pkgName)
+            putExtra(EXTRA_TITLE, title)
+            putExtra(EXTRA_SHORTCUT, true)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
 
-        val addIntent = Intent()
-        addIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent)
-        addIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, title)
-        addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.drawable.ic_launcher))
-        addIntent.action = INSTALL_SHORTCUT
+        val addIntent = Intent().apply {
+            putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent)
+            putExtra(Intent.EXTRA_SHORTCUT_NAME, title)
+            putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
+                    Intent.ShortcutIconResource.fromContext(
+                            this@PreferencesActivity,
+                            R.drawable.ic_launcher)
+            )
+            action = INSTALL_SHORTCUT
+        }
         sendBroadcast(addIntent)
     }
 
@@ -208,22 +194,21 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
         val backup = Date().time.toString()
         backupContainer!!.put(fullPath!!, backup)
 
-        //TODO: asynctask
-        if (Utils.backupFile(backup, fullPath, this)) {
-            Utils.saveBackups(this, pkgName!!, backupContainer!!)
-            Toast.makeText(this, R.string.toast_backup_success, Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, R.string.toast_backup_fail, Toast.LENGTH_SHORT).show()
+        runOnUiThread {
+            if (Utils.backupFile(backup, fullPath, this)) {
+                Utils.saveBackups(this, pkgName!!, backupContainer!!)
+                Toast.makeText(this, R.string.toast_backup_success, Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, R.string.toast_backup_fail, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    override fun canRestoreFile(fullPath: String?): Boolean {
-        return backupContainer != null && backupContainer!!.contains(fullPath!!)
-    }
+    override fun canRestoreFile(fullPath: String?): Boolean =
+            backupContainer != null && backupContainer!!.contains(fullPath!!)
 
-    override fun getBackups(fullPath: String?): List<String>? {
-        return if (backupContainer == null) emptyList() else backupContainer!![fullPath!!]
-    }
+    override fun getBackups(fullPath: String?): List<String>? =
+            if (backupContainer == null) emptyList() else backupContainer!![fullPath!!]
 
     override fun onRestoreFile(backup: String, fullPath: String?): String {
         Log.d(TAG, String.format("onRestoreFile(%s, %s)", backup, fullPath))
@@ -249,21 +234,15 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
         val fadeOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
 
         if (files == null || files!!.isEmpty()) {
-            if (fadeIn != null) {
-                mEmptyView!!.startAnimation(fadeIn)
-            }
-            mEmptyView!!.visibility = View.VISIBLE
-            if (fadeOut != null) {
-                mLoadingView!!.startAnimation(fadeOut)
-            }
-            mLoadingView!!.visibility = View.GONE
+            mEmptyView!!.startAnimation(fadeIn)
+            mEmptyView!!.hide()
+            mLoadingView!!.startAnimation(fadeOut)
+            mLoadingView!!.hide()
         } else {
-            mEmptyView!!.visibility = View.GONE
-            mLoadingView!!.visibility = View.GONE
-            if (fadeIn != null) {
-                mViewPager!!.startAnimation(fadeIn)
-            }
-            mViewPager!!.visibility = View.VISIBLE
+            mEmptyView!!.hide()
+            mLoadingView!!.hide()
+            mViewPager!!.startAnimation(fadeIn)
+            mViewPager!!.show()
         }
     }
 
@@ -271,26 +250,31 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
         backupContainer = b
     }
 
-    internal inner class SectionsPagerAdapter(fm: FragmentManager, private val mFiles: List<String>) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    internal inner class SectionsPagerAdapter(
+            fm: FragmentManager,
+            private val mFiles: List<String>
+    ) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
-        override fun getItem(position: Int): Fragment {
-            return PreferencesFragment.newInstance(mFiles[position], pkgName!!, iconUri!!)
-        }
+        override fun getItem(position: Int): Fragment =
+                PreferencesFragment.newInstance(mFiles[position], pkgName!!, iconUri!!)
 
-        override fun getCount(): Int {
-            return mFiles.size
-        }
+        override fun getCount(): Int = mFiles.size
 
-        override fun getPageTitle(position: Int): CharSequence? {
-            return Utils.extractFileName(mFiles[position])
-        }
+        override fun getPageTitle(position: Int): CharSequence? =
+                Utils.extractFileName(mFiles[position])
+
     }
 
     @SuppressLint("StaticFieldLeak")
-    internal inner class FindFilesAndBackupsTask(private val mPackageName: String) : AsyncTask<Void, Void, Pair<List<String>, BackupContainer>>() {
+    internal inner class FindFilesAndBackupsTask(
+            private val mPackageName: String
+    ) : AsyncTask<Void, Void, Pair<List<String>, BackupContainer>>() {
 
         override fun doInBackground(vararg params: Void): Pair<List<String>, BackupContainer> {
-            return Pair.create(Utils.findXmlFiles(mPackageName), Utils.getBackups(applicationContext, mPackageName))
+            return Pair.create(
+                    Utils.findXmlFiles(mPackageName),
+                    Utils.getBackups(applicationContext, mPackageName)
+            )
         }
 
         override fun onPostExecute(result: Pair<List<String>, BackupContainer>) {
@@ -301,9 +285,7 @@ class PreferencesActivity : AppCompatActivity(), OnPreferenceFragmentInteraction
     }
 
     override fun onDestroy() {
-        if (findFilesAndBackupsTask != null) {
-            findFilesAndBackupsTask!!.cancel(true)
-        }
+        findFilesAndBackupsTask?.cancel(true)
         super.onDestroy()
     }
 

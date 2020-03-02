@@ -16,21 +16,17 @@ package fr.simon.marquis.preferencesmanager.ui
  * the License.
  */
 
-import android.net.Uri
 import android.os.Bundle
 import android.text.*
 import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
@@ -38,9 +34,7 @@ import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorTagEnum
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorThemeEnum
 import fr.simon.marquis.preferencesmanager.model.XmlFontSize
 import fr.simon.marquis.preferencesmanager.util.Utils
-import fr.simon.marquis.preferencesmanager.util.hideSoftKeyboard
 import kotlinx.android.synthetic.main.activity_file_editor.*
-import kotlinx.android.synthetic.main.toolbar.*
 import java.util.regex.Pattern
 
 class FileEditorActivity : AppCompatActivity(), TextWatcher {
@@ -57,7 +51,6 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
     private var mNeedUpdateOnActivityFinish = false
 
     override fun onCreate(arg0: Bundle?) {
-        //setTheme(App.theme.theme)
         super.onCreate(arg0)
         setContentView(R.layout.activity_file_editor)
 
@@ -67,22 +60,8 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             return
         }
 
-        //Custom Toolbar
         setSupportActionBar(toolbar)
-
-        if (supportActionBar != null)
-            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
-        toolbar_app_name.visibility = View.VISIBLE
-
-        appName.isSelected = true
-
-        Glide.with(this)
-                .load(intent.getParcelable<Uri>(PreferencesFragment.ARG_ICON_URI))
-                .apply(RequestOptions()
-                        .error(R.drawable.ic_action_settings)
-                )
-                .into(toolbar_icon)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mEditText = editText
         mFile = intent.getString(PreferencesFragment.ARG_FILE)
@@ -108,12 +87,14 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             mColorTheme = ColorThemeEnum.valueOf(arg0.getString(KEY_COLOR_THEME)!!)
             setXmlFontSize(XmlFontSize.generateSize(arg0.getInt(KEY_FONT_SIZE)))
         }
-        mXmlColorTheme = XmlColorTheme.createTheme(resources, mColorTheme!!)
+        mXmlColorTheme = XmlColorTheme.createTheme(this, mColorTheme!!)
 
         updateTitle()
         invalidateOptionsMenu()
 
+
         highlightXMLText(mEditText!!.text)
+
 
         mEditText!!.clearFocus()
     }
@@ -228,7 +209,7 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
     private fun setXmlColorTheme(theme: ColorThemeEnum) {
         if (mColorTheme != theme) {
             mColorTheme = theme
-            mXmlColorTheme = XmlColorTheme.createTheme(resources, mColorTheme!!)
+            mXmlColorTheme = XmlColorTheme.createTheme(this, mColorTheme!!)
             invalidateOptionsMenu()
             highlightXMLText(mEditText!!.text)
 

@@ -36,12 +36,12 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.PreferenceSortType
 import fr.simon.marquis.preferencesmanager.model.PreferenceType
 import fr.simon.marquis.preferencesmanager.util.Utils
-import fr.simon.marquis.preferencesmanager.util.hideSoftKeyboard
 import kotlin.collections.Map.Entry
 
 class PreferencesFragment : Fragment() {
@@ -237,8 +237,8 @@ class PreferencesFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CODE_EDIT_FILE && resultCode == AppCompatActivity.RESULT_OK) {
-            loadingView!!.visibility = View.VISIBLE
-            gridView!!.visibility = View.GONE
+            loadingView!!.hide()
+            gridView!!.hide()
 
             if (activity != null) {
                 val fadeInAnim = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
@@ -255,6 +255,7 @@ class PreferencesFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    @Suppress("Unchecked_Cast")
     private fun showPrefDialog(type: PreferenceType, editMode: Boolean = false, editKey: String? = null, obj: Any? = null) {
 
         //This is hacky :(
@@ -338,7 +339,7 @@ class PreferencesFragment : Fragment() {
 
             when (mPreferenceType) {
                 PreferenceType.BOOLEAN -> {
-                    dialog.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).visibility = View.GONE
+                    dialog.getCustomView().findViewById<TextInputLayout>(R.id.value_input_layout).visibility = View.GONE
                     dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).visibility = View.VISIBLE
                     dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked = mEditValue as Boolean
                 }
@@ -388,7 +389,6 @@ class PreferencesFragment : Fragment() {
                             //addStringSetEntry(true, null)
                         }
                     }
-
         }
 
         dialog.show()
@@ -419,7 +419,6 @@ class PreferencesFragment : Fragment() {
         } catch (e: ClassCastException) {
             throw ClassCastException("$context must implement OnPreferenceFragmentInteractionListener")
         }
-
     }
 
     override fun onDetach() {
@@ -428,28 +427,34 @@ class PreferencesFragment : Fragment() {
     }
 
     internal fun updateListView(p: PreferenceFile?, animate: Boolean) {
+
         if (activity == null || activity!!.isFinishing) {
             return
         }
+
         if (p == null) {
             activity!!.finish()
             return
         }
+
         preferenceFile = p
-        emptyViewText!!.setText(if (preferenceFile!!.isValidPreferenceFile) R.string.empty_preference_file_valid else R.string.empty_preference_file_invalid)
-        loadingView!!.visibility = View.GONE
-        gridView!!.visibility = View.VISIBLE
+        emptyViewText!!.setText(
+                if (preferenceFile!!.isValidPreferenceFile)
+                    R.string.empty_preference_file_valid
+                else
+                    R.string.empty_preference_file_invalid
+        )
+        loadingView!!.hide()
+        gridView!!.show()
 
         if (animate) {
             if (activity != null) {
-                val fadeOut = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
-                if (fadeOut != null) {
-                    loadingView!!.startAnimation(fadeOut)
-                }
-                val fadeIn = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
-                if (fadeIn != null) {
-                    gridView!!.startAnimation(fadeIn)
-                }
+                loadingView!!.startAnimation(
+                        AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
+                )
+                gridView!!.startAnimation(
+                        AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
+                )
             }
         }
 
@@ -457,12 +462,12 @@ class PreferencesFragment : Fragment() {
         gridView!!.emptyView = emptyViewText
         gridView!!.setOnItemClickListener { _, _, arg2, _ ->
 
-            val item = gridView!!.adapter.getItem(arg2) as Entry<String, Any>
-            val type = PreferenceType.fromObject(item.value)
+            val item = gridView!!.adapter.getItem(arg2) as Entry<*, *>
+            val type = PreferenceType.fromObject(item.value!!)
             if (type == PreferenceType.UNSUPPORTED) {
                 Toast.makeText(activity, R.string.preference_unsupported, Toast.LENGTH_SHORT).show()
             } else {
-                showPrefDialog(type, true, item.key, item.value)
+                showPrefDialog(type, true, item.key as String, item.value)
             }
         }
         gridView!!.setMultiChoiceModeListener(object : MultiChoiceModeListener {
@@ -470,7 +475,7 @@ class PreferencesFragment : Fragment() {
             override fun onItemCheckedStateChanged(mode: ActionMode, position: Int, id: Long, checked: Boolean) {
                 (gridView!!.adapter as PreferenceAdapter).itemCheckedStateChanged(position, checked)
                 @Suppress("DEPRECATION")
-                mode.title = Html.fromHtml("<b>" + gridView!!.checkedItemCount + "</b>")
+                mode.title = Html.fromHtml("<b>" + gridView!!.checkedItemCount + "</b> selected")
             }
 
             override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
@@ -496,10 +501,12 @@ class PreferencesFragment : Fragment() {
             override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
                 val inflater = mode.menuInflater
                 inflater?.inflate(R.menu.cab, menu)
+                (activity as PreferencesActivity).supportActionBar?.hide()
                 return true
             }
 
             override fun onDestroyActionMode(mode: ActionMode) {
+                (activity as PreferencesActivity).supportActionBar?.show()
                 (gridView!!.adapter as PreferenceAdapter).resetSelection()
                 activity!!.invalidateOptionsMenu()
             }
@@ -548,10 +555,11 @@ class PreferencesFragment : Fragment() {
 
         fun newInstance(paramFile: String, paramPackageName: String, paramIconUri: Uri): PreferencesFragment {
             val fragment = PreferencesFragment()
-            val args = Bundle()
-            args.putParcelable(ARG_ICON_URI, paramIconUri)
-            args.putString(ARG_FILE, paramFile)
-            args.putString(ARG_PACKAGE_NAME, paramPackageName)
+            val args = Bundle().apply {
+                putParcelable(ARG_ICON_URI, paramIconUri)
+                putString(ARG_FILE, paramFile)
+                putString(ARG_PACKAGE_NAME, paramPackageName)
+            }
             fragment.arguments = args
             return fragment
         }

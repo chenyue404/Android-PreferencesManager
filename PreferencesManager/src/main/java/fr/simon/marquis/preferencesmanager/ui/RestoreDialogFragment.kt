@@ -125,24 +125,25 @@ class RestoreDialogFragment : DialogFragment(), AdapterView.OnItemClickListener 
 
         fun show(target: PreferencesFragment, fm: FragmentManager, fullPath: String, backups: List<String>) {
             dismiss(fm)
-            val restoreDialogFragment = newInstance(fullPath, backups)
-            restoreDialogFragment.setTargetFragment(target, "Fragment:$fullPath".hashCode())
-            restoreDialogFragment.show(fm, TAG)
+            newInstance(fullPath, backups).apply {
+                setTargetFragment(target, "Fragment:$fullPath".hashCode())
+                show(fm, TAG)
+            }
         }
 
         private fun newInstance(fullPath: String, backups: List<String>): RestoreDialogFragment {
             val dialog = RestoreDialogFragment()
-            val args = Bundle()
             val array = JSONArray(backups)
-            args.putString(ARG_FULL_PATH, fullPath)
-            args.putString(ARG_BACKUPS, array.toString())
+            val args = Bundle().apply {
+                putString(ARG_FULL_PATH, fullPath)
+                putString(ARG_BACKUPS, array.toString())
+            }
             dialog.arguments = args
             return dialog
         }
 
         private fun dismiss(fm: FragmentManager?) {
-            val dialog = find(fm!!)
-            dialog?.dismiss()
+            find(fm!!)?.dismiss()
         }
 
         private fun find(fm: FragmentManager): RestoreDialogFragment? {

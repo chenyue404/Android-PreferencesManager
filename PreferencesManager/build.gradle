@@ -4,14 +4,14 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '29.0.1'
+    buildToolsVersion '29.0.2'
 
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 29
 
-        versionName "1.9.0"
-        versionCode 190
+        versionName "1.9.1"
+        versionCode 191
     }
 
     buildTypes {
@@ -33,21 +33,21 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-beta01'
-    implementation 'com.google.android.material:material:1.1.0-alpha08'
-    implementation 'androidx.preference:preference:1.1.0-rc01'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha01'
+    implementation 'com.google.android.material:material:1.2.0-alpha05'
+    implementation 'androidx.preference:preference:1.1.0'
 
-    implementation 'androidx.core:core-ktx:1.2.0-alpha02'
+    implementation 'androidx.core:core-ktx:1.3.0-alpha01'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     implementation 'se.emilsjolander:stickylistheaders:2.7.0'
 
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
-    implementation 'com.afollestad.material-dialogs:core:3.1.0'
+    implementation 'com.afollestad.material-dialogs:core:3.3.0'
 
-    implementation 'com.github.topjohnwu.libsu:core:2.5.0'
+    implementation 'com.github.topjohnwu.libsu:core:2.5.1'
 }

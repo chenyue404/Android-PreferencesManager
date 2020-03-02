@@ -24,7 +24,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.preference.PreferenceManager
@@ -34,10 +33,7 @@ import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.Utils
-import fr.simon.marquis.preferencesmanager.util.animateView
-import fr.simon.marquis.preferencesmanager.util.hideSoftKeyboard
 import kotlinx.android.synthetic.main.activity_app_list.*
-import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
 class AppListActivity : AppCompatActivity() {
@@ -47,15 +43,15 @@ class AppListActivity : AppCompatActivity() {
     private var task: GetApplicationsTask? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //setTheme(App.theme.theme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_list)
         Utils.checkBackups(applicationContext)
 
-        //Custom Toolbar
         setSupportActionBar(toolbar)
 
-        toolbar_app_name.visibility = View.VISIBLE
+        if (savedInstanceState == null) {
+            checkRoot()
+        }
 
         listView!!.isDrawingListUnderStickyHeader = false
         listView!!.setOnItemClickListener { _, _, arg2, _ ->
@@ -66,10 +62,6 @@ class AppListActivity : AppCompatActivity() {
             }
         }
 
-        if (savedInstanceState == null) {
-            checkRoot()
-        }
-
         if (savedInstanceState == null || Utils.previousApps == null) {
             startTask()
         } else {
@@ -78,7 +70,6 @@ class AppListActivity : AppCompatActivity() {
     }
 
     private fun checkRoot() {
-
         isRootAccessGiven = Shell.rootAccess()
 
         Log.i(TAG, "Root Access: $isRootAccessGiven")
@@ -140,9 +131,7 @@ class AppListActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PREFERENCES_ACTIVITY) {
-            if (mAdapter != null) {
-                mAdapter!!.notifyDataSetChanged()
-            }
+            mAdapter?.notifyDataSetChanged()
         }
     }
 
@@ -181,10 +170,10 @@ class AppListActivity : AppCompatActivity() {
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val show = Utils.isShowSystemApps(this)
         val showItem = menu.findItem(R.id.show_system_apps)
-        if (showItem != null) {
-            showItem.setTitle(if (show) R.string.hide_system_apps else R.string.show_system_apps)
-            showItem.setIcon(if (show) R.drawable.ic_action_show else R.drawable.ic_action_hide)
-        }
+
+        showItem.setTitle(if (show) R.string.hide_system_apps else R.string.show_system_apps)
+        showItem.setIcon(if (show) R.drawable.ic_action_show else R.drawable.ic_action_hide)
+
         return super.onPrepareOptionsMenu(menu)
     }
 

@@ -28,7 +28,7 @@ class MyComparator : Comparator<AppEntry> {
         sCollator.strength = Collator.SECONDARY
     }
 
-    override fun compare(obj1: AppEntry, obj2: AppEntry): Int {
-        return sCollator.compare(obj1.sortingValue, obj2.sortingValue)
-    }
+    override fun compare(obj1: AppEntry, obj2: AppEntry): Int =
+            sCollator.compare(obj1.sortingValue, obj2.sortingValue)
+
 }

@@ -36,7 +36,6 @@ import java.io.IOException
 import java.io.OutputStreamWriter
 import java.util.*
 
-@Suppress("RegExpRedundantEscape")
 object Utils {
 
     val TAG = Utils::class.java.simpleName
@@ -51,7 +50,7 @@ object Utils {
     private const val TMP_FILE = ".temp"
     private val FILE_SEPARATOR = System.getProperty("file.separator")
     private val LINE_SEPARATOR = System.getProperty("line.separator")
-    private const val PACKAGE_NAME_PATTERN = "^[a-zA-Z_\\$][\\w\\$]*(?:\\.[a-zA-Z_\\$][\\w\\$]*)*$"
+    private const val PACKAGE_NAME_PATTERN = "^[a-zA-Z_$][\\w$]*(?:\\.[a-zA-Z_$][\\w$]*)*$"
 
     var previousApps: ArrayList<AppEntry>? = null
         private set
@@ -83,7 +82,7 @@ object Utils {
             Collections.sort(entries, MyComparator())
             previousApps = ArrayList(entries)
         }
-        Log.d(TAG, "Applications: " + Arrays.toString(previousApps!!.toTypedArray()))
+        Log.d(TAG, "Applications: " + previousApps!!.toTypedArray().contentToString())
         return previousApps!!
     }
 
@@ -158,7 +157,7 @@ object Utils {
         Log.d(TAG, String.format("findXmlFiles(%s)", packageName))
         val files = ArrayList<String>()
         Shell.sh(String.format(CMD_FIND_XML_FILES, packageName)).to(files).exec()
-        Log.d(TAG, "files: " + Arrays.toString(files.toTypedArray()))
+        Log.d(TAG, "files: " + files.toTypedArray().contentToString())
 
         return files
     }
@@ -170,9 +169,10 @@ object Utils {
         Shell.sh(String.format(CMD_CAT_FILE, file)).to(lines).exec()
 
         for (line in lines) {
-            sb.append(line).append(LINE_SEPARATOR)
+            sb.append(line)
+            sb.append(LINE_SEPARATOR)
         }
-
+        
         return sb.toString()
     }
 

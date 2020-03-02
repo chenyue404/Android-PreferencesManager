@@ -463,6 +463,7 @@ object XmlUtils {
      *
      * @see .readThisMapXml .see .writeMapXml
      */
+    @Suppress("Unchecked_Cast")
     @Throws(XmlPullParserException::class, java.io.IOException::class)
     fun readMapXml(`in`: InputStream): HashMap<Any, Any>? {
         val parser = Xml.newPullParser()
@@ -633,6 +634,7 @@ object XmlUtils {
      * @return Returns a newly generated int[].
      * @see .readListXml
      */
+    @Suppress("Unused_Parameter")
     @Throws(XmlPullParserException::class, java.io.IOException::class)
     fun readThisIntArrayXml(parser: XmlPullParser, endTag: String, name: Array<String?>): IntArray {
 
@@ -664,9 +666,9 @@ object XmlUtils {
                     throw XmlPullParserException("Expected item tag at: " + parser.name)
                 }
             } else if (eventType == END_TAG) {
-                when {
-                    parser.name == endTag -> return array
-                    parser.name == "item" -> i++
+                when (parser.name) {
+                    endTag -> return array
+                    "item" -> i++
                     else -> throw XmlPullParserException("Expected " + endTag + " end tag at: " + parser.name)
                 }
             }

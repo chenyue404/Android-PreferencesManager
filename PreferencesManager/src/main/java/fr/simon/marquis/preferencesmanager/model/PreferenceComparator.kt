@@ -19,7 +19,9 @@ package fr.simon.marquis.preferencesmanager.model
 import java.util.Comparator
 import kotlin.collections.Map.Entry
 
-internal class PreferenceComparator(private val mType: PreferenceSortType) : Comparator<Entry<Any, Any>> {
+internal class PreferenceComparator(
+        private val mType: PreferenceSortType
+) : Comparator<Entry<Any, Any>> {
 
     override fun compare(lhs: Entry<Any, Any>?, rhs: Entry<Any, Any>?): Int {
         if (mType == PreferenceSortType.TYPE_AND_ALPHANUMERIC) {

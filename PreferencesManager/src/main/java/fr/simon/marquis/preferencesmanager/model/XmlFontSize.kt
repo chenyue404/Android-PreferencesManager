@@ -18,15 +18,11 @@ package fr.simon.marquis.preferencesmanager.model
 enum class XmlFontSize(val size: Int) {
     EXTRA_SMALL(10), SMALL(13), MEDIUM(16), LARGE(20), EXTRA_LARGE(24);
 
-
     companion object {
-
         fun generateSize(n: Int): XmlFontSize {
-            val sizes = values()
-            for (size in sizes) {
-                if (size.size == n) {
-                    return size
-                }
+            values().map {
+                if (it.size == n)
+                    return it
             }
             return MEDIUM
         }

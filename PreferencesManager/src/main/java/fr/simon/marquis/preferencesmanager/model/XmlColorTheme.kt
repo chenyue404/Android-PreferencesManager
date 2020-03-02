@@ -16,25 +16,33 @@ package fr.simon.marquis.preferencesmanager.model
  * the License.
  */
 
-import android.content.res.Resources
-
+import android.content.Context
+import androidx.core.content.ContextCompat
 import fr.simon.marquis.preferencesmanager.R
 
-class XmlColorTheme private constructor(r: Resources, xmlTag: Int, xmlAttributeName: Int, xmlAttributeValue: Int, xmlComment: Int, xmlValue: Int, xmlDefault: Int) {
+class XmlColorTheme(
+        context: Context,
+        xmlTag: Int,
+        xmlAttributeName: Int,
+        xmlAttributeValue: Int,
+        xmlComment: Int,
+        xmlValue: Int,
+        xmlDefault: Int
+) {
 
-    private val tag: Int = r.getColor(xmlTag)
-    private val attributeName: Int = r.getColor(xmlAttributeName)
-    private val attributeValue: Int = r.getColor(xmlAttributeValue)
-    private val comment: Int = r.getColor(xmlComment)
-    private val value: Int = r.getColor(xmlValue)
-//    private val defaultColor: Int = r.getColor(xmlDefault)
+    private val tag: Int = ContextCompat.getColor(context, xmlTag)
+    private val attributeName: Int = ContextCompat.getColor(context, xmlAttributeName)
+    private val attributeValue: Int = ContextCompat.getColor(context, xmlAttributeValue)
+    private val comment: Int = ContextCompat.getColor(context, xmlComment)
+    private val value: Int = ContextCompat.getColor(context, xmlValue)
+    private val defaultColor: Int = ContextCompat.getColor(context, xmlDefault)
 
     enum class ColorThemeEnum {
         ECLIPSE, GOOGLE, ROBOTICKET, NOTEPAD, NETBEANS
     }
 
     enum class ColorTagEnum {
-        TAG, ATTR_NAME, ATTR_VALUE, COMMENT, VALUE
+        TAG, ATTR_NAME, ATTR_VALUE, COMMENT, VALUE, DEFAULT
     }
 
     fun getColor(type: ColorTagEnum): Int {
@@ -44,18 +52,64 @@ class XmlColorTheme private constructor(r: Resources, xmlTag: Int, xmlAttributeN
             ColorTagEnum.ATTR_VALUE -> attributeValue
             ColorTagEnum.COMMENT -> comment
             ColorTagEnum.VALUE -> value
+            ColorTagEnum.DEFAULT -> defaultColor
         }
     }
 
     companion object {
 
-        fun createTheme(r: Resources, theme: ColorThemeEnum): XmlColorTheme? {
+        fun createTheme(context: Context, theme: ColorThemeEnum): XmlColorTheme? {
             return when (theme) {
-                ColorThemeEnum.ECLIPSE -> XmlColorTheme(r, R.color.xml_eclipse_tag, R.color.xml_eclipse_attribute_name, R.color.xml_eclipse_attribute_value, R.color.xml_eclipse_comment, R.color.xml_eclipse_value, R.color.xml_eclipse_default)
-                ColorThemeEnum.GOOGLE -> XmlColorTheme(r, R.color.xml_google_tag, R.color.xml_google_attribute_name, R.color.xml_google_attribute_value, R.color.xml_google_comment, R.color.xml_google_value, R.color.xml_google_default)
-                ColorThemeEnum.NETBEANS -> XmlColorTheme(r, R.color.xml_netbeans_tag, R.color.xml_netbeans_attribute_name, R.color.xml_netbeans_attribute_value, R.color.xml_netbeans_comment, R.color.xml_netbeans_value, R.color.xml_netbeans_default)
-                ColorThemeEnum.NOTEPAD -> XmlColorTheme(r, R.color.xml_notepad_tag, R.color.xml_notepad_attribute_name, R.color.xml_notepad_attribute_value, R.color.xml_notepad_comment, R.color.xml_notepad_value, R.color.xml_notepad_default)
-                ColorThemeEnum.ROBOTICKET -> XmlColorTheme(r, R.color.xml_roboticket_tag, R.color.xml_roboticket_attribute_name, R.color.xml_roboticket_attribute_value, R.color.xml_roboticket_comment, R.color.xml_roboticket_value, R.color.xml_roboticket_default)
+                ColorThemeEnum.ECLIPSE ->
+                    XmlColorTheme(
+                            context,
+                            R.color.xml_eclipse_tag,
+                            R.color.xml_eclipse_attribute_name,
+                            R.color.xml_eclipse_attribute_value,
+                            R.color.xml_eclipse_comment,
+                            R.color.xml_eclipse_value,
+                            R.color.xml_eclipse_default
+                    )
+                ColorThemeEnum.GOOGLE ->
+                    XmlColorTheme(
+                            context,
+                            R.color.xml_google_tag,
+                            R.color.xml_google_attribute_name,
+                            R.color.xml_google_attribute_value,
+                            R.color.xml_google_comment,
+                            R.color.xml_google_value,
+                            R.color.xml_google_default
+                    )
+                ColorThemeEnum.NETBEANS ->
+                    XmlColorTheme(
+                            context,
+                            R.color.xml_netbeans_tag,
+                            R.color.xml_netbeans_attribute_name,
+                            R.color.xml_netbeans_attribute_value,
+                            R.color.xml_netbeans_comment,
+                            R.color.xml_netbeans_value,
+                            R.color.xml_netbeans_default
+                    )
+                ColorThemeEnum.NOTEPAD ->
+                    XmlColorTheme(
+                            context,
+                            R.color.xml_notepad_tag,
+                            R.color.xml_notepad_attribute_name,
+                            R.color.xml_notepad_attribute_value,
+                            R.color.xml_notepad_comment,
+                            R.color.xml_notepad_value,
+                            R.color.xml_notepad_default
+                    )
+                ColorThemeEnum.ROBOTICKET ->
+                    XmlColorTheme(
+                            context,
+                            R.color.xml_roboticket_tag,
+                            R.color.xml_roboticket_attribute_name,
+                            R.color.xml_roboticket_attribute_value,
+                            R.color.xml_roboticket_comment,
+                            R.color.xml_roboticket_value,
+                            R.color.xml_roboticket_default
+                    )
             }
         }
     }
