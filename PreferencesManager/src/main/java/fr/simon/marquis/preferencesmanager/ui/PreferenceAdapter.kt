@@ -25,19 +25,20 @@ import fr.simon.marquis.preferencesmanager.model.PreferenceType
 import java.util.*
 import java.util.regex.Pattern
 
-class PreferenceAdapter(context: Context, private val mPreferencesFragment: PreferencesFragment) : BaseAdapter(), Filterable {
+class PreferenceAdapter(
+        context: Context,
+        private val mPreferencesFragment: PreferencesFragment
+) : BaseAdapter(), Filterable {
 
-    private val layoutInflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    private val color: Int = context.resources.getColor(R.color.header_blue, null)
+    private val color: Int = context.getResColor(R.color.header_blue)
     private val mLock = Any()
-    private val mCheckedPositions: MutableMap<MutableMap.MutableEntry<Any, Any>, Boolean>
     private var pattern: Pattern? = null
-    private var mListToDisplay: MutableList<MutableMap.MutableEntry<Any, Any>>? = null
-
-    init {
-        this.mCheckedPositions = HashMap()
-        this.mListToDisplay = mPreferencesFragment.preferenceFile!!.list
-    }
+    private val mCheckedPositions: MutableMap<MutableMap.MutableEntry<Any, Any>, Boolean> =
+            HashMap()
+    private val layoutInflater: LayoutInflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private var mListToDisplay: MutableList<MutableMap.MutableEntry<Any, Any>>? =
+            mPreferencesFragment.preferenceFile!!.list
 
     override fun getCount(): Int {
         return mListToDisplay!!.size
@@ -149,7 +150,6 @@ class PreferenceAdapter(context: Context, private val mPreferencesFragment: Pref
     }
 
     companion object {
-
         fun truncate(str: String?, length: Int): String? {
             return if (str != null && str.length > length) str.substring(0, length) else str
         }

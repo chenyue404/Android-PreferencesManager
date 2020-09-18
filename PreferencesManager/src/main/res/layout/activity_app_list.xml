@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,6 +13,7 @@
      limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -69,12 +69,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:drawableTop="@drawable/empty_view"
         android:drawablePadding="10dp"
         android:text="@string/empty_apps"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/tertiary_text_light"
         android:visibility="gone"
-        tools:visibility="visible"/>
+        app:drawableTopCompat="@drawable/empty_view"
+        tools:visibility="visible" />
 
 </RelativeLayout>

@@ -21,8 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import coil.load
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.MyComparator
@@ -38,9 +37,8 @@ internal class AppAdapter(
 
     private val layoutInflater: LayoutInflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    private val color: Int = context.resources.getColor(R.color.header_blue, null)
+    private val color: Int = context.getResColor(R.color.header_blue)
     private val mLock = Any()
-
     private var pattern: Pattern? = null
     private var applicationsToDisplay: ArrayList<AppEntry>? = applications
 
@@ -86,11 +84,9 @@ internal class AppAdapter(
         val item = applicationsToDisplay!![position]
         holder.textView!!.text = createSpannable(pattern, color, item.label!!)
 
-        Glide.with(context)
-                .load(item.iconUri)
-                .apply(RequestOptions().error(R.drawable.ic_action_settings))
-                .into(holder.imageView!!)
-
+        holder.imageView!!.load(item.iconUri) {
+            error(R.drawable.ic_action_settings)
+        }
         return view
     }
 
@@ -117,7 +113,7 @@ internal class AppAdapter(
     }
 
     private class HeaderViewHolder {
-        internal var text: TextView? = null
+        var text: TextView? = null
     }
 
     override fun getHeaderId(position: Int): Long =

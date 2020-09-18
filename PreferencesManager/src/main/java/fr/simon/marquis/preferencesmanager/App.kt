@@ -13,21 +13,34 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package fr.simon.marquis.preferencesmanager.ui
+package fr.simon.marquis.preferencesmanager
 
 import android.app.Application
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
 import androidx.preference.PreferenceManager
+import com.topjohnwu.superuser.Shell
+
 
 class App : Application() {
+
+    init {
+        Shell.enableVerboseLogging = BuildConfig.DEBUG
+        Shell.setDefaultBuilder(
+                Shell.Builder.create()
+                        .setFlags(Shell.FLAG_REDIRECT_STDERR)
+                        .setFlags(Shell.FLAG_MOUNT_MASTER) // Android R fix
+                        .setTimeout(10)
+        )
+    }
 
     override fun onCreate() {
         super.onCreate()
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val themePref = sharedPreferences.getString("themePref", DEFAULT_MODE)
-        applyTheme(themePref!!)
+        val themePref = sharedPreferences.getString("themePref", DEFAULT_MODE)!!
+        applyTheme(themePref)
     }
 
     companion object {
@@ -35,21 +48,17 @@ class App : Application() {
         const val DARK_MODE = "dark"
         const val DEFAULT_MODE = "default"
 
-        private fun isAtLeast(): Boolean {
-            return Build.VERSION.SDK_INT >= 29
-        }
-
         fun applyTheme(themePref: String) {
             when (themePref) {
                 LIGHT_MODE ->
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                 DARK_MODE ->
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 else -> {
-                    if (isAtLeast()) {
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    if (Build.VERSION.SDK_INT >= 29) {
+                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
                     } else {
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
+                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
                     }
                 }
             }

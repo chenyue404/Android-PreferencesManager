@@ -62,10 +62,11 @@ class PreferencesFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (arguments != null) {
-            mIconUri = arguments!!.getParcelable(ARG_ICON_URI)
-            mFile = arguments!!.getString(ARG_FILE)
-            mPackageName = arguments!!.getString(ARG_PACKAGE_NAME)
+
+        arguments?.let {
+            mIconUri = it.getParcelable(ARG_ICON_URI)
+            mFile = it.getString(ARG_FILE)
+            mPackageName = it.getString(ARG_PACKAGE_NAME)
         }
 
         retainInstance = true
@@ -174,7 +175,7 @@ class PreferencesFragment : Fragment() {
             R.id.action_edit_file -> {
                 if (preferenceFile == null) {
                     if (activity != null) {
-                        activity!!.finish()
+                        activity?.finish()
                     }
                 }
                 val intent = Intent(activity, FileEditorActivity::class.java)
@@ -208,7 +209,9 @@ class PreferencesFragment : Fragment() {
 
     private fun restoreBackup() {
         if (mListener != null) {
-            mListener!!.getBackups(mFile)?.let { RestoreDialogFragment.show(this, fragmentManager!!, mFile!!, it) }
+            mListener!!.getBackups(mFile)?.let {
+                RestoreDialogFragment.show(this, parentFragmentManager, mFile!!, it)
+            }
         }
     }
 
@@ -224,7 +227,7 @@ class PreferencesFragment : Fragment() {
         if (PreferencesActivity.preferenceSortType != type) {
             PreferencesActivity.preferenceSortType = type
             if (activity != null) {
-                activity!!.invalidateOptionsMenu()
+                activity?.invalidateOptionsMenu()
                 PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal).apply()
             }
 
@@ -297,7 +300,7 @@ class PreferencesFragment : Fragment() {
             }
         }
 
-        val dialog = MaterialDialog(context!!)
+        val dialog = MaterialDialog(requireActivity())
                 .title(if (editMode) type.dialogTitleEdit else type.dialogTitleAdd)
                 .customView(R.layout.dialog_layout)
                 .positiveButton(if (editMode) R.string.dialog_update else R.string.dialog_add) {
@@ -399,7 +402,7 @@ class PreferencesFragment : Fragment() {
             return
         }
         preferenceFile!!.add(previousKey, newKey, value, editMode)
-        Utils.savePreferences(preferenceFile, mFile!!, mPackageName!!, activity!!)
+        Utils.savePreferences(preferenceFile, mFile!!, mPackageName!!, requireActivity())
         (gridView!!.adapter as PreferenceAdapter).notifyDataSetChanged()
     }
 
@@ -408,7 +411,7 @@ class PreferencesFragment : Fragment() {
             return
         }
         preferenceFile!!.removeValue(key)
-        Utils.savePreferences(preferenceFile, mFile!!, mPackageName!!, activity!!)
+        Utils.savePreferences(preferenceFile, mFile!!, mPackageName!!, requireActivity())
         (gridView!!.adapter as PreferenceAdapter).notifyDataSetChanged()
     }
 
@@ -428,12 +431,12 @@ class PreferencesFragment : Fragment() {
 
     internal fun updateListView(p: PreferenceFile?, animate: Boolean) {
 
-        if (activity == null || activity!!.isFinishing) {
+        if (activity == null || requireActivity().isFinishing) {
             return
         }
 
         if (p == null) {
-            activity!!.finish()
+            requireActivity().finish()
             return
         }
 
@@ -458,7 +461,7 @@ class PreferencesFragment : Fragment() {
             }
         }
 
-        gridView!!.adapter = PreferenceAdapter(activity!!, this)
+        gridView!!.adapter = PreferenceAdapter(requireActivity(), this)
         gridView!!.emptyView = emptyViewText
         gridView!!.setOnItemClickListener { _, _, arg2, _ ->
 
@@ -516,7 +519,7 @@ class PreferencesFragment : Fragment() {
             }
 
         })
-        activity!!.invalidateOptionsMenu()
+        requireActivity().invalidateOptionsMenu()
     }
 
     interface OnPreferenceFragmentInteractionListener {

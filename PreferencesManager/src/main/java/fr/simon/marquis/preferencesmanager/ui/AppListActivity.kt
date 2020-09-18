@@ -30,6 +30,7 @@ import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.topjohnwu.superuser.Shell
+import fr.simon.marquis.preferencesmanager.App
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.Utils
@@ -87,10 +88,11 @@ class AppListActivity : AppCompatActivity() {
         if (!Shell.rootAccess()) {
             Utils.displayNoRoot(this)
         } else {
-            val i = Intent(this@AppListActivity, PreferencesActivity::class.java)
-            i.putExtra(PreferencesActivity.KEY_ICON_URI, app.iconUri)
-            i.putExtra(PreferencesActivity.EXTRA_TITLE, app.label)
-            i.putExtra(PreferencesActivity.EXTRA_PACKAGE_NAME, app.applicationInfo.packageName)
+            val i = Intent(this, PreferencesActivity::class.java).apply {
+                putExtra(PreferencesActivity.KEY_ICON_URI, app.iconUri)
+                putExtra(PreferencesActivity.EXTRA_TITLE, app.label)
+                putExtra(PreferencesActivity.EXTRA_PACKAGE_NAME, app.applicationInfo.packageName)
+            }
             startActivityForResult(i, REQUEST_CODE_PREFERENCES_ACTIVITY)
         }
     }
@@ -231,7 +233,6 @@ class AppListActivity : AppCompatActivity() {
             finishTask()
             super.onCancelled()
         }
-
     }
 
     private fun switchThemeDialog() {
@@ -257,5 +258,4 @@ class AppListActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PREFERENCES_ACTIVITY = 123
         private var isRootAccessGiven = false
     }
-
 }

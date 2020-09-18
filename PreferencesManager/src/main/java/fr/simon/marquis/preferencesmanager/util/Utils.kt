@@ -25,6 +25,7 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.topjohnwu.superuser.Shell
+import fr.simon.marquis.preferencesmanager.BuildConfig
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
@@ -38,7 +39,7 @@ import java.util.*
 
 object Utils {
 
-    val TAG = Utils::class.java.simpleName
+    val TAG: String = Utils::class.java.simpleName
     private const val FAVORITES_KEY = "FAVORITES_KEY"
     private const val VERSION_CODE_KEY = "VERSION_CODE"
     private const val BACKUP_PREFIX = "BACKUP_"
@@ -67,8 +68,10 @@ object Utils {
             previousApps = ArrayList()
         } else {
             val showSystemApps = isShowSystemApps(ctx)
-            var appsInfo: List<ApplicationInfo>? = pm.getInstalledApplications(0)
-            if (appsInfo == null) {
+            var appsInfo: MutableList<ApplicationInfo> =
+                    pm.getInstalledApplications(PackageManager.GET_META_DATA)
+
+            if (appsInfo.isNullOrEmpty()) {
                 appsInfo = ArrayList()
             }
 
@@ -155,18 +158,31 @@ object Utils {
 
     fun findXmlFiles(packageName: String): List<String> {
         Log.d(TAG, String.format("findXmlFiles(%s)", packageName))
-        val files = ArrayList<String>()
-        Shell.sh(String.format(CMD_FIND_XML_FILES, packageName)).to(files).exec()
-        Log.d(TAG, "files: " + files.toTypedArray().contentToString())
 
-        return files
+        val stdout: List<String> = ArrayList()
+        val stderr: List<String> = ArrayList()
+        val what = Shell.su(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
+
+        if(BuildConfig.DEBUG) {
+            println("Out: " + what.out)
+            println("Err: " + what.err)
+            println("Succ: " + what.isSuccess)
+            println("Code: " + what.code)
+
+            println("stdout: $stdout")
+            println("stderr: $stderr")
+        }
+
+        Log.d(TAG, "files: " + stdout.toTypedArray().contentToString())
+
+        return stdout
     }
 
     fun readFile(file: String): String {
         Log.d(TAG, String.format("readFile(%s)", file))
         val sb = StringBuilder()
         val lines = ArrayList<String>()
-        Shell.sh(String.format(CMD_CAT_FILE, file)).to(lines).exec()
+        Shell.su(String.format(CMD_CAT_FILE, file)).to(lines).exec()
 
         for (line in lines) {
             sb.append(line)
@@ -277,7 +293,7 @@ object Utils {
     fun backupFile(backup: String, fileName: String, ctx: Context): Boolean {
         Log.d(TAG, String.format("backupFile(%s, %s)", backup, fileName))
         val destination = File(ctx.filesDir, backup)
-        Shell.sh(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
+        Shell.su(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
         Log.d(TAG, "backupFile --> $destination")
         return true
     }
@@ -285,7 +301,7 @@ object Utils {
     fun restoreFile(ctx: Context, backup: String, fileName: String, packageName: String): Boolean {
         Log.d(TAG, String.format("restoreFile(%s, %s, %s)", backup, fileName, packageName))
         val backupFile = File(ctx.filesDir, backup)
-        Shell.sh(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
+        Shell.su(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
             Log.e(TAG, "Error fixUserAndGroupId")
@@ -332,7 +348,7 @@ object Utils {
             return false
         }
 
-        Shell.sh(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
+        Shell.su(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
 
         if (!fixUserAndGroupId(ctx, file, packageName)) {
             Log.e(TAG, "Error fixUserAndGroupId")
@@ -373,7 +389,7 @@ object Utils {
             return false
         }
 
-        Shell.sh(String.format(CMD_CHOWN, uid, uid, file)).exec()
+        Shell.su(String.format(CMD_CHOWN, uid, uid, file)).exec()
         return true
     }
 }

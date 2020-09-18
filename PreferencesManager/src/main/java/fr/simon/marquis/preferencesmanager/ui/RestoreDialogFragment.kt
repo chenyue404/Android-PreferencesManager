@@ -44,11 +44,11 @@ class RestoreDialogFragment : DialogFragment(), AdapterView.OnItemClickListener 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (arguments != null) {
-            mFullPath = arguments!!.getString(ARG_FULL_PATH)
+        arguments?.let {
+            mFullPath = it.getString(ARG_FULL_PATH)
             backups = ArrayList()
             try {
-                val array = JSONArray(arguments!!.getString(ARG_BACKUPS))
+                val array = JSONArray(it.getString(ARG_BACKUPS))
                 for (i in 0 until array.length()) {
                     val backup = array.optString(i)
                     if (!TextUtils.isEmpty(backup)) {
@@ -68,7 +68,7 @@ class RestoreDialogFragment : DialogFragment(), AdapterView.OnItemClickListener 
         @SuppressLint("InflateParams")
         val view = LayoutInflater.from(activity).inflate(R.layout.dialog_restore, null)!!
         val listView = view.findViewById<ListView>(R.id.listView)
-        listView.adapter = RestoreAdapter(activity!!, this, backups, listener!!, mFullPath!!)
+        listView.adapter = RestoreAdapter(requireActivity(), this, backups, listener!!, mFullPath!!)
         listView.onItemClickListener = this
         return view
     }
@@ -107,7 +107,7 @@ class RestoreDialogFragment : DialogFragment(), AdapterView.OnItemClickListener 
         dismiss(fragmentManager)
         val fragment = targetFragment as PreferencesFragment?
         if (fragment != null && fragment.activity != null) {
-            fragment.activity!!.invalidateOptionsMenu()
+            fragment.requireActivity().invalidateOptionsMenu()
         }
     }
 

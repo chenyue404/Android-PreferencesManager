@@ -45,14 +45,13 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/value_boolean"
-        style="@style/Widget.MaterialComponents.CompoundButton.Switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/switch_text"
-        android:textColor="@color/white"
+        android:textColor="?colorOnBackground"
         android:visibility="gone"
         tools:visibility="visible" />
 

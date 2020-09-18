@@ -13,6 +13,7 @@
      limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -49,12 +50,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:drawableTop="@drawable/empty_view"
         android:drawablePadding="10dp"
         android:text="@string/empty_preference_application"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/tertiary_text_light"
         android:visibility="gone"
+        app:drawableTopCompat="@drawable/empty_view"
         tools:visibility="visible" />
 
     <LinearLayout
