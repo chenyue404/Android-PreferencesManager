@@ -29,7 +29,6 @@ import fr.simon.marquis.preferencesmanager.BuildConfig
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
-import fr.simon.marquis.preferencesmanager.ui.rootDialog
 import org.json.JSONArray
 import org.json.JSONException
 import java.io.File
@@ -58,10 +57,6 @@ object Utils {
 
     private var favorites: HashSet<String>? = null
 
-    fun displayNoRoot(activity: Activity) {
-        activity.rootDialog()
-    }
-
     fun getApplications(ctx: Context): ArrayList<AppEntry> {
         val pm = ctx.packageManager
         if (pm == null) {
@@ -69,7 +64,7 @@ object Utils {
         } else {
             val showSystemApps = isShowSystemApps(ctx)
             var appsInfo: MutableList<ApplicationInfo> =
-                    pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
             if (appsInfo.isNullOrEmpty()) {
                 appsInfo = ArrayList()
@@ -146,7 +141,8 @@ object Utils {
     }
 
     fun isShowSystemApps(ctx: Context): Boolean {
-        return PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean(PREF_SHOW_SYSTEM_APPS, false)
+        return PreferenceManager.getDefaultSharedPreferences(ctx)
+            .getBoolean(PREF_SHOW_SYSTEM_APPS, false)
     }
 
     fun setShowSystemApps(ctx: Context, show: Boolean) {
@@ -161,19 +157,22 @@ object Utils {
 
         val stdout: List<String> = ArrayList()
         val stderr: List<String> = ArrayList()
-        val what = Shell.su(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
+        val what =
+            Shell.su(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
 
-        if(BuildConfig.DEBUG) {
-            println("Out: " + what.out)
-            println("Err: " + what.err)
-            println("Succ: " + what.isSuccess)
-            println("Code: " + what.code)
+        if (BuildConfig.DEBUG) {
+            Log.d(
+                TAG,
+                "Out: ${what.out}\n" +
+                    "Err: ${what.err}\n" +
+                    "Succ: ${what.isSuccess}\n" +
+                    "Code: ${what.code}\n" +
+                    "stdout: $stdout \n" +
+                    "stderr: $stderr \n"
+            )
 
-            println("stdout: $stdout")
-            println("stderr: $stderr")
+            Log.d(TAG, "files: " + stdout.toTypedArray().contentToString())
         }
-
-        Log.d(TAG, "files: " + stdout.toTypedArray().contentToString())
 
         return stdout
     }
@@ -188,7 +187,7 @@ object Utils {
             sb.append(line)
             sb.append(LINE_SEPARATOR)
         }
-        
+
         return sb.toString()
     }
 
@@ -215,7 +214,10 @@ object Utils {
 
             Log.d(TAG, "key: $key")
 
-            if (!key.startsWith(BACKUP_PREFIX) && key.matches(PACKAGE_NAME_PATTERN.toRegex()) && value.contains("FILE") && value.contains("BACKUPS")) {
+            if (!key.startsWith(BACKUP_PREFIX) && key.matches(PACKAGE_NAME_PATTERN.toRegex()) && value.contains(
+                    "FILE"
+                ) && value.contains("BACKUPS")
+            ) {
                 Log.d(TAG, " need to be updated")
                 var array: JSONArray? = null
                 try {
@@ -256,7 +258,10 @@ object Utils {
         try {
             //Ignoring for older devices
             @Suppress("DEPRECATION")
-            sp.edit().putInt(VERSION_CODE_KEY, ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionCode).apply()
+            sp.edit().putInt(
+                VERSION_CODE_KEY,
+                ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionCode
+            ).apply()
         } catch (e: Exception) {
             Log.e(TAG, "Error trying to save the version code", e)
         }
@@ -268,7 +273,8 @@ object Utils {
         val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
         var container: BackupContainer? = null
         try {
-            container = BackupContainer.fromJSON(JSONArray(sp.getString(BACKUP_PREFIX + packageName, "[]")))
+            container =
+                BackupContainer.fromJSON(JSONArray(sp.getString(BACKUP_PREFIX + packageName, "[]")))
         } catch (ignore: JSONException) {
         }
 
@@ -308,7 +314,9 @@ object Utils {
             return false
         }
 
-        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(packageName)
+        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(
+            packageName
+        )
 
         Log.d(TAG, "restoreFile --> $fileName")
         return true
@@ -320,7 +328,12 @@ object Utils {
         } else s.substring(s.lastIndexOf(FILE_SEPARATOR!!) + 1)
     }
 
-    fun savePreferences(preferenceFile: PreferenceFile?, file: String, packageName: String, ctx: Context): Boolean {
+    fun savePreferences(
+        preferenceFile: PreferenceFile?,
+        file: String,
+        packageName: String,
+        ctx: Context
+    ): Boolean {
         Log.d(TAG, String.format("savePreferences(%s, %s)", file, packageName))
         if (preferenceFile == null) {
             Log.e(TAG, "Error preferenceFile is null")
@@ -340,7 +353,8 @@ object Utils {
 
         val tmpFile = File(ctx.filesDir, TMP_FILE)
         try {
-            val outputStreamWriter = OutputStreamWriter(ctx.openFileOutput(TMP_FILE, Context.MODE_PRIVATE))
+            val outputStreamWriter =
+                OutputStreamWriter(ctx.openFileOutput(TMP_FILE, Context.MODE_PRIVATE))
             outputStreamWriter.write(preferences)
             outputStreamWriter.close()
         } catch (e: IOException) {
@@ -359,7 +373,9 @@ object Utils {
             Log.e(TAG, "Error deleting temporary file")
         }
 
-        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(packageName)
+        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(
+            packageName
+        )
         Log.d(TAG, "Preferences correctly updated")
         return true
     }

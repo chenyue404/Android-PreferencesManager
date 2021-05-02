@@ -29,25 +29,30 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
      * File of the application
      */
     private val mApkFile: File
+
     /**
      * Label of the application
      */
-    var label: String? = null
+    var label: String = ""
         private set
+
     /**
      * Value used to sort the list of applications
      */
     var sortingValue: String? = null
         private set
+
     /**
      * Detect if app is starred by user
      */
     private var isFavorite: Boolean = false
+
     /**
      * Char value used by indexed ListView
      */
     var headerChar: Char = ' '
         private set
+
     /**
      * Uri of the app icon
      */
@@ -70,14 +75,10 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
         iconUri = builder.build()
     }
 
-    override fun toString(): String {
-        return label ?: ""
-    }
-
     fun setFavorite(isFavorite: Boolean) {
         this.isFavorite = isFavorite
         // IMPORTANT! also update the char used for sorting
-        sortingValue = (if (isFavorite) " " else "") + label!!
+        sortingValue = (if (isFavorite) " " else "") + label
         headerChar = formatChar(label)
     }
 
@@ -87,7 +88,7 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
      * @param ctx .
      */
     private fun loadLabels(ctx: Context) {
-        if (label == null) {
+        if (label.isEmpty()) {
             if (!mApkFile.exists()) {
                 label = applicationInfo.packageName
             } else {
@@ -100,11 +101,11 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
             }
 
             // replace false spaces O_o
-            label = label!!.replace("\\s".toRegex(), " ")
+            label = label.replace("\\s".toRegex(), " ")
         }
 
         if (sortingValue == null)
-            sortingValue = (if (isFavorite) " " else "") + label!!
+            sortingValue = (if (isFavorite) " " else "") + label
 
         headerChar = formatChar(label)
     }
@@ -115,7 +116,7 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
      * @param s .
      * @return .
      */
-    private fun formatChar(s: String?): Char {
+    private fun formatChar(s: String): Char {
         if (isFavorite) {
             return '☆'
         }
@@ -124,7 +125,7 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
             return '#'
         }
 
-        val c = Character.toUpperCase(s!![0])
+        val c = Character.toUpperCase(s[0])
 
         // Number
         if (c in '0'..'9') {

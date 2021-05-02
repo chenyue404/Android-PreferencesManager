@@ -45,7 +45,7 @@ fun Context.animateView(view: View, show: Boolean, animate: Boolean) {
     }
 }
 
-fun Activity.rootDialog() {
+fun Activity.displayNoRoot() {
     MaterialDialog(this).show {
         title(R.string.no_root_title)
         message(R.string.no_root_message)

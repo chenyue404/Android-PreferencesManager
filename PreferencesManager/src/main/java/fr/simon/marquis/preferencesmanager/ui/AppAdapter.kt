@@ -82,7 +82,7 @@ internal class AppAdapter(
         }
 
         val item = applicationsToDisplay!![position]
-        holder.textView!!.text = createSpannable(pattern, color, item.label!!)
+        holder.textView!!.text = createSpannable(pattern, color, item.label)
 
         holder.imageView!!.load(item.iconUri) {
             error(R.drawable.ic_action_settings)
@@ -148,7 +148,7 @@ internal class AppAdapter(
                     synchronized(mLock) {
                         for (data in applications) {
                             val p = Pattern.compile(prefixString, Pattern.CASE_INSENSITIVE)
-                            if (p.matcher(data.label!!.toLowerCase(Locale.getDefault()).trim { it <= ' ' }).find()) {
+                            if (p.matcher(data.label.toLowerCase(Locale.getDefault()).trim { it <= ' ' }).find()) {
                                 filterResultsData.add(data)
                             }
                         }

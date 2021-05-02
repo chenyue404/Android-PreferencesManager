@@ -217,9 +217,9 @@ class PreferencesFragment : Fragment() {
 
     private fun updateFilter(s: String?): Boolean {
         val filter = if (!TextUtils.isEmpty(s)) s!!.trim { it <= ' ' } else null
-        val adapter: PreferenceAdapter? = gridView?.adapter as PreferenceAdapter? ?: return false
-        adapter?.setFilter(filter)
-        adapter?.filter?.filter(filter)
+        val adapter: PreferenceAdapter = gridView?.adapter as PreferenceAdapter? ?: return false
+        adapter.setFilter(filter)
+        adapter.filter.filter(filter)
         return true
     }
 

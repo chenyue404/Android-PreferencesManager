@@ -76,7 +76,7 @@ class AppListActivity : AppCompatActivity() {
         Log.i(TAG, "Root Access: $isRootAccessGiven")
 
         if (!isRootAccessGiven)
-            Utils.displayNoRoot(this@AppListActivity)
+            displayNoRoot()
     }
 
     /**
@@ -86,7 +86,7 @@ class AppListActivity : AppCompatActivity() {
      */
     private fun startPreferencesActivity(app: AppEntry) {
         if (!Shell.rootAccess()) {
-            Utils.displayNoRoot(this)
+            displayNoRoot()
         } else {
             val i = Intent(this, PreferencesActivity::class.java).apply {
                 putExtra(PreferencesActivity.KEY_ICON_URI, app.iconUri)
