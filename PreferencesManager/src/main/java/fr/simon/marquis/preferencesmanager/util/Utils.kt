@@ -28,12 +28,34 @@ import fr.simon.marquis.preferencesmanager.BuildConfig
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
-import org.json.JSONArray
-import org.json.JSONException
 import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONException
+
+fun <P, R> CoroutineScope.executeAsyncTask(
+    onPreExecute: () -> Unit,
+    doInBackground: suspend (suspend (P) -> Unit) -> R,
+    onPostExecute: (R) -> Unit,
+    onProgressUpdate: (P) -> Unit
+) = launch {
+    onPreExecute()
+
+    val result = withContext(Dispatchers.IO) {
+        doInBackground {
+            withContext(Dispatchers.Main) {
+                onProgressUpdate(it)
+            }
+        }
+    }
+    onPostExecute(result)
+}
 
 object Utils {
 

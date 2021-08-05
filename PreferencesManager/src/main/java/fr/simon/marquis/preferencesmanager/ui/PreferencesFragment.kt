@@ -15,11 +15,9 @@
  */
 package fr.simon.marquis.preferencesmanager.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.text.Html
 import android.text.TextUtils
@@ -32,6 +30,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
@@ -44,6 +43,7 @@ import fr.simon.marquis.preferencesmanager.model.PreferenceSortType
 import fr.simon.marquis.preferencesmanager.model.PreferenceType
 import fr.simon.marquis.preferencesmanager.ui.PreferencesActivity.Companion.preferenceSortType
 import fr.simon.marquis.preferencesmanager.util.Utils
+import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import kotlin.collections.Map.Entry
 
 class PreferencesFragment : Fragment() {
@@ -119,8 +119,23 @@ class PreferencesFragment : Fragment() {
     }
 
     private fun launchTask() {
-        val task = ParsingTask(mFile!!)
-        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        lifecycleScope.executeAsyncTask(
+            onPreExecute = {
+            },
+            doInBackground = { _: suspend (progress: Int) -> Unit ->
+                val start = System.currentTimeMillis()
+                Log.d(Utils.TAG, "Start reading $mFile")
+                val content = Utils.readFile(mFile!!)
+                val ms = System.currentTimeMillis() - start
+                Log.d(Utils.TAG, "End reading $mFile --> $ms ms")
+                PreferenceFile.fromXml(content)
+            },
+            onPostExecute = {
+                updateListView(it, true)
+            },
+            onProgressUpdate = {
+            }
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -582,24 +597,6 @@ class PreferencesFragment : Fragment() {
         fun canRestoreFile(fullPath: String?): Boolean
 
         fun getBackups(fullPath: String?): List<String>?
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    internal inner class ParsingTask(private val mFile: String) : AsyncTask<Void, Void, PreferenceFile>() {
-
-        override fun doInBackground(vararg params: Void): PreferenceFile {
-            val start = System.currentTimeMillis()
-            Log.d(Utils.TAG, "Start reading $mFile")
-            val content = Utils.readFile(mFile)
-            Log.d(Utils.TAG, "End reading " + mFile + " --> " + (System.currentTimeMillis() - start) + " ms")
-            return PreferenceFile.fromXml(content)
-        }
-
-        override fun onPostExecute(result: PreferenceFile) {
-            super.onPostExecute(result)
-            updateListView(result, true)
-        }
-
     }
 
     companion object {

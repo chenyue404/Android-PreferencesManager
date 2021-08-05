@@ -15,10 +15,8 @@
  */
 package fr.simon.marquis.preferencesmanager.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.util.Pair
@@ -31,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
 import fr.simon.marquis.preferencesmanager.R
@@ -38,9 +37,11 @@ import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceSortType
 import fr.simon.marquis.preferencesmanager.ui.PreferencesFragment.OnPreferenceFragmentInteractionListener
 import fr.simon.marquis.preferencesmanager.util.Utils
-import kotlinx.android.synthetic.main.activity_preferences.*
-import org.json.JSONArray
+import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.*
+import kotlinx.android.synthetic.main.activity_preferences.*
+import kotlinx.coroutines.cancel
+import org.json.JSONArray
 
 class PreferencesActivity :
     AppCompatActivity(),
@@ -57,8 +58,6 @@ class PreferencesActivity :
     private var title: String? = null
 
     private var backupContainer: BackupContainer? = null
-
-    private var findFilesAndBackupsTask: FindFilesAndBackupsTask? = null
 
     private var launchedFromShortcut = false
 
@@ -91,8 +90,7 @@ class PreferencesActivity :
         supportActionBar?.subtitle = pkgName
 
         if (savedInstanceState == null) {
-            findFilesAndBackupsTask = FindFilesAndBackupsTask(pkgName!!)
-            findFilesAndBackupsTask!!.execute()
+            backupTask(pkgName!!)
         } else {
             try {
                 val tmp = ArrayList<String>()
@@ -103,10 +101,8 @@ class PreferencesActivity :
                 updateFindFiles(tmp)
                 updateFindBackups(Utils.getBackups(applicationContext, pkgName!!))
             } catch (e: Exception) {
-                findFilesAndBackupsTask = FindFilesAndBackupsTask(pkgName!!)
-                findFilesAndBackupsTask!!.execute()
+                backupTask(pkgName!!)
             }
-
         }
     }
 
@@ -268,28 +264,28 @@ class PreferencesActivity :
             Utils.extractFileName(mFiles[position])
     }
 
-    @SuppressLint("StaticFieldLeak")
-    internal inner class FindFilesAndBackupsTask(
-            private val mPackageName: String
-    ) : AsyncTask<Void, Void, Pair<List<String>, BackupContainer>>() {
-
-        override fun doInBackground(vararg params: Void): Pair<List<String>, BackupContainer> {
-            return Pair.create(
+    private fun backupTask(mPackageName: String) {
+        lifecycleScope.executeAsyncTask(
+            onPreExecute = {
+            },
+            doInBackground = { _: suspend (progress: Int) -> Unit ->
+                Pair.create(
                     Utils.findXmlFiles(mPackageName),
                     Utils.getBackups(applicationContext, mPackageName)
-            )
-        }
-
-        override fun onPostExecute(result: Pair<List<String>, BackupContainer>) {
-            updateFindFiles(result.first)
-            updateFindBackups(result.second)
-            super.onPostExecute(result)
-        }
+                )
+            },
+            onPostExecute = {
+                updateFindFiles(it.first)
+                updateFindBackups(it.second)
+            },
+            onProgressUpdate = {
+            }
+        )
     }
 
     override fun onDestroy() {
-        findFilesAndBackupsTask?.cancel(true)
         super.onDestroy()
+        lifecycleScope.cancel()
     }
 
     companion object {

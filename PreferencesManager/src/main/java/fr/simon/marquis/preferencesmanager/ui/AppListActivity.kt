@@ -16,9 +16,7 @@
 package fr.simon.marquis.preferencesmanager.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -27,6 +25,7 @@ import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
@@ -35,8 +34,10 @@ import fr.simon.marquis.preferencesmanager.App
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.Utils
-import kotlinx.android.synthetic.main.activity_app_list.*
+import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.*
+import kotlinx.android.synthetic.main.activity_app_list.*
+import kotlinx.coroutines.*
 
 class AppListActivity : AppCompatActivity() {
 
@@ -169,9 +170,7 @@ class AppListActivity : AppCompatActivity() {
             R.id.menu_about -> aboutDialog()
             R.id.show_system_apps -> {
                 Utils.setShowSystemApps(this, !Utils.isShowSystemApps(this))
-                if (!startTask()) {
-                    Utils.setShowSystemApps(this, !Utils.isShowSystemApps(this))
-                }
+                startTask()
                 invalidateOptionsMenu()
             }
             R.id.menu_switch_theme -> {
@@ -192,32 +191,20 @@ class AppListActivity : AppCompatActivity() {
         return true
     }
 
-    @SuppressLint("StaticFieldLeak")
-    internal inner class GetApplicationsTask(private val mContext: Context) : AsyncTask<Void, Void, ArrayList<AppEntry>>() {
-
-        override fun onPreExecute() {
-            setListState(true)
-            super.onPreExecute()
-        }
-
-        override fun doInBackground(vararg params: Void): ArrayList<AppEntry> {
-            return Utils.getApplications(mContext)
-        }
-
-        override fun onPostExecute(result: ArrayList<AppEntry>) {
-            super.onPostExecute(result)
-            updateListView(result)
-            finishTask()
-        }
-
-        private fun finishTask() {
-            task = null
-        }
-
-        override fun onCancelled() {
-            finishTask()
-            super.onCancelled()
-        }
+    private fun startTask() {
+        lifecycleScope.executeAsyncTask(
+            onPreExecute = {
+                setListState(true)
+            },
+            doInBackground = { _: suspend (progress: Int) -> Unit ->
+                Utils.getApplications(this@AppListActivity)
+            },
+            onPostExecute = {
+                updateListView(it)
+            },
+            onProgressUpdate = {
+            }
+        )
     }
 
     @SuppressLint("CheckResult")
