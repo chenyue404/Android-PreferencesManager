@@ -59,7 +59,6 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
     var iconUri: Uri? = null
         private set
 
-
     init {
         isFavorite = Utils.isFavorite(applicationInfo.packageName, context)
         mApkFile = File(applicationInfo.sourceDir)

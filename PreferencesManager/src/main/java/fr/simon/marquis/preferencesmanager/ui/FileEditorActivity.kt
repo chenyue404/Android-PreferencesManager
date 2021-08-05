@@ -30,12 +30,12 @@ import com.afollestad.materialdialogs.MaterialDialog
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
-import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorTagEnum
+import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorTagEnum.*
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorThemeEnum
 import fr.simon.marquis.preferencesmanager.model.XmlFontSize
 import fr.simon.marquis.preferencesmanager.util.Utils
-import kotlinx.android.synthetic.main.activity_file_editor.*
 import java.util.regex.Pattern
+import kotlinx.android.synthetic.main.activity_file_editor.*
 
 class FileEditorActivity : AppCompatActivity(), TextWatcher {
 
@@ -68,16 +68,29 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
         mTitle = Utils.extractFileName(mFile!!)
         mPackageName = intent.getString(PreferencesFragment.ARG_PACKAGE_NAME)
 
-        //Hack to prevent EditText to request focus when the Activity is created
+        // Hack to prevent EditText to request focus when the Activity is created
         mEditText!!.post {
             mEditText!!.isFocusable = true
             mEditText!!.isFocusableInTouchMode = true
         }
 
         if (arg0 == null) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
             mEditText!!.setText(Utils.readFile(mFile!!))
-            mColorTheme = ColorThemeEnum.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(KEY_COLOR_THEME, ColorThemeEnum.ECLIPSE.name)!!)
-            setXmlFontSize(XmlFontSize.generateSize(PreferenceManager.getDefaultSharedPreferences(this).getInt(KEY_FONT_SIZE, XmlFontSize.MEDIUM.size)))
+            mColorTheme = ColorThemeEnum.valueOf(
+                prefs.getString(
+                    KEY_COLOR_THEME,
+                    ColorThemeEnum.ECLIPSE.name
+                )!!
+            )
+            setXmlFontSize(
+                XmlFontSize.generateSize(
+                    prefs.getInt(
+                        KEY_FONT_SIZE,
+                        XmlFontSize.MEDIUM.size
+                    )
+                )
+            )
         } else {
             mHasContentChanged = arg0.getBoolean(KEY_HAS_CONTENT_CHANGED, false)
             mNeedUpdateOnActivityFinish = arg0.getBoolean(KEY_NEED_UPDATE_ON_ACTIVITY_FINISH, false)
@@ -92,9 +105,7 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
         updateTitle()
         invalidateOptionsMenu()
 
-
         highlightXMLText(mEditText!!.text)
-
 
         mEditText!!.clearFocus()
     }
@@ -126,8 +137,12 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_save).setEnabled(mHasContentChanged).setIcon(if (mHasContentChanged) R.drawable.ic_action_save else R.drawable.ic_action_save_disabled)
+        val saveIcon = if (mHasContentChanged)
+            R.drawable.ic_action_save
+        else
+            R.drawable.ic_action_save_disabled
 
+        menu.findItem(R.id.action_save).setEnabled(mHasContentChanged).setIcon(saveIcon)
         menu.findItem(R.id.action_theme_eclipse).isChecked = false
         menu.findItem(R.id.action_theme_google).isChecked = false
         menu.findItem(R.id.action_theme_roboticket).isChecked = false
@@ -202,7 +217,10 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             invalidateOptionsMenu()
             mEditText!!.setTextSize(TypedValue.COMPLEX_UNIT_SP, mXmlFontSize!!.size.toFloat())
 
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(KEY_FONT_SIZE, mXmlFontSize!!.size).apply()
+            PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putInt(KEY_FONT_SIZE, mXmlFontSize!!.size)
+                .apply()
         }
     }
 
@@ -213,7 +231,10 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             invalidateOptionsMenu()
             highlightXMLText(mEditText!!.text)
 
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(KEY_COLOR_THEME, mColorTheme!!.name).apply()
+            PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putString(KEY_COLOR_THEME, mColorTheme!!.name)
+                .apply()
         }
     }
 
@@ -236,9 +257,10 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun updateTitle() {
-        @Suppress("DEPRECATION")
-        val str = Html.fromHtml((if (mHasContentChanged) "<font color='#33b5e5'><b>&#9679;</b></font> " else "") + mTitle!!)
+        val content = if (mHasContentChanged) "<font color='#33b5e5'><b>&#9679;</b></font> " else ""
+        val str = Html.fromHtml(content + mTitle!!)
         val actionBar = actionBar
         if (actionBar != null) {
             actionBar.title = str
@@ -254,13 +276,13 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
 
     private fun highlightXMLText(source: Spannable) {
         clearSpans(source)
-        generateSpan(source, TAG_START, mXmlColorTheme!!.getColor(ColorTagEnum.TAG))
-        generateSpan(source, TAG_END, mXmlColorTheme!!.getColor(ColorTagEnum.TAG))
-        generateSpan(source, TAG_ATTRIBUTE_VALUE, mXmlColorTheme!!.getColor(ColorTagEnum.ATTR_VALUE))
-        generateSpan(source, TAG_ATTRIBUTE_VALUE_2, mXmlColorTheme!!.getColor(ColorTagEnum.ATTR_VALUE))
-        generateSpan(source, TAG_ATTRIBUTE_NAME, mXmlColorTheme!!.getColor(ColorTagEnum.ATTR_NAME))
-        generateSpan(source, COMMENT_START, mXmlColorTheme!!.getColor(ColorTagEnum.COMMENT))
-        generateSpan(source, COMMENT_END, mXmlColorTheme!!.getColor(ColorTagEnum.COMMENT))
+        generateSpan(source, TAG_START, mXmlColorTheme!!.getColor(TAG))
+        generateSpan(source, TAG_END, mXmlColorTheme!!.getColor(TAG))
+        generateSpan(source, TAG_ATTRIBUTE_VALUE, mXmlColorTheme!!.getColor(ATTR_VALUE))
+        generateSpan(source, TAG_ATTRIBUTE_VALUE_2, mXmlColorTheme!!.getColor(ATTR_VALUE))
+        generateSpan(source, TAG_ATTRIBUTE_NAME, mXmlColorTheme!!.getColor(ATTR_NAME))
+        generateSpan(source, COMMENT_START, mXmlColorTheme!!.getColor(COMMENT))
+        generateSpan(source, COMMENT_END, mXmlColorTheme!!.getColor(COMMENT))
     }
 
     override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
@@ -293,7 +315,6 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
 
     @Suppress("RegExpRedundantEscape")
     companion object {
-
         private val TAG_START = Pattern.compile("</?[-\\w\\?]+", Pattern.CASE_INSENSITIVE)
         private val TAG_END = Pattern.compile("\\??/?>")
         private val TAG_ATTRIBUTE_NAME = Pattern.compile("\\s(\\w*)\\=")
@@ -315,7 +336,12 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
                 start = matcher.start()
                 end = matcher.end()
                 if (start != end) {
-                    source.setSpan(ForegroundColorSpan(color), matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    source.setSpan(
+                        ForegroundColorSpan(color),
+                        matcher.start(),
+                        matcher.end(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                 }
             }
         }

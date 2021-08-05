@@ -26,19 +26,19 @@ import java.util.*
 import java.util.regex.Pattern
 
 class PreferenceAdapter(
-        context: Context,
-        private val mPreferencesFragment: PreferencesFragment
+    context: Context,
+    private val mPreferencesFragment: PreferencesFragment
 ) : BaseAdapter(), Filterable {
 
     private val color: Int = context.getResColor(R.color.header_blue)
     private val mLock = Any()
     private var pattern: Pattern? = null
     private val mCheckedPositions: MutableMap<MutableMap.MutableEntry<Any, Any>, Boolean> =
-            HashMap()
+        HashMap()
     private val layoutInflater: LayoutInflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var mListToDisplay: MutableList<MutableMap.MutableEntry<Any, Any>>? =
-            mPreferencesFragment.preferenceFile!!.list
+        mPreferencesFragment.preferenceFile!!.list
 
     override fun getCount(): Int {
         return mListToDisplay!!.size
@@ -70,10 +70,16 @@ class PreferenceAdapter(
 
         val item = mListToDisplay!![position]
         val checked = mCheckedPositions[item]
+        val icon = if (checked != null && checked)
+            R.drawable.list_focused
+        else
+            R.drawable.selectable_background
+
         holder.border!!.setBackgroundResource(PreferenceType.getDialogLayout(item.value))
         holder.name!!.text = createSpannable(pattern, color, item.key.toString())
-        holder.value!!.text = createSpannable(pattern, color, truncate(item.value.toString(), 100)!!)
-        holder.selector!!.setBackgroundResource(if (checked != null && checked) R.drawable.list_focused else R.drawable.selectable_background)
+        holder.value!!.text =
+            createSpannable(pattern, color, truncate(item.value.toString(), 100)!!)
+        holder.selector!!.setBackgroundResource(icon)
 
         return convertView
     }
@@ -87,7 +93,10 @@ class PreferenceAdapter(
     }
 
     fun setFilter(filter: String?) {
-        pattern = if (filter.isNullOrBlank()) null else Pattern.compile(filter, Pattern.CASE_INSENSITIVE)
+        pattern = if (filter.isNullOrBlank())
+            null
+        else
+            Pattern.compile(filter, Pattern.CASE_INSENSITIVE)
     }
 
     override fun getFilter(): Filter {
@@ -100,12 +109,14 @@ class PreferenceAdapter(
                         results.count = mPreferencesFragment.preferenceFile!!.list.size
                     }
                 } else {
-                    val prefixString = charSequence.toString().toLowerCase(Locale.getDefault()).trim { it <= ' ' }
+                    val prefixString = charSequence.toString().lowercase().trim { it <= ' ' }
                     val filterResultsData = ArrayList<MutableMap.MutableEntry<Any, Any>>()
                     synchronized(mLock) {
                         for (data in mPreferencesFragment.preferenceFile!!.list) {
                             val p = Pattern.compile(prefixString, Pattern.CASE_INSENSITIVE)
-                            if (p.matcher(data.key.toString().toLowerCase(Locale.getDefault()).trim { it <= ' ' }).find() || p.matcher(data.value.toString().toLowerCase(Locale.getDefault()).trim { it <= ' ' }).find()) {
+                            if (p.matcher(data.key.toString().lowercase().trim()).find() ||
+                                p.matcher(data.value.toString().lowercase().trim()).find()
+                            ) {
                                 filterResultsData.add(data)
                             }
                         }
@@ -121,7 +132,9 @@ class PreferenceAdapter(
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(charSequence: CharSequence?, filterResults: FilterResults) {
-                mListToDisplay = filterResults.values as MutableList<MutableMap.MutableEntry<Any, Any>>
+                mListToDisplay =
+                    filterResults.values as MutableList<MutableMap.MutableEntry<Any, Any>>
+
                 notifyDataSetChanged()
             }
         }

@@ -38,7 +38,10 @@ fun createSpannable(pattern: Pattern?, color: Int, s: String): SpannableStringBu
 fun Context.animateView(view: View, show: Boolean, animate: Boolean) {
     view.visibility = if (show) View.VISIBLE else View.GONE
     if (animate) {
-        val animation = AnimationUtils.loadAnimation(this, if (show) android.R.anim.fade_in else android.R.anim.fade_out)
+        val animation = AnimationUtils.loadAnimation(
+            this,
+            if (show) android.R.anim.fade_in else android.R.anim.fade_out
+        )
         if (animation != null) {
             view.startAnimation(animation)
         }

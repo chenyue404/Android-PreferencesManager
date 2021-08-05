@@ -28,6 +28,7 @@ import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.*
 import android.widget.AbsListView.MultiChoiceModeListener
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -41,6 +42,7 @@ import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.PreferenceSortType
 import fr.simon.marquis.preferencesmanager.model.PreferenceType
+import fr.simon.marquis.preferencesmanager.ui.PreferencesActivity.Companion.preferenceSortType
 import fr.simon.marquis.preferencesmanager.util.Utils
 import kotlin.collections.Map.Entry
 
@@ -60,6 +62,25 @@ class PreferencesFragment : Fragment() {
     private var loadingView: View? = null
     private var emptyViewText: TextView? = null
 
+    private var resultFileEdit = registerForActivityResult(StartActivityForResult()) {
+        if (it.resultCode == AppCompatActivity.RESULT_OK) {
+            loadingView!!.hide()
+            gridView!!.hide()
+
+            if (activity != null) {
+                val fadeInAnim = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
+                if (fadeInAnim != null) {
+                    loadingView!!.startAnimation(fadeInAnim)
+                }
+                val fadeOutAnim = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
+                if (fadeOutAnim != null) {
+                    gridView!!.startAnimation(fadeOutAnim)
+                }
+            }
+            launchTask()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -73,7 +94,11 @@ class PreferencesFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_preferences, container, false)
     }
 
@@ -131,18 +156,25 @@ class PreferencesFragment : Fragment() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.findItem(R.id.action_add).isEnabled = preferenceFile != null && preferenceFile!!.isValidPreferenceFile
-        menu.findItem(R.id.action_add).setIcon(if (preferenceFile != null && preferenceFile!!.isValidPreferenceFile) R.drawable.ic_action_add else R.drawable.ic_action_add_disabled)
+        val addEnabled = preferenceFile != null && preferenceFile!!.isValidPreferenceFile
+        val addIcon = if (addEnabled)
+            R.drawable.ic_action_add
+        else
+            R.drawable.ic_action_add_disabled
+
+        menu.findItem(R.id.action_add).isEnabled = addEnabled
+        menu.findItem(R.id.action_add).setIcon(addIcon)
         val sortAlpha = menu.findItem(R.id.action_sort_alpha)
         val sortType = menu.findItem(R.id.action_sort_type)
         sortAlpha.isChecked = false
         sortType.isChecked = false
-        if (PreferencesActivity.preferenceSortType == PreferenceSortType.ALPHANUMERIC) {
+        if (preferenceSortType == PreferenceSortType.ALPHANUMERIC) {
             sortAlpha.isChecked = true
-        } else if (PreferencesActivity.preferenceSortType == PreferenceSortType.TYPE_AND_ALPHANUMERIC) {
+        } else if (preferenceSortType == PreferenceSortType.TYPE_AND_ALPHANUMERIC) {
             sortType.isChecked = true
         }
-        menu.findItem(R.id.action_restore_file).isVisible = mListener != null && mListener!!.canRestoreFile(mFile)
+        val restoreVisibility = mListener != null && mListener!!.canRestoreFile(mFile)
+        menu.findItem(R.id.action_restore_file).isVisible = restoreVisibility
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -182,7 +214,7 @@ class PreferencesFragment : Fragment() {
                 intent.putExtra(ARG_ICON_URI, mIconUri)
                 intent.putExtra(ARG_FILE, mFile)
                 intent.putExtra(ARG_PACKAGE_NAME, mPackageName)
-                startActivityForResult(intent, CODE_EDIT_FILE)
+                resultFileEdit.launch(intent)
                 return true
             }
             R.id.action_sort_alpha -> {
@@ -228,7 +260,10 @@ class PreferencesFragment : Fragment() {
             PreferencesActivity.preferenceSortType = type
             if (activity != null) {
                 activity?.invalidateOptionsMenu()
-                PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal).apply()
+                PreferenceManager.getDefaultSharedPreferences(activity)
+                    .edit()
+                    .putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal)
+                    .apply()
             }
 
             if (gridView!!.adapter != null && preferenceFile != null) {
@@ -238,31 +273,16 @@ class PreferencesFragment : Fragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == CODE_EDIT_FILE && resultCode == AppCompatActivity.RESULT_OK) {
-            loadingView!!.hide()
-            gridView!!.hide()
-
-            if (activity != null) {
-                val fadeInAnim = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
-                if (fadeInAnim != null) {
-                    loadingView!!.startAnimation(fadeInAnim)
-                }
-                val fadeOutAnim = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
-                if (fadeOutAnim != null) {
-                    gridView!!.startAnimation(fadeOutAnim)
-                }
-            }
-            launchTask()
-        }
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
     @Suppress("Unchecked_Cast")
-    private fun showPrefDialog(type: PreferenceType, editMode: Boolean = false, editKey: String? = null, obj: Any? = null) {
+    private fun showPrefDialog(
+        type: PreferenceType,
+        editMode: Boolean = false,
+        editKey: String? = null,
+        obj: Any? = null
+    ) {
 
-        //This is hacky :(
-        //TODO StringSet
+        // This is hacky :(
+        // TODO StringSet
 
         val mPreferenceType = PreferenceType.valueOf(type.name)
         var keyValue: Any? = null
@@ -284,7 +304,7 @@ class PreferencesFragment : Fragment() {
                     keyValue = stringArray
                 }
                 PreferenceType.UNSUPPORTED -> {
-                    //Nothing
+                    // Nothing
                 }
             }
         }
@@ -301,56 +321,77 @@ class PreferencesFragment : Fragment() {
         }
 
         val dialog = MaterialDialog(requireActivity())
-                .title(if (editMode) type.dialogTitleEdit else type.dialogTitleAdd)
-                .customView(R.layout.dialog_layout)
-                .positiveButton(if (editMode) R.string.dialog_update else R.string.dialog_add) {
-
-                    val editable = it.getCustomView().findViewById<TextInputEditText>(R.id.key_edit_text)
-                    var key = ""
-                    if (editable != null) {
-                        key = editable.text.toString()
-                    }
-
-                    var value: Any? = null
-
-                    when (mPreferenceType) {
-                        PreferenceType.BOOLEAN -> value = it.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked
-                        PreferenceType.INT -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString().toInt()
-                        PreferenceType.STRING -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString()
-                        PreferenceType.FLOAT -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString().toFloat()
-                        PreferenceType.LONG -> value = it.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).text.toString().toLong()
-                        PreferenceType.STRINGSET -> {
-                            //val set = HashSet<String>()
-                            //val container = mValue as LinearLayout?
-                            //for (i in 0 until container!!.childCount) {
-                            //    set.add((((container.getChildAt(i) as ViewGroup).getChildAt(0) as ViewGroup).getChildAt(1) as EditText).text.toString())
-                            //}
-                            //value = set
-                        }
-                        PreferenceType.UNSUPPORTED -> {
-                        }
-                    }
-
-                    addPrefKeyValue(editKey, key, value, editMode)
-
+            .title(if (editMode) type.dialogTitleEdit else type.dialogTitleAdd)
+            .customView(R.layout.dialog_layout)
+            .positiveButton(if (editMode) R.string.dialog_update else R.string.dialog_add) {
+                val view = it.getCustomView()
+                val editable = view.findViewById<TextInputEditText>(R.id.key_edit_text)
+                var key = ""
+                if (editable != null) {
+                    key = editable.text.toString()
                 }
-                .negativeButton(R.string.dialog_cancel)
 
-        //Init Values
+                var value: Any? = null
+                when (mPreferenceType) {
+                    PreferenceType.BOOLEAN ->
+                        value = it.getCustomView()
+                            .findViewById<Switch>(R.id.value_boolean).isChecked
+                    PreferenceType.INT ->
+                        value = it.getCustomView()
+                            .findViewById<TextInputEditText>(R.id.value_edit_text)
+                            .text.toString().toInt()
+                    PreferenceType.STRING ->
+                        value = it.getCustomView()
+                            .findViewById<TextInputEditText>(R.id.value_edit_text)
+                            .text.toString()
+                    PreferenceType.FLOAT ->
+                        value = it.getCustomView()
+                            .findViewById<TextInputEditText>(R.id.value_edit_text)
+                            .text.toString().toFloat()
+                    PreferenceType.LONG ->
+                        value = it.getCustomView()
+                            .findViewById<TextInputEditText>(R.id.value_edit_text)
+                            .text.toString().toLong()
+                    PreferenceType.STRINGSET -> {
+                        // val set = HashSet<String>()
+                        // val container = mValue as LinearLayout?
+                        // for (i in 0 until container!!.childCount) {
+                        //    set.add((((container.getChildAt(i) as ViewGroup).getChildAt(0) as ViewGroup).getChildAt(1) as EditText).text.toString())
+                        // }
+                        // value = set
+                    }
+                    PreferenceType.UNSUPPORTED -> {
+                    }
+                }
+                addPrefKeyValue(editKey, key, value, editMode)
+            }
+            .negativeButton(R.string.dialog_cancel)
+
+        // Init Values
         if (editMode) {
-            dialog.getCustomView().findViewById<TextInputEditText>(R.id.key_edit_text).setText(editKey)
+            dialog.getCustomView()
+                .findViewById<TextInputEditText>(R.id.key_edit_text)
+                .setText(editKey)
 
             when (mPreferenceType) {
                 PreferenceType.BOOLEAN -> {
-                    dialog.getCustomView().findViewById<TextInputLayout>(R.id.value_input_layout).visibility = View.GONE
-                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).visibility = View.VISIBLE
-                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked = mEditValue as Boolean
+                    dialog.getCustomView()
+                        .findViewById<TextInputLayout>(R.id.value_input_layout)
+                        .visibility = View.GONE
+                    dialog.getCustomView()
+                        .findViewById<Switch>(R.id.value_boolean)
+                        .visibility = View.VISIBLE
+                    dialog.getCustomView()
+                        .findViewById<Switch>(R.id.value_boolean)
+                        .isChecked = mEditValue as Boolean
                 }
                 PreferenceType.FLOAT,
                 PreferenceType.INT,
                 PreferenceType.LONG,
                 PreferenceType.STRING -> {
-                    dialog.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).setText(mEditValue.toString())
+                    dialog.getCustomView()
+                        .findViewById<TextInputEditText>(R.id.value_edit_text)
+                        .setText(mEditValue.toString())
                 }
                 PreferenceType.STRINGSET -> {
                     //    val array = mEditValue as Array<String>?
@@ -361,17 +402,18 @@ class PreferencesFragment : Fragment() {
                 PreferenceType.UNSUPPORTED -> {
                 }
             }
-
         } else {
             when (mPreferenceType) {
                 PreferenceType.BOOLEAN -> {
-                    dialog.getCustomView().findViewById<TextInputEditText>(R.id.value_edit_text).visibility = View.GONE
-                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).visibility = View.VISIBLE
-                    dialog.getCustomView().findViewById<Switch>(R.id.value_boolean).isChecked = true
+                    with(dialog.getCustomView()) {
+                        findViewById<TextInputEditText>(R.id.value_edit_text).visibility = View.GONE
+                        findViewById<Switch>(R.id.value_boolean).visibility = View.VISIBLE
+                        findViewById<Switch>(R.id.value_boolean).isChecked = true
+                    }
                 }
-                //PreferenceType.STRINGSET -> if ((mValue as LinearLayout).childCount == 0) {
+                // PreferenceType.STRINGSET -> if ((mValue as LinearLayout).childCount == 0) {
                 //    addStringSetEntry(false, null)
-                //}
+                // }
                 else -> {
                 }
             }
@@ -386,18 +428,23 @@ class PreferencesFragment : Fragment() {
 
         if (mPreferenceType == PreferenceType.STRINGSET) {
             dialog.getCustomView()
-                    .findViewById<Button>(R.id.dialog_add).apply {
-                        this.visibility = View.VISIBLE
-                        this.setOnClickListener {
-                            //addStringSetEntry(true, null)
-                        }
+                .findViewById<Button>(R.id.dialog_add).apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        // addStringSetEntry(true, null)
                     }
+                }
         }
 
         dialog.show()
     }
 
-    private fun addPrefKeyValue(previousKey: String?, newKey: String?, value: Any?, editMode: Boolean) {
+    private fun addPrefKeyValue(
+        previousKey: String?,
+        newKey: String?,
+        value: Any?,
+        editMode: Boolean
+    ) {
         if (preferenceFile == null) {
             return
         }
@@ -420,7 +467,9 @@ class PreferencesFragment : Fragment() {
         try {
             mListener = context as OnPreferenceFragmentInteractionListener?
         } catch (e: ClassCastException) {
-            throw ClassCastException("$context must implement OnPreferenceFragmentInteractionListener")
+            throw ClassCastException(
+                "$context must implement OnPreferenceFragmentInteractionListener"
+            )
         }
     }
 
@@ -442,10 +491,10 @@ class PreferencesFragment : Fragment() {
 
         preferenceFile = p
         emptyViewText!!.setText(
-                if (preferenceFile!!.isValidPreferenceFile)
-                    R.string.empty_preference_file_valid
-                else
-                    R.string.empty_preference_file_invalid
+            if (preferenceFile!!.isValidPreferenceFile)
+                R.string.empty_preference_file_valid
+            else
+                R.string.empty_preference_file_invalid
         )
         loadingView!!.hide()
         gridView!!.show()
@@ -453,10 +502,10 @@ class PreferencesFragment : Fragment() {
         if (animate) {
             if (activity != null) {
                 loadingView!!.startAnimation(
-                        AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
+                    AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
                 )
                 gridView!!.startAnimation(
-                        AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
+                    AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
                 )
             }
         }
@@ -475,7 +524,12 @@ class PreferencesFragment : Fragment() {
         }
         gridView!!.setMultiChoiceModeListener(object : MultiChoiceModeListener {
 
-            override fun onItemCheckedStateChanged(mode: ActionMode, position: Int, id: Long, checked: Boolean) {
+            override fun onItemCheckedStateChanged(
+                mode: ActionMode,
+                position: Int,
+                id: Long,
+                checked: Boolean
+            ) {
                 (gridView!!.adapter as PreferenceAdapter).itemCheckedStateChanged(position, checked)
                 @Suppress("DEPRECATION")
                 mode.title = Html.fromHtml("<b>" + gridView!!.checkedItemCount + "</b> selected")
@@ -517,7 +571,6 @@ class PreferencesFragment : Fragment() {
             override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
                 return false
             }
-
         })
         requireActivity().invalidateOptionsMenu()
     }
@@ -550,13 +603,15 @@ class PreferencesFragment : Fragment() {
     }
 
     companion object {
-        private const val CODE_EDIT_FILE = 666
-
         const val ARG_ICON_URI = "ICON_URI"
         const val ARG_FILE = "FILE"
         const val ARG_PACKAGE_NAME = "PACKAGE_NAME"
 
-        fun newInstance(paramFile: String, paramPackageName: String, paramIconUri: Uri): PreferencesFragment {
+        fun newInstance(
+            paramFile: String,
+            paramPackageName: String,
+            paramIconUri: Uri
+        ): PreferencesFragment {
             val fragment = PreferencesFragment()
             val args = Bundle().apply {
                 putParcelable(ARG_ICON_URI, paramIconUri)
@@ -567,5 +622,4 @@ class PreferencesFragment : Fragment() {
             return fragment
         }
     }
-
 }

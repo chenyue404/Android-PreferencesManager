@@ -23,16 +23,15 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageButton
 import android.widget.TextView
-
 import fr.simon.marquis.preferencesmanager.R
 import java.util.*
 
 internal class RestoreAdapter(
-        private val ctx: Context,
-        private val dialog: RestoreDialogFragment,
-        private var backups: List<String>?,
-        private val listener: RestoreDialogFragment.OnRestoreFragmentInteractionListener,
-        private val fullPath: String
+    private val ctx: Context,
+    private val dialog: RestoreDialogFragment,
+    private var backups: List<String>?,
+    private val listener: RestoreDialogFragment.OnRestoreFragmentInteractionListener,
+    private val fullPath: String
 ) : BaseAdapter() {
 
     init {
@@ -79,26 +78,27 @@ internal class RestoreAdapter(
 
     private fun getDisplayLabel(ctx: Context, time: Long): String {
         return upperFirstLetter(
-                DateUtils.formatDateTime(
-                        ctx,
-                        time,
-                        DateUtils.FORMAT_SHOW_DATE or
-                                DateUtils.FORMAT_SHOW_TIME or
-                                DateUtils.FORMAT_SHOW_WEEKDAY
-                )
+            DateUtils.formatDateTime(
+                ctx,
+                time,
+                DateUtils.FORMAT_SHOW_DATE or
+                    DateUtils.FORMAT_SHOW_TIME or
+                    DateUtils.FORMAT_SHOW_WEEKDAY
+            )
         ) + " (" + lowerFirstLetter(
-                DateUtils.getRelativeTimeSpanString(
-                        time,
-                        Date().time,
-                        DateUtils.SECOND_IN_MILLIS
-                ).toString()) + ")"
+            DateUtils.getRelativeTimeSpanString(
+                time,
+                Date().time,
+                DateUtils.SECOND_IN_MILLIS
+            ).toString()
+        ) + ")"
     }
 
     private fun upperFirstLetter(original: String): String {
         return if (original.isEmpty()) {
             original
         } else {
-            original.substring(0, 1).toUpperCase(Locale.getDefault()) + original.substring(1)
+            original.substring(0, 1).uppercase() + original.substring(1)
         }
     }
 
@@ -106,7 +106,7 @@ internal class RestoreAdapter(
         return if (original.isEmpty()) {
             original
         } else {
-            original.substring(0, 1).toLowerCase(Locale.getDefault()) + original.substring(1)
+            original.substring(0, 1).lowercase() + original.substring(1)
         }
     }
 }

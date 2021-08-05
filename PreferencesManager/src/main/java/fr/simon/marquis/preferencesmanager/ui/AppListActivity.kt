@@ -24,6 +24,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.preference.PreferenceManager
@@ -41,7 +42,10 @@ class AppListActivity : AppCompatActivity() {
 
     private var mAdapter: AppAdapter? = null
     private var mSearchView: SearchView? = null
-    private var task: GetApplicationsTask? = null
+
+    private var resultPreferences = registerForActivityResult(StartActivityForResult()) {
+        mAdapter?.notifyDataSetChanged()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,25 +92,13 @@ class AppListActivity : AppCompatActivity() {
         if (!Shell.rootAccess()) {
             displayNoRoot()
         } else {
-            val i = Intent(this, PreferencesActivity::class.java).apply {
+            val intent = Intent(this, PreferencesActivity::class.java).apply {
                 putExtra(PreferencesActivity.KEY_ICON_URI, app.iconUri)
                 putExtra(PreferencesActivity.EXTRA_TITLE, app.label)
                 putExtra(PreferencesActivity.EXTRA_PACKAGE_NAME, app.applicationInfo.packageName)
             }
-            startActivityForResult(i, REQUEST_CODE_PREFERENCES_ACTIVITY)
+            resultPreferences.launch(intent)
         }
-    }
-
-    /**
-     * @return true if a new task is started
-     */
-    private fun startTask(): Boolean {
-        if (task == null || task!!.isCancelled) {
-            task = GetApplicationsTask(this)
-            task!!.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
-            return true
-        }
-        return false
     }
 
     /**
@@ -128,13 +120,6 @@ class AppListActivity : AppCompatActivity() {
     private fun setListState(loading: Boolean) {
         animateView(loadingView!!, loading, loading)
         animateView(listView!!, !loading, !loading)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_PREFERENCES_ACTIVITY) {
-            mAdapter?.notifyDataSetChanged()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -171,10 +156,10 @@ class AppListActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val show = Utils.isShowSystemApps(this)
-        val showItem = menu.findItem(R.id.show_system_apps)
-
-        showItem.setTitle(if (show) R.string.hide_system_apps else R.string.show_system_apps)
-        showItem.setIcon(if (show) R.drawable.ic_action_show else R.drawable.ic_action_hide)
+        menu.findItem(R.id.show_system_apps).apply {
+            setTitle(if (show) R.string.hide_system_apps else R.string.show_system_apps)
+            setIcon(if (show) R.drawable.ic_action_show else R.drawable.ic_action_hide)
+        }
 
         return super.onPrepareOptionsMenu(menu)
     }
@@ -235,8 +220,8 @@ class AppListActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun switchThemeDialog() {
-
         val theme = arrayOf(App.LIGHT_MODE, App.DARK_MODE, App.DEFAULT_MODE)
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = prefs.edit()
@@ -244,7 +229,10 @@ class AppListActivity : AppCompatActivity() {
 
         MaterialDialog(this).show {
             title(text = "Switch Theme")
-            listItemsSingleChoice(R.array.themeListArray, initialSelection = theme.indexOf(themePref)) { _, index, _ ->
+            listItemsSingleChoice(
+                res = R.array.themeListArray,
+                initialSelection = theme.indexOf(themePref)
+            ) { _, index, _ ->
                 App.applyTheme(theme[index])
                 editor.putString("themePref", theme[index]).apply()
             }
@@ -254,8 +242,6 @@ class AppListActivity : AppCompatActivity() {
 
     companion object {
         private val TAG = AppListActivity::class.java.simpleName
-
-        private const val REQUEST_CODE_PREFERENCES_ACTIVITY = 123
         private var isRootAccessGiven = false
     }
 }

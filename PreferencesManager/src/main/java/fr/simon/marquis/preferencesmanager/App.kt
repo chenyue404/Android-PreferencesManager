@@ -22,16 +22,15 @@ import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
 import androidx.preference.PreferenceManager
 import com.topjohnwu.superuser.Shell
 
-
 class App : Application() {
 
     init {
         Shell.enableVerboseLogging = BuildConfig.DEBUG
         Shell.setDefaultBuilder(
-                Shell.Builder.create()
-                        .setFlags(Shell.FLAG_REDIRECT_STDERR)
-                        .setFlags(Shell.FLAG_MOUNT_MASTER) // Android R fix
-                        .setTimeout(10)
+            Shell.Builder.create()
+                .setFlags(Shell.FLAG_REDIRECT_STDERR)
+                .setFlags(Shell.FLAG_MOUNT_MASTER) // Android R fix
+                .setTimeout(10)
         )
     }
 

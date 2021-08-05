@@ -16,7 +16,6 @@ package fr.simon.marquis.preferencesmanager.util
  * limitations under the License.
  */
 
-import org.xmlpull.v1.XmlSerializer
 import java.io.IOException
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
@@ -27,7 +26,7 @@ import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
 import java.nio.charset.IllegalCharsetNameException
 import java.nio.charset.UnsupportedCharsetException
-
+import org.xmlpull.v1.XmlSerializer
 
 /**
  * This is a quick and dirty implementation of XmlSerializer that isn't horribly
@@ -113,7 +112,7 @@ class FastXmlSerializer : XmlSerializer {
                 pos++
                 continue
             }
-            val escape = escapes[c.toInt()]
+            val escape = escapes[c.code]
             if (escape == null) {
                 pos++
                 continue
@@ -141,7 +140,7 @@ class FastXmlSerializer : XmlSerializer {
                 pos++
                 continue
             }
-            val escape = escapes[c.toInt()]
+            val escape = escapes[c.code]
             if (escape == null) {
                 pos++
                 continue
@@ -301,9 +300,9 @@ class FastXmlSerializer : XmlSerializer {
         try {
             mCharset = Charset.forName(encoding).newEncoder()
         } catch (e: IllegalCharsetNameException) {
-            throw UnsupportedEncodingException(encoding).initCause(e) as UnsupportedEncodingException
+            throw UnsupportedEncodingException(encoding).initCause(e)
         } catch (e: UnsupportedCharsetException) {
-            throw UnsupportedEncodingException(encoding).initCause(e) as UnsupportedEncodingException
+            throw UnsupportedEncodingException(encoding).initCause(e)
         }
 
         mOutputStream = os
@@ -326,7 +325,8 @@ class FastXmlSerializer : XmlSerializer {
 
     @Throws(IOException::class, IllegalArgumentException::class, IllegalStateException::class)
     override fun startDocument(encoding: String?, standalone: Boolean?) {
-        append("<?xml version='1.0' encoding='utf-8' standalone='" + (if (standalone!!) "yes" else "no") + "' ?>\n")
+        val startText = "<?xml version='1.0' encoding='utf-8' standalone='"
+        append(startText + (if (standalone!!) "yes" else "no") + "' ?>\n")
     }
 
     @Throws(IOException::class, IllegalArgumentException::class, IllegalStateException::class)
@@ -366,17 +366,16 @@ class FastXmlSerializer : XmlSerializer {
 
     companion object {
         private val ESCAPE_TABLE = arrayOf(
-                null, null, null, null, null, null, null, null,         // 0-7
-                null, null, null, null, null, null, null, null,         // 8-15
-                null, null, null, null, null, null, null, null,         // 16-23
-                null, null, null, null, null, null, null, null,         // 24-31
-                null, null, "&quot;", null, null, null, "&amp;", null,  // 32-39
-                null, null, null, null, null, null, null, null,         // 40-47
-                null, null, null, null, null, null, null, null,         // 48-55
-                null, null, null, null, "&lt;", null, "&gt;", null      // 56-63
+            null, null, null, null, null, null, null, null, // 0-7
+            null, null, null, null, null, null, null, null, // 8-15
+            null, null, null, null, null, null, null, null, // 16-23
+            null, null, null, null, null, null, null, null, // 24-31
+            null, null, "&quot;", null, null, null, "&amp;", null, // 32-39
+            null, null, null, null, null, null, null, null, // 40-47
+            null, null, null, null, null, null, null, null, // 48-55
+            null, null, null, null, "&lt;", null, "&gt;", null // 56-63
         )
 
         private const val BUFFER_LEN = 8192
     }
-
 }

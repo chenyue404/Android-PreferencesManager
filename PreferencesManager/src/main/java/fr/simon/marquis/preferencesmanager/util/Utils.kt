@@ -15,7 +15,6 @@
  */
 package fr.simon.marquis.preferencesmanager.util
 
-import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.SharedPreferences
@@ -135,7 +134,6 @@ object Utils {
                 } catch (e: JSONException) {
                     Log.e(TAG, "error parsing JSON", e)
                 }
-
             }
         }
     }
@@ -214,9 +212,10 @@ object Utils {
 
             Log.d(TAG, "key: $key")
 
-            if (!key.startsWith(BACKUP_PREFIX) && key.matches(PACKAGE_NAME_PATTERN.toRegex()) && value.contains(
-                    "FILE"
-                ) && value.contains("BACKUPS")
+            if (!key.startsWith(BACKUP_PREFIX) &&
+                key.matches(PACKAGE_NAME_PATTERN.toRegex()) &&
+                value.contains("FILE") &&
+                value.contains("BACKUPS")
             ) {
                 Log.d(TAG, " need to be updated")
                 var array: JSONArray? = null
@@ -256,7 +255,7 @@ object Utils {
 
     private fun saveVersionCode(ctx: Context, sp: SharedPreferences) {
         try {
-            //Ignoring for older devices
+            // Ignoring for older devices
             @Suppress("DEPRECATION")
             sp.edit().putInt(
                 VERSION_CODE_KEY,
@@ -265,7 +264,6 @@ object Utils {
         } catch (e: Exception) {
             Log.e(TAG, "Error trying to save the version code", e)
         }
-
     }
 
     fun getBackups(ctx: Context, packageName: String): BackupContainer {

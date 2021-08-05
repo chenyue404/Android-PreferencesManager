@@ -25,18 +25,18 @@ import coil.load
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.MyComparator
-import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter
 import java.util.*
 import java.util.regex.Pattern
+import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter
 
 internal class AppAdapter(
-        private val context: Context,
-        private val applications: ArrayList<AppEntry>,
-        private val emptyView: View
+    private val context: Context,
+    private val applications: ArrayList<AppEntry>,
+    private val emptyView: View
 ) : BaseAdapter(), StickyListHeadersAdapter, Filterable {
 
     private val layoutInflater: LayoutInflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private val color: Int = context.getResColor(R.color.header_blue)
     private val mLock = Any()
     private var pattern: Pattern? = null
@@ -117,7 +117,7 @@ internal class AppAdapter(
     }
 
     override fun getHeaderId(position: Int): Long =
-            applicationsToDisplay!![position].headerChar.toLong()
+        applicationsToDisplay!![position].headerChar.code.toLong()
 
     fun setFilter(filter: String?) {
         pattern = if (filter.isNullOrEmpty()) {
@@ -143,12 +143,18 @@ internal class AppAdapter(
                         results.count = applications.size
                     }
                 } else {
-                    val prefixString = charSequence.toString().toLowerCase(Locale.getDefault()).trim { it <= ' ' }
+                    val prefixString =
+                        charSequence.toString().lowercase().trim { it <= ' ' }
                     val filterResultsData = ArrayList<AppEntry>()
                     synchronized(mLock) {
                         for (data in applications) {
                             val p = Pattern.compile(prefixString, Pattern.CASE_INSENSITIVE)
-                            if (p.matcher(data.label.toLowerCase(Locale.getDefault()).trim { it <= ' ' }).find()) {
+                            if (p.matcher(
+                                    data.label
+                                        .lowercase()
+                                        .trim { it <= ' ' }
+                                ).find()
+                            ) {
                                 filterResultsData.add(data)
                             }
                         }

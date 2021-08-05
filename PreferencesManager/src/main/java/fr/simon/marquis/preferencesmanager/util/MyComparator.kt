@@ -15,10 +15,9 @@
  */
 package fr.simon.marquis.preferencesmanager.util
 
+import fr.simon.marquis.preferencesmanager.model.AppEntry
 import java.text.Collator
 import java.util.Comparator
-
-import fr.simon.marquis.preferencesmanager.model.AppEntry
 
 class MyComparator : Comparator<AppEntry> {
     private val sCollator = Collator.getInstance()
@@ -29,6 +28,5 @@ class MyComparator : Comparator<AppEntry> {
     }
 
     override fun compare(obj1: AppEntry, obj2: AppEntry): Int =
-            sCollator.compare(obj1.sortingValue, obj2.sortingValue)
-
+        sCollator.compare(obj1.sortingValue, obj2.sortingValue)
 }

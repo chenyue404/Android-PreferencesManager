@@ -18,11 +18,11 @@ package fr.simon.marquis.preferencesmanager.model
 import android.text.TextUtils
 import fr.simon.marquis.preferencesmanager.ui.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.util.XmlUtils
-import org.xmlpull.v1.XmlPullParserException
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
+import org.xmlpull.v1.XmlPullParserException
 
 class PreferenceFile {
 
@@ -156,7 +156,6 @@ class PreferenceFile {
                 preferenceFile.setPreferences(map)
 
                 return preferenceFile
-
             } catch (ignored: XmlPullParserException) {
             } catch (ignored: IOException) {
             }
@@ -165,5 +164,4 @@ class PreferenceFile {
             return preferenceFile
         }
     }
-
 }

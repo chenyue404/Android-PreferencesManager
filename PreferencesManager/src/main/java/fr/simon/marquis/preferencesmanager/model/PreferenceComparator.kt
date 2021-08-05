@@ -20,7 +20,7 @@ import java.util.Comparator
 import kotlin.collections.Map.Entry
 
 internal class PreferenceComparator(
-        private val mType: PreferenceSortType
+    private val mType: PreferenceSortType
 ) : Comparator<Entry<Any, Any>> {
 
     override fun compare(lhs: Entry<Any, Any>?, rhs: Entry<Any, Any>?): Int {

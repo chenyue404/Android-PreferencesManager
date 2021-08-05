@@ -17,13 +17,13 @@ package fr.simon.marquis.preferencesmanager.util
  */
 
 import android.util.Xml
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParser.*
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.*
 
 /**
  * {@hide}
@@ -285,7 +285,7 @@ object XmlUtils {
      * Flatten a byte[] into an XmlSerializer. The list can later be read back
      * with readThisByteArrayXml().
      *
-     * @param val  The byte array to be flattened.
+     * @param `val`  The byte array to be flattened.
      * @param name Name attribute to include with this array's tag, or null for
      * none.
      * @param out  XmlSerializer to write the array into.
@@ -294,9 +294,9 @@ object XmlUtils {
      * @see .writeValueXml
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun writeByteArrayXml(`val`: ByteArray?, name: String?, out: XmlSerializer) {
+    fun writeByteArrayXml(byteArray: ByteArray?, name: String?, out: XmlSerializer) {
 
-        if (`val` == null) {
+        if (byteArray == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
             return
@@ -307,16 +307,16 @@ object XmlUtils {
             out.attribute(null, "name", name)
         }
 
-        val n = `val`.size
+        val n = byteArray.size
         out.attribute(null, "num", n.toString())
 
-        val sb = StringBuilder(`val`.size * 2)
+        val sb = StringBuilder(byteArray.size * 2)
         for (i in 0 until n) {
-            val b = `val`[i].toInt()
+            val b = byteArray[i].toInt()
             var h = b shr 4
-            sb.append(if (h >= 10) 'a'.toInt() + h - 10 else '0'.toInt() + h)
+            sb.append(if (h >= 10) 'a'.code + h - 10 else '0'.code + h)
             h = b and 0xff
-            sb.append(if (h >= 10) 'a'.toInt() + h - 10 else '0'.toInt() + h)
+            sb.append(if (h >= 10) 'a'.code + h - 10 else '0'.code + h)
         }
 
         out.text(sb.toString())
@@ -661,7 +661,6 @@ object XmlUtils {
                     } catch (e: NumberFormatException) {
                         throw XmlPullParserException("Not a number in value attribute in item")
                     }
-
                 } else {
                     throw XmlPullParserException("Expected item tag at: " + parser.name)
                 }
@@ -669,7 +668,9 @@ object XmlUtils {
                 when (parser.name) {
                     endTag -> return array
                     "item" -> i++
-                    else -> throw XmlPullParserException("Expected " + endTag + " end tag at: " + parser.name)
+                    else -> throw XmlPullParserException(
+                        "Expected " + endTag + " end tag at: " + parser.name
+                    )
                 }
             }
             eventType = parser.next()
@@ -736,12 +737,15 @@ object XmlUtils {
                                 // + ": " + value);
                                 return value
                             }
-                            throw XmlPullParserException("Unexpected end tag in <string>: " + parser.name)
+                            throw XmlPullParserException(
+                                "Unexpected end tag in <string>: " + parser.name
+                            )
                         }
                         TEXT -> value += parser.text
-                        START_TAG -> throw XmlPullParserException("Unexpected start tag in <string>: " + parser.name)
+                        START_TAG -> throw XmlPullParserException(
+                            "Unexpected start tag in <string>: " + parser.name
+                        )
                     }
-
                 } while (eventType != END_DOCUMENT)
 
                 throw XmlPullParserException("Unexpected end of document in <string>")
@@ -800,12 +804,17 @@ object XmlUtils {
                         // ": " + res);
                         return res
                     }
-                    throw XmlPullParserException("Unexpected end tag in <" + tagName + ">: " + parser.name)
+                    throw XmlPullParserException(
+                        "Unexpected end tag in <" + tagName + ">: " + parser.name
+                    )
                 }
-                TEXT -> throw XmlPullParserException("Unexpected text in <" + tagName + ">: " + parser.name)
-                START_TAG -> throw XmlPullParserException("Unexpected start tag in <" + tagName + ">: " + parser.name)
+                TEXT -> throw XmlPullParserException(
+                    "Unexpected text in <" + tagName + ">: " + parser.name
+                )
+                START_TAG -> throw XmlPullParserException(
+                    "Unexpected start tag in <" + tagName + ">: " + parser.name
+                )
             }
-
         } while (eventType != END_DOCUMENT)
 
         throw XmlPullParserException("Unexpected end of document in <$tagName>")

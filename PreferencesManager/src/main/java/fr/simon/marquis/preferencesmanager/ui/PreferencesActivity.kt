@@ -43,9 +43,9 @@ import org.json.JSONArray
 import java.util.*
 
 class PreferencesActivity :
-        AppCompatActivity(),
-        OnPreferenceFragmentInteractionListener,
-        RestoreDialogFragment.OnRestoreFragmentInteractionListener {
+    AppCompatActivity(),
+    OnPreferenceFragmentInteractionListener,
+    RestoreDialogFragment.OnRestoreFragmentInteractionListener {
 
     private var mViewPager: ViewPager? = null
     private var mLoadingView: View? = null
@@ -130,14 +130,14 @@ class PreferencesActivity :
         val fav = Utils.isFavorite(pkgName!!, this)
         val itemFav = menu.findItem(R.id.action_fav)
         itemFav?.setIcon(
-                if (fav)
-                    R.drawable.ic_action_star_10
-                else
-                    R.drawable.ic_action_star_0
+            if (fav)
+                R.drawable.ic_action_star_10
+            else
+                R.drawable.ic_action_star_0
         )?.setTitle(
-                if (fav)
-                    R.string.action_unfav
-                else R.string.action_fav
+            if (fav)
+                R.string.action_unfav
+            else R.string.action_fav
         )
         return super.onPrepareOptionsMenu(menu)
     }
@@ -146,10 +146,12 @@ class PreferencesActivity :
         when (item.itemId) {
             android.R.id.home -> {
                 if (launchedFromShortcut) {
-                    startActivity(Intent(this, AppListActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    })
+                    startActivity(
+                        Intent(this, AppListActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        }
+                    )
                 }
                 finish()
                 return true
@@ -180,10 +182,12 @@ class PreferencesActivity :
         val addIntent = Intent().apply {
             putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent)
             putExtra(Intent.EXTRA_SHORTCUT_NAME, title)
-            putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-                    Intent.ShortcutIconResource.fromContext(
-                            this@PreferencesActivity,
-                            R.drawable.ic_launcher)
+            putExtra(
+                Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
+                Intent.ShortcutIconResource.fromContext(
+                    this@PreferencesActivity,
+                    R.drawable.ic_launcher
+                )
             )
             action = INSTALL_SHORTCUT
         }
@@ -205,10 +209,10 @@ class PreferencesActivity :
     }
 
     override fun canRestoreFile(fullPath: String?): Boolean =
-            backupContainer != null && backupContainer!!.contains(fullPath!!)
+        backupContainer != null && backupContainer!!.contains(fullPath!!)
 
     override fun getBackups(fullPath: String?): List<String>? =
-            if (backupContainer == null) emptyList() else backupContainer!![fullPath!!]
+        if (backupContainer == null) emptyList() else backupContainer!![fullPath!!]
 
     override fun onRestoreFile(backup: String, fullPath: String?): String {
         Log.d(TAG, String.format("onRestoreFile(%s, %s)", backup, fullPath))
@@ -251,18 +255,17 @@ class PreferencesActivity :
     }
 
     internal inner class SectionsPagerAdapter(
-            fm: FragmentManager,
-            private val mFiles: List<String>
+        fm: FragmentManager,
+        private val mFiles: List<String>
     ) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
         override fun getItem(position: Int): Fragment =
-                PreferencesFragment.newInstance(mFiles[position], pkgName!!, iconUri!!)
+            PreferencesFragment.newInstance(mFiles[position], pkgName!!, iconUri!!)
 
         override fun getCount(): Int = mFiles.size
 
         override fun getPageTitle(position: Int): CharSequence? =
-                Utils.extractFileName(mFiles[position])
-
+            Utils.extractFileName(mFiles[position])
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -290,8 +293,10 @@ class PreferencesActivity :
     }
 
     companion object {
-
         private val TAG = PreferencesActivity::class.java.simpleName
+
+        var preferenceSortType = PreferenceSortType.TYPE_AND_ALPHANUMERIC
+
         const val KEY_SORT_TYPE = "KEY_SORT_TYPE"
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
         const val KEY_ICON_URI = "KEY_ICON_URI"
@@ -299,6 +304,5 @@ class PreferencesActivity :
         private const val KEY_FILES = "KEY_FILES"
         private const val INSTALL_SHORTCUT = "com.android.launcher.action.INSTALL_SHORTCUT"
         private const val EXTRA_SHORTCUT = "EXTRA_SHORTCUT"
-        var preferenceSortType = PreferenceSortType.TYPE_AND_ALPHANUMERIC
     }
 }

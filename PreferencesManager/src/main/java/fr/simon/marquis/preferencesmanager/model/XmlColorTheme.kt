@@ -21,13 +21,13 @@ import androidx.core.content.ContextCompat
 import fr.simon.marquis.preferencesmanager.R
 
 class XmlColorTheme(
-        context: Context,
-        xmlTag: Int,
-        xmlAttributeName: Int,
-        xmlAttributeValue: Int,
-        xmlComment: Int,
-        xmlValue: Int,
-        xmlDefault: Int
+    context: Context,
+    xmlTag: Int,
+    xmlAttributeName: Int,
+    xmlAttributeValue: Int,
+    xmlComment: Int,
+    xmlValue: Int,
+    xmlDefault: Int
 ) {
 
     private val tag: Int = ContextCompat.getColor(context, xmlTag)
@@ -62,53 +62,53 @@ class XmlColorTheme(
             return when (theme) {
                 ColorThemeEnum.ECLIPSE ->
                     XmlColorTheme(
-                            context,
-                            R.color.xml_eclipse_tag,
-                            R.color.xml_eclipse_attribute_name,
-                            R.color.xml_eclipse_attribute_value,
-                            R.color.xml_eclipse_comment,
-                            R.color.xml_eclipse_value,
-                            R.color.xml_eclipse_default
+                        context,
+                        R.color.xml_eclipse_tag,
+                        R.color.xml_eclipse_attribute_name,
+                        R.color.xml_eclipse_attribute_value,
+                        R.color.xml_eclipse_comment,
+                        R.color.xml_eclipse_value,
+                        R.color.xml_eclipse_default
                     )
                 ColorThemeEnum.GOOGLE ->
                     XmlColorTheme(
-                            context,
-                            R.color.xml_google_tag,
-                            R.color.xml_google_attribute_name,
-                            R.color.xml_google_attribute_value,
-                            R.color.xml_google_comment,
-                            R.color.xml_google_value,
-                            R.color.xml_google_default
+                        context,
+                        R.color.xml_google_tag,
+                        R.color.xml_google_attribute_name,
+                        R.color.xml_google_attribute_value,
+                        R.color.xml_google_comment,
+                        R.color.xml_google_value,
+                        R.color.xml_google_default
                     )
                 ColorThemeEnum.NETBEANS ->
                     XmlColorTheme(
-                            context,
-                            R.color.xml_netbeans_tag,
-                            R.color.xml_netbeans_attribute_name,
-                            R.color.xml_netbeans_attribute_value,
-                            R.color.xml_netbeans_comment,
-                            R.color.xml_netbeans_value,
-                            R.color.xml_netbeans_default
+                        context,
+                        R.color.xml_netbeans_tag,
+                        R.color.xml_netbeans_attribute_name,
+                        R.color.xml_netbeans_attribute_value,
+                        R.color.xml_netbeans_comment,
+                        R.color.xml_netbeans_value,
+                        R.color.xml_netbeans_default
                     )
                 ColorThemeEnum.NOTEPAD ->
                     XmlColorTheme(
-                            context,
-                            R.color.xml_notepad_tag,
-                            R.color.xml_notepad_attribute_name,
-                            R.color.xml_notepad_attribute_value,
-                            R.color.xml_notepad_comment,
-                            R.color.xml_notepad_value,
-                            R.color.xml_notepad_default
+                        context,
+                        R.color.xml_notepad_tag,
+                        R.color.xml_notepad_attribute_name,
+                        R.color.xml_notepad_attribute_value,
+                        R.color.xml_notepad_comment,
+                        R.color.xml_notepad_value,
+                        R.color.xml_notepad_default
                     )
                 ColorThemeEnum.ROBOTICKET ->
                     XmlColorTheme(
-                            context,
-                            R.color.xml_roboticket_tag,
-                            R.color.xml_roboticket_attribute_name,
-                            R.color.xml_roboticket_attribute_value,
-                            R.color.xml_roboticket_comment,
-                            R.color.xml_roboticket_value,
-                            R.color.xml_roboticket_default
+                        context,
+                        R.color.xml_roboticket_tag,
+                        R.color.xml_roboticket_attribute_name,
+                        R.color.xml_roboticket_attribute_value,
+                        R.color.xml_roboticket_comment,
+                        R.color.xml_roboticket_value,
+                        R.color.xml_roboticket_default
                     )
             }
         }

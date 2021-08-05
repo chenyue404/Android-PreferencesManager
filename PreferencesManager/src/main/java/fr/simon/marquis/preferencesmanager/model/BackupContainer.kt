@@ -16,13 +16,11 @@
 package fr.simon.marquis.preferencesmanager.model
 
 import android.text.TextUtils
-
+import java.util.ArrayList
+import java.util.HashMap
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
-import java.util.ArrayList
-import java.util.HashMap
 
 class BackupContainer {
 
