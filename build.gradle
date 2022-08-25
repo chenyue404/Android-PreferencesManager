@@ -2,16 +2,16 @@
 
 buildscript {
 
-    ext.kotlin_version = '1.5.21'
-    ext.ktlint_version = '10.1.0'
+    ext.kotlin_version = '1.7.10'
+    ext.ktlint_version = '10.3.0'
 
     repositories {
-        jcenter()
-        google()
         maven { url "https://plugins.gradle.org/m2/" } // Ktlint
+        google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0'
+        classpath 'com.android.tools.build:gradle:7.3.0-rc01'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_version"
 
@@ -23,7 +23,7 @@ buildscript {
 allprojects {
     repositories {
         maven { url 'https://jitpack.io' }
-        jcenter()
+        mavenCentral()
         google()
     }
 }

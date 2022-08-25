@@ -87,7 +87,7 @@ object Utils {
             var appsInfo: MutableList<ApplicationInfo> =
                 pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
-            if (appsInfo.isNullOrEmpty()) {
+            if (appsInfo.isEmpty()) {
                 appsInfo = ArrayList()
             }
 
@@ -178,7 +178,7 @@ object Utils {
         val stdout: List<String> = ArrayList()
         val stderr: List<String> = ArrayList()
         val what =
-            Shell.su(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
+            Shell.cmd(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
 
         if (BuildConfig.DEBUG) {
             Log.d(
@@ -201,7 +201,7 @@ object Utils {
         Log.d(TAG, String.format("readFile(%s)", file))
         val sb = StringBuilder()
         val lines = ArrayList<String>()
-        Shell.su(String.format(CMD_CAT_FILE, file)).to(lines).exec()
+        Shell.cmd(String.format(CMD_CAT_FILE, file)).to(lines).exec()
 
         for (line in lines) {
             sb.append(line)
@@ -319,7 +319,7 @@ object Utils {
     fun backupFile(backup: String, fileName: String, ctx: Context): Boolean {
         Log.d(TAG, String.format("backupFile(%s, %s)", backup, fileName))
         val destination = File(ctx.filesDir, backup)
-        Shell.su(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
+        Shell.cmd(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
         Log.d(TAG, "backupFile --> $destination")
         return true
     }
@@ -327,7 +327,7 @@ object Utils {
     fun restoreFile(ctx: Context, backup: String, fileName: String, packageName: String): Boolean {
         Log.d(TAG, String.format("restoreFile(%s, %s, %s)", backup, fileName, packageName))
         val backupFile = File(ctx.filesDir, backup)
-        Shell.su(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
+        Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
             Log.e(TAG, "Error fixUserAndGroupId")
@@ -382,7 +382,7 @@ object Utils {
             return false
         }
 
-        Shell.su(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
+        Shell.cmd(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
 
         if (!fixUserAndGroupId(ctx, file, packageName)) {
             Log.e(TAG, "Error fixUserAndGroupId")
@@ -425,7 +425,7 @@ object Utils {
             return false
         }
 
-        Shell.su(String.format(CMD_CHOWN, uid, uid, file)).exec()
+        Shell.cmd(String.format(CMD_CHOWN, uid, uid, file)).exec()
         return true
     }
 }

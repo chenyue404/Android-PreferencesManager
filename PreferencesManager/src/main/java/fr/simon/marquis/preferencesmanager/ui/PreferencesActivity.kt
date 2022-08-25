@@ -39,7 +39,6 @@ import fr.simon.marquis.preferencesmanager.ui.PreferencesFragment.OnPreferenceFr
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.*
-import kotlinx.android.synthetic.main.activity_preferences.*
 import kotlinx.coroutines.cancel
 import org.json.JSONArray
 
@@ -65,7 +64,7 @@ class PreferencesActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preferences)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         val intent = intent.extras
         if (intent == null) {

@@ -273,13 +273,11 @@ class PreferencesFragment : Fragment() {
     private fun setSortType(type: PreferenceSortType) {
         if (PreferencesActivity.preferenceSortType != type) {
             PreferencesActivity.preferenceSortType = type
-            if (activity != null) {
-                activity?.invalidateOptionsMenu()
-                PreferenceManager.getDefaultSharedPreferences(activity)
-                    .edit()
-                    .putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal)
-                    .apply()
-            }
+            activity?.invalidateOptionsMenu()
+            PreferenceManager.getDefaultSharedPreferences(requireActivity())
+                .edit()
+                .putInt(PreferencesActivity.KEY_SORT_TYPE, type.ordinal)
+                .apply()
 
             if (gridView!!.adapter != null && preferenceFile != null) {
                 preferenceFile!!.updateSort()

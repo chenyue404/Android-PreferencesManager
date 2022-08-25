@@ -35,7 +35,6 @@ import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorThemeEnum
 import fr.simon.marquis.preferencesmanager.model.XmlFontSize
 import fr.simon.marquis.preferencesmanager.util.Utils
 import java.util.regex.Pattern
-import kotlinx.android.synthetic.main.activity_file_editor.*
 
 class FileEditorActivity : AppCompatActivity(), TextWatcher {
 
@@ -60,10 +59,10 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             return
         }
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        mEditText = editText
+        mEditText = findViewById(R.id.editText)
         mFile = intent.getString(PreferencesFragment.ARG_FILE)
         mTitle = Utils.extractFileName(mFile!!)
         mPackageName = intent.getString(PreferencesFragment.ARG_PACKAGE_NAME)
@@ -160,6 +159,7 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
                 menu.findItem(R.id.action_theme_notepad).isChecked = true
             ColorThemeEnum.NETBEANS ->
                 menu.findItem(R.id.action_theme_netbeans).isChecked = true
+            else -> Unit
         }
 
         menu.findItem(R.id.action_size_extra_small).isChecked = false
@@ -179,6 +179,7 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
                 menu.findItem(R.id.action_size_large).isChecked = true
             XmlFontSize.EXTRA_LARGE ->
                 menu.findItem(R.id.action_size_extra_large).isChecked = true
+            else -> Unit
         }
 
         return super.onPrepareOptionsMenu(menu)

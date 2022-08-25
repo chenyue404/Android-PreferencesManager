@@ -35,9 +35,8 @@ import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView
 import java.util.*
-import kotlinx.android.synthetic.main.activity_app_list.*
-import kotlinx.coroutines.*
 
 class AppListActivity : AppCompatActivity() {
 
@@ -53,14 +52,14 @@ class AppListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_app_list)
         Utils.checkBackups(applicationContext)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         if (savedInstanceState == null) {
             checkRoot()
         }
 
-        listView!!.isDrawingListUnderStickyHeader = false
-        listView!!.setOnItemClickListener { _, _, arg2, _ ->
+        findViewById<StickyListHeadersListView>(R.id.listView).isDrawingListUnderStickyHeader = false
+        findViewById<StickyListHeadersListView>(R.id.listView).setOnItemClickListener { _, _, arg2, _ ->
             if (isRootAccessGiven) {
                 startPreferencesActivity(mAdapter!!.getItem(arg2) as AppEntry)
             } else {
@@ -76,7 +75,15 @@ class AppListActivity : AppCompatActivity() {
     }
 
     private fun checkRoot() {
-        isRootAccessGiven = Shell.rootAccess()
+        isRootAccessGiven = Shell.isAppGrantedRoot() ?: false
+
+        if (!isRootAccessGiven) {
+            Shell.getShell {
+                val intent = Intent(this, AppListActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
 
         Log.i(TAG, "Root Access: $isRootAccessGiven")
 
@@ -90,7 +97,7 @@ class AppListActivity : AppCompatActivity() {
      * @param app to browse
      */
     private fun startPreferencesActivity(app: AppEntry) {
-        if (!Shell.rootAccess()) {
+        if (Shell.isAppGrantedRoot() == false) {
             displayNoRoot()
         } else {
             val intent = Intent(this, PreferencesActivity::class.java).apply {
@@ -108,8 +115,8 @@ class AppListActivity : AppCompatActivity() {
      * @param apps List of applications
      */
     private fun updateListView(apps: ArrayList<AppEntry>?) {
-        mAdapter = AppAdapter(this, apps!!, emptyView!!)
-        listView!!.adapter = mAdapter
+        mAdapter = AppAdapter(this, apps!!, findViewById(R.id.emptyView))
+        findViewById<StickyListHeadersListView>(R.id.listView).adapter = mAdapter
         setListState(false)
     }
 
@@ -119,8 +126,8 @@ class AppListActivity : AppCompatActivity() {
      * @param loading state to apply
      */
     private fun setListState(loading: Boolean) {
-        animateView(loadingView!!, loading, loading)
-        animateView(listView!!, !loading, !loading)
+        animateView(findViewById(R.id.loadingView), loading, loading)
+        animateView(findViewById(R.id.listView), !loading, !loading)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
