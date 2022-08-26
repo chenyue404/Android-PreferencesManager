@@ -7,11 +7,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
+import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun AppListMenu(
@@ -68,7 +71,10 @@ fun AppListMenu(
 private fun Preview_AppListMenu(
     appName: String = stringResource(id = R.string.app_name)
 ) {
+    val context = LocalContext.current
+    PrefManager.init(context)
     var isMenuShowing by remember { mutableStateOf(false) }
+    val textState = MutableStateFlow(TextFieldValue(""))
 
     AppTheme {
         AppBar(
@@ -82,7 +88,8 @@ private fun Preview_AppListMenu(
                     onSwitchTheme = {},
                     onAbout = {}
                 )
-            }
+            },
+            textState = textState
         )
     }
 }

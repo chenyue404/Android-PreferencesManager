@@ -145,4 +145,8 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
         // Everything else
         return '#'
     }
+
+    override fun toString(): String {
+        return label
+    }
 }

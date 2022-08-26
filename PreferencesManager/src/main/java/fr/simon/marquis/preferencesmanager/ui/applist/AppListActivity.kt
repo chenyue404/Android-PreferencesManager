@@ -16,7 +16,6 @@
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -45,6 +44,7 @@ import fr.simon.marquis.preferencesmanager.util.Utils
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+// TODO some composables should be hoisted and broken apart
 class AppListActivity : ComponentActivity() {
 
     private val viewModel: AppListViewModel by viewModels()
@@ -61,21 +61,21 @@ class AppListActivity : ComponentActivity() {
 
         if (savedInstanceState == null || Utils.previousApps == null) {
             viewModel.run {
-                if (isRootGranted.value)
+                if (viewModel.uiState.value.isRootGranted)
                     startTask(this@AppListActivity)
             }
         }
 
         Timber.i("onCreate")
         setContent {
+            val uiState by viewModel.uiState
+
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
+            val scrollState = rememberLazyListState()
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
-            val scrollState = rememberLazyListState()
             var isMenuShowing by remember { mutableStateOf(false) }
-
-            val hasRoot = viewModel.isRootGranted.collectAsState()
 
             val windowInset = Modifier
                 .statusBarsPadding()
@@ -96,10 +96,9 @@ class AppListActivity : ComponentActivity() {
             val dialogNoRootState = rememberMaterialDialogState()
             DialogNoRoot(dialogState = dialogNoRootState)
 
-            if (!hasRoot.value) {
+            if (!uiState.isRootGranted) {
                 LaunchedEffect(Unit) {
                     scope.launch {
-                        Timber.d("Yeet")
                         dialogNoRootState.show()
                     }
                 }
@@ -116,14 +115,7 @@ class AppListActivity : ComponentActivity() {
                                 AppListMenu(
                                     isMenuShowing = isMenuShowing,
                                     setMenuShowing = { isMenuShowing = it },
-                                    onSearch = {
-                                        // TODO
-                                        Toast.makeText(
-                                            context,
-                                            "TODO: Not implemented",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
+                                    onSearch = { viewModel.setIsSearching(true) },
                                     onShowSystemApps = {
                                         Utils.setShowSystemApps(
                                             context,
@@ -134,8 +126,10 @@ class AppListActivity : ComponentActivity() {
                                     onSwitchTheme = { dialogThemeState.show() },
                                     onAbout = { dialogAboutState.show() }
                                 )
-                            }
-                        )
+                            },
+                            textState = viewModel.searchText,
+                            isSearching = uiState.isSearching
+                        ) { viewModel.setIsSearching(false) }
                     }
                 ) { paddingValues ->
                     Box(
@@ -147,23 +141,23 @@ class AppListActivity : ComponentActivity() {
                             Modifier
                                 .fillMaxSize()
                                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-                            verticalArrangement = Arrangement.Center
                         ) {
-                            val list = viewModel.appList.collectAsState()
-
                             LazyColumn(
                                 modifier = Modifier.fillMaxWidth(),
                                 state = scrollState,
                                 contentPadding = PaddingValues(bottom = 112.dp)
                             ) {
-                                val items = list.value.groupBy { it.headerChar }
-
+                                val items = uiState.filteredAppList.groupBy { it.headerChar }
                                 items.forEach { (letter, item) ->
                                     stickyHeader {
-                                        AppEntryHeader(letter = letter)
+                                        AppEntryHeader(
+                                            modifier = Modifier, // .animateItemPlacement(),
+                                            letter = letter
+                                        )
                                     }
                                     items(item) { entry ->
                                         AppEntryItem(
+                                            modifier = Modifier.animateItemPlacement(),
                                             entry = entry,
                                             onClick = { viewModel.launchPreference(context, entry) }
                                         )

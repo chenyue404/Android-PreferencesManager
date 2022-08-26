@@ -2,6 +2,9 @@ package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.superuser.Shell
@@ -9,38 +12,74 @@ import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.ui.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
+import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
+
+data class AppListState(
+    val isLoading: Boolean = false,
+    val isRootGranted: Boolean = false,
+    val isSearching: Boolean = false,
+    val appList: List<AppEntry> = listOf(),
+    val filteredAppList: List<AppEntry> = listOf()
+)
 
 class AppListViewModel : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    private val _uiState = mutableStateOf(AppListState())
+    val uiState: State<AppListState> = _uiState
 
-    private val _isRootGranted = MutableStateFlow(false)
-    val isRootGranted: StateFlow<Boolean> = _isRootGranted
+    private val _searchText = MutableStateFlow(TextFieldValue(""))
+    val searchText: MutableStateFlow<TextFieldValue> = _searchText
 
-    private val _appList = MutableStateFlow(mutableListOf<AppEntry>())
-    val appList: StateFlow<MutableList<AppEntry>> = _appList
+    init {
+        viewModelScope.launch {
+            searchText.collectLatest {
+                searchText(it.text)
+            }
+        }
+    }
+
+    fun setIsSearching(value: Boolean) {
+        _uiState.value = uiState.value.copy(isSearching = value)
+    }
 
     fun checkRoot() {
-        _isRootGranted.value = Shell.isAppGrantedRoot() ?: false
+        _uiState.value = uiState.value.copy(isRootGranted = Shell.isAppGrantedRoot() ?: false)
 
-        Timber.i("Root access is ${_isRootGranted.value}")
+        Timber.i("Root access is ${uiState.value.isRootGranted}")
+    }
+
+    private fun searchText(value: String) {
+        val list = if (uiState.value.isSearching && searchText.value.text.isNotEmpty()) {
+            uiState.value.appList.filter {
+                it.label
+                    .lowercase(Locale.getDefault())
+                    .contains(value.lowercase(Locale.getDefault()))
+            }
+        } else {
+            uiState.value.appList
+        }
+
+        _uiState.value = uiState.value.copy(filteredAppList = list)
     }
 
     fun startTask(context: Context) {
         viewModelScope.executeAsyncTask(
             onPreExecute = {
-                _isLoading.value = true
+                _uiState.value = uiState.value.copy(isLoading = true)
             },
             doInBackground = { _: suspend (progress: Int) -> Unit ->
                 Utils.getApplications(context)
             },
             onPostExecute = {
-                _appList.value = it
-                _isLoading.value = false
+                _uiState.value = uiState.value.copy(
+                    isLoading = false,
+                    appList = it,
+                    filteredAppList = it
+                )
             },
             onProgressUpdate = {
             }
@@ -48,7 +87,7 @@ class AppListViewModel : ViewModel() {
     }
 
     fun launchPreference(context: Context, app: AppEntry) {
-        if (!_isRootGranted.value) {
+        if (!uiState.value.isRootGranted) {
             Timber.e("We don't have root to continue!")
         } else {
             context.run {
