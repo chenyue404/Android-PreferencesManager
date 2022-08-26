@@ -16,11 +16,9 @@
 package fr.simon.marquis.preferencesmanager
 
 import android.app.Application
-import android.os.Build
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
-import androidx.preference.PreferenceManager
 import com.topjohnwu.superuser.Shell
+import fr.simon.marquis.preferencesmanager.util.PrefManager
+import timber.log.Timber
 
 class App : Application() {
 
@@ -37,30 +35,9 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val themePref = sharedPreferences.getString("themePref", DEFAULT_MODE)!!
-        applyTheme(themePref)
-    }
+        PrefManager.init(applicationContext)
 
-    companion object {
-        const val LIGHT_MODE = "light"
-        const val DARK_MODE = "dark"
-        const val DEFAULT_MODE = "default"
-
-        fun applyTheme(themePref: String) {
-            when (themePref) {
-                LIGHT_MODE ->
-                    setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                DARK_MODE ->
-                    setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                else -> {
-                    if (Build.VERSION.SDK_INT >= 29) {
-                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    } else {
-                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
-                    }
-                }
-            }
-        }
+        if (BuildConfig.DEBUG)
+            Timber.plant(Timber.DebugTree())
     }
 }

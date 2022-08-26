@@ -16,6 +16,7 @@ package fr.simon.marquis.preferencesmanager.ui
  * the License.
  */
 
+import android.os.Build.VERSION
 import android.os.Bundle
 import android.text.*
 import android.text.style.ForegroundColorSpan
@@ -24,6 +25,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
@@ -49,9 +52,31 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
     private var mHasContentChanged: Boolean = false
     private var mNeedUpdateOnActivityFinish = false
 
+    private val onBackPressed = {
+        if (mHasContentChanged) {
+            showSavePopup()
+        }
+    }
+
     override fun onCreate(arg0: Bundle?) {
         super.onCreate(arg0)
         setContentView(R.layout.activity_file_editor)
+
+        if (VERSION.SDK_INT >= 33) {
+            val priority = OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(priority) {
+                onBackPressed
+            }
+        } else {
+            onBackPressedDispatcher.addCallback(
+                this,
+                object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        onBackPressed
+                    }
+                }
+            )
+        }
 
         val intent = intent.extras
         if (intent == null) {
@@ -125,14 +150,6 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
         outState.putInt(KEY_FONT_SIZE, mXmlFontSize!!.size)
         outState.putBoolean(KEY_NEED_UPDATE_ON_ACTIVITY_FINISH, mNeedUpdateOnActivityFinish)
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onBackPressed() {
-        if (mHasContentChanged) {
-            showSavePopup()
-            return
-        }
-        super.onBackPressed()
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {

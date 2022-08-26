@@ -58,7 +58,7 @@ class XmlColorTheme(
 
     companion object {
 
-        fun createTheme(context: Context, theme: ColorThemeEnum): XmlColorTheme? {
+        fun createTheme(context: Context, theme: ColorThemeEnum): XmlColorTheme {
             return when (theme) {
                 ColorThemeEnum.ECLIPSE ->
                     XmlColorTheme(

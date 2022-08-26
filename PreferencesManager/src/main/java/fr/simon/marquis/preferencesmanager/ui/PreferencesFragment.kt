@@ -271,8 +271,8 @@ class PreferencesFragment : Fragment() {
     }
 
     private fun setSortType(type: PreferenceSortType) {
-        if (PreferencesActivity.preferenceSortType != type) {
-            PreferencesActivity.preferenceSortType = type
+        if (preferenceSortType != type) {
+            preferenceSortType = type
             activity?.invalidateOptionsMenu()
             PreferenceManager.getDefaultSharedPreferences(requireActivity())
                 .edit()
