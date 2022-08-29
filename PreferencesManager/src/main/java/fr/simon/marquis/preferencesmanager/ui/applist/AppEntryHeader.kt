@@ -7,7 +7,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.ui.theme.headerBlue
-import fr.simon.marquis.preferencesmanager.util.PrefManager
 import java.util.*
 
 @Composable
@@ -46,9 +44,6 @@ fun AppEntryHeader(
 private fun Preview_AppEntryHeader(
     letter: String = "Some Cool App"
 ) {
-    val context = LocalContext.current
-    PrefManager.init(context)
-
     AppTheme {
         Surface {
             AppEntryHeader(letter = letter[0])
@@ -61,9 +56,6 @@ private fun Preview_AppEntryHeader(
 private fun Preview_Dark_AppEntryHeader(
     letter: String = "Some Cool App"
 ) {
-    val context = LocalContext.current
-    PrefManager.init(context)
-
     AppTheme(isDarkTheme = true) {
         Surface {
             AppEntryHeader(letter = letter[0])

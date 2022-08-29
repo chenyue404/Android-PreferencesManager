@@ -16,7 +16,8 @@
 package fr.simon.marquis.preferencesmanager.model
 
 import android.text.TextUtils
-import fr.simon.marquis.preferencesmanager.ui.PreferencesActivity
+import fr.simon.marquis.preferencesmanager.ui.preferences.EPreferencesSort
+import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.XmlUtils
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -26,11 +27,10 @@ import org.xmlpull.v1.XmlPullParserException
 
 class PreferenceFile {
 
-    var isValidPreferenceFile = true
-        private set
-
     private var mPreferences: MutableMap<Any, Any>? = null
     private var mList: MutableList<MutableMap.MutableEntry<Any, Any>>? = null
+
+    lateinit var file: String
 
     var list: MutableList<MutableMap.MutableEntry<Any, Any>>
         get() {
@@ -92,7 +92,7 @@ class PreferenceFile {
         updateSort()
     }
 
-    fun removeValue(key: String) {
+    private fun removeValue(key: String) {
         mPreferences!!.remove(key)
         for (entry in mList!!) {
             if (entry.key == key) {
@@ -134,14 +134,18 @@ class PreferenceFile {
         }
     }
 
-    fun updateSort() {
-        Collections.sort(list, PreferenceComparator(PreferencesActivity.preferenceSortType))
+    private fun updateSort() {
+        val sortType = PrefManager.keySortType
+        val comparator = PreferenceComparator(EPreferencesSort.values()[sortType])
+        Collections.sort(list, comparator)
     }
 
     companion object {
 
-        fun fromXml(xml: String): PreferenceFile {
+        fun fromXml(xml: String, file: String = ""): PreferenceFile {
             val preferenceFile = PreferenceFile()
+
+            preferenceFile.file = file
 
             // Check for empty files
             if (TextUtils.isEmpty(xml) || xml.trim { it <= ' ' }.isEmpty()) {
@@ -160,7 +164,6 @@ class PreferenceFile {
             } catch (ignored: IOException) {
             }
 
-            preferenceFile.isValidPreferenceFile = false
             return preferenceFile
         }
     }

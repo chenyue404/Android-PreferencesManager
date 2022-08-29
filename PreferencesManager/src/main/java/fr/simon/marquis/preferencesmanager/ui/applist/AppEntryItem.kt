@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.pm.ApplicationInfo
@@ -22,9 +24,6 @@ import coil.compose.AsyncImagePainter
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 
-// TODO: App Icon
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppEntryItem(
     modifier: Modifier = Modifier,

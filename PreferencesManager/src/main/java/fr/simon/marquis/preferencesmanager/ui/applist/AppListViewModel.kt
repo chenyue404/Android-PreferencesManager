@@ -9,7 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.model.AppEntry
-import fr.simon.marquis.preferencesmanager.ui.PreferencesActivity
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_ICON_URI
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_TITLE
+import fr.simon.marquis.preferencesmanager.ui.preferences.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.*
@@ -92,12 +95,9 @@ class AppListViewModel : ViewModel() {
         } else {
             context.run {
                 val intent = Intent(this, PreferencesActivity::class.java).apply {
-                    putExtra(PreferencesActivity.KEY_ICON_URI, app.iconUri)
-                    putExtra(PreferencesActivity.EXTRA_TITLE, app.label)
-                    putExtra(
-                        PreferencesActivity.EXTRA_PACKAGE_NAME,
-                        app.applicationInfo.packageName
-                    )
+                    putExtra(KEY_ICON_URI, app.iconUri)
+                    putExtra(KEY_TITLE, app.label)
+                    putExtra(KEY_PACKAGE_NAME, app.applicationInfo.packageName)
                 }
                 startActivity(intent)
             }

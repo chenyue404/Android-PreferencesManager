@@ -1,4 +1,5 @@
 package fr.simon.marquis.preferencesmanager.ui.applist
+
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.height
@@ -53,7 +54,6 @@ fun ScrollBackUp(
                 Text(text = stringResource(id = R.string.scrollUp))
             },
             onClick = onClicked,
-            containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = Color.White,
             modifier = modifier
                 .offset(x = 0.dp, y = -bottomOffset)

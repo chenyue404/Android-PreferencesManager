@@ -17,16 +17,17 @@ package fr.simon.marquis.preferencesmanager.util
 
 import android.app.ActivityManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.icu.text.SimpleDateFormat
+import android.os.Build
+import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.topjohnwu.superuser.Shell
-import fr.simon.marquis.preferencesmanager.BuildConfig
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
+import fr.simon.marquis.preferencesmanager.model.BackupContainerInfo
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import java.io.File
 import java.io.IOException
@@ -38,6 +39,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
+import timber.log.Timber
+
+// Support Android 33+ getParcelable()
+fun <T : Any> getParcelable(intent: Bundle, key: String?, clazz: Class<T>): T? {
+    return if (Build.VERSION.SDK_INT >= 33) {
+        intent.getParcelable(key, clazz)
+    } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelable(key)
+    }
+}
 
 fun <P, R> CoroutineScope.executeAsyncTask(
     onPreExecute: () -> Unit,
@@ -59,31 +71,26 @@ fun <P, R> CoroutineScope.executeAsyncTask(
 
 object Utils {
 
-    val TAG: String = Utils::class.java.simpleName
+    private val TAG: String = Utils::class.java.simpleName
     private const val FAVORITES_KEY = "FAVORITES_KEY"
-    private const val VERSION_CODE_KEY = "VERSION_CODE"
-    private const val BACKUP_PREFIX = "BACKUP_"
-    private const val PREF_SHOW_SYSTEM_APPS = "SHOW_SYSTEM_APPS"
     private const val CMD_FIND_XML_FILES = "find /data/data/%s -type f -name \\*.xml"
     private const val CMD_CHOWN = "chown %s.%s \"%s\""
     private const val CMD_CAT_FILE = "cat \"%s\""
     private const val CMD_CP = "cp \"%s\" \"%s\""
     private const val TMP_FILE = ".temp"
-    private val FILE_SEPARATOR = System.getProperty("file.separator")
     private val LINE_SEPARATOR = System.getProperty("line.separator")
-    private const val PACKAGE_NAME_PATTERN = "^[a-zA-Z_$][\\w$]*(?:\\.[a-zA-Z_$][\\w$]*)*$"
 
     var previousApps: ArrayList<AppEntry>? = null
         private set
 
     private var favorites: HashSet<String>? = null
 
+    // Get a list of all installed applications.
     fun getApplications(ctx: Context): ArrayList<AppEntry> {
         val pm = ctx.packageManager
         if (pm == null) {
             previousApps = ArrayList()
         } else {
-            val showSystemApps = isShowSystemApps(ctx)
             var appsInfo: MutableList<ApplicationInfo> =
                 pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
@@ -93,7 +100,7 @@ object Utils {
 
             val entries = ArrayList<AppEntry>(appsInfo.size)
             for (a in appsInfo) {
-                if (showSystemApps || a.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
+                if (PrefManager.showSystemApps || a.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
                     entries.add(AppEntry(a, ctx))
                 }
             }
@@ -101,12 +108,12 @@ object Utils {
             Collections.sort(entries, MyComparator())
             previousApps = ArrayList(entries)
         }
-        Log.d(TAG, "Applications: " + previousApps!!.toTypedArray().contentToString())
+        Timber.tag(TAG).d("Applications: %s", previousApps!!.toTypedArray().contentToString())
         return previousApps!!
     }
 
     fun setFavorite(packageName: String, favorite: Boolean, ctx: Context) {
-        Log.d(TAG, String.format("setFavorite(%s, %s)", packageName, favorite))
+        Timber.tag(TAG).d("setFavorite(%s, %s)", packageName, favorite)
         initFavorites(ctx)
 
         if (favorite) {
@@ -127,7 +134,7 @@ object Utils {
     }
 
     private fun updateApplicationInfo(packageName: String, favorite: Boolean) {
-        Log.d(TAG, String.format("updateApplicationInfo(%s, %s)", packageName, favorite))
+        Timber.tag(TAG).d("updateApplicationInfo(%s, %s)", packageName, favorite)
         for (a in previousApps!!) {
             if (a.applicationInfo.packageName == packageName) {
                 a.setFavorite(favorite)
@@ -154,51 +161,24 @@ object Utils {
                         favorites!!.add(array.optString(i))
                     }
                 } catch (e: JSONException) {
-                    Log.e(TAG, "error parsing JSON", e)
+                    Timber.tag(TAG).e(e, "error parsing JSON")
                 }
             }
         }
     }
 
-    fun isShowSystemApps(ctx: Context): Boolean {
-        return PreferenceManager.getDefaultSharedPreferences(ctx)
-            .getBoolean(PREF_SHOW_SYSTEM_APPS, false)
-    }
-
-    fun setShowSystemApps(ctx: Context, show: Boolean) {
-        Log.d(TAG, String.format("setShowSystemApps(%s)", show))
-        val e = PreferenceManager.getDefaultSharedPreferences(ctx).edit()
-        e.putBoolean(PREF_SHOW_SYSTEM_APPS, show)
-        e.apply()
-    }
-
     fun findXmlFiles(packageName: String): List<String> {
-        Log.d(TAG, String.format("findXmlFiles(%s)", packageName))
+        Timber.tag(TAG).d(packageName, "findXmlFiles(%s)")
 
         val stdout: List<String> = ArrayList()
         val stderr: List<String> = ArrayList()
-        val what =
-            Shell.cmd(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
-
-        if (BuildConfig.DEBUG) {
-            Log.d(
-                TAG,
-                "Out: ${what.out}\n" +
-                    "Err: ${what.err}\n" +
-                    "Succ: ${what.isSuccess}\n" +
-                    "Code: ${what.code}\n" +
-                    "stdout: $stdout \n" +
-                    "stderr: $stderr \n"
-            )
-
-            Log.d(TAG, "files: " + stdout.toTypedArray().contentToString())
-        }
+        Shell.cmd(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
 
         return stdout
     }
 
     fun readFile(file: String): String {
-        Log.d(TAG, String.format("readFile(%s)", file))
+        Timber.tag(TAG).d(file, "readFile(%s)")
         val sb = StringBuilder()
         val lines = ArrayList<String>()
         Shell.cmd(String.format(CMD_CAT_FILE, file)).to(lines).exec()
@@ -211,126 +191,55 @@ object Utils {
         return sb.toString()
     }
 
-    fun checkBackups(ctx: Context) {
-        Log.d(TAG, "checkBackups")
-        val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
-        val needToBackport = needToBackport(sp)
-        Log.d(TAG, "needToBackport ? $needToBackport")
-        saveVersionCode(ctx, sp)
-        if (!needToBackport) {
-            return
-        }
-        backportBackups(ctx)
-    }
+    fun getBackups(ctx: Context, packageName: String): BackupContainer {
+        val fileDir = ctx.externalCacheDir
 
-    private fun backportBackups(ctx: Context) {
-        Log.d(TAG, "backportBackups")
-        val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
-        val editor = sp.edit()
-        val keys = sp.all ?: return
+        val container = BackupContainer(packageName, mutableListOf())
 
-        for ((key, value1) in keys) {
-            val value = value1.toString()
+        Timber.d("Package Name: $packageName")
 
-            Log.d(TAG, "key: $key")
+        fileDir?.listFiles()?.forEach {
+            if (it.isDirectory)
+                return@forEach
 
-            if (!key.startsWith(BACKUP_PREFIX) &&
-                key.matches(PACKAGE_NAME_PATTERN.toRegex()) &&
-                value.contains("FILE") &&
-                value.contains("BACKUPS")
-            ) {
-                Log.d(TAG, " need to be updated")
-                var array: JSONArray? = null
-                try {
-                    array = JSONArray(value)
-                    for (i in 0 until array.length()) {
-                        val container = array.getJSONObject(i)
-                        val file = container.getString("FILE")
-                        if (!file.startsWith(FILE_SEPARATOR!!)) {
-                            container.put("FILE", FILE_SEPARATOR + file)
-                        }
-                        val backups = container.getJSONArray("BACKUPS")
-                        val values = ArrayList<String>(backups.length())
-                        for (j in 0 until backups.length()) {
-                            values.add(backups.getJSONObject(j).getLong("TIME").toString())
-                        }
-                        container.put("BACKUPS", JSONArray(values))
-                    }
-                } catch (e: JSONException) {
-                    Log.e(TAG, "Error trying to backport Backups", e)
-                }
+            val currentFile = it.name.split(" ")
+            if (packageName.contains(currentFile[1]) && packageName.contains(currentFile[2])) {
+                val dateFormat = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.getDefault())
+                val dateString = dateFormat.format(Date(currentFile[0].toLong()))
 
-                if (array != null) {
-                    editor.putString(BACKUP_PREFIX + key, array.toString())
-                }
-                editor.remove(key)
+                container.backupList.add(
+                    BackupContainerInfo(
+                        backupDate = dateString,
+                        backupFile = File(it.absolutePath),
+                        backupXmlName = currentFile[2],
+                        size = it.length()
+                    )
+                )
             }
         }
 
-        editor.apply()
-    }
-
-    private fun needToBackport(sp: SharedPreferences): Boolean {
-        // 18 was the latest version code release with old Backup system
-        return sp.getInt(VERSION_CODE_KEY, 0) <= 18
-    }
-
-    private fun saveVersionCode(ctx: Context, sp: SharedPreferences) {
-        try {
-            // Ignoring for older devices
-            @Suppress("DEPRECATION")
-            sp.edit().putInt(
-                VERSION_CODE_KEY,
-                ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionCode
-            ).apply()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error trying to save the version code", e)
-        }
-    }
-
-    fun getBackups(ctx: Context, packageName: String): BackupContainer {
-        Log.d(TAG, String.format("getBackups(%s)", packageName))
-        val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
-        var container: BackupContainer? = null
-        try {
-            container =
-                BackupContainer.fromJSON(JSONArray(sp.getString(BACKUP_PREFIX + packageName, "[]")))
-        } catch (ignore: JSONException) {
-        }
-
-        if (container == null) {
-            container = BackupContainer()
-        }
-        Log.d(TAG, "backups: " + container.toJSON().toString())
         return container
     }
 
-    fun saveBackups(ctx: Context, packageName: String, container: BackupContainer) {
-        Log.d(TAG, String.format("saveBackups(%s, %s)", packageName, container.toJSON().toString()))
-        val ed = PreferenceManager.getDefaultSharedPreferences(ctx).edit()
-        if (container.isEmpty) {
-            ed.remove(BACKUP_PREFIX + packageName)
-        } else {
-            ed.putString(BACKUP_PREFIX + packageName, container.toJSON().toString())
-        }
-        ed.apply()
-    }
+    fun backupFile(ctx: Context, date: Long, pkgName: String, fileName: String): Boolean {
+        val fileDir = ctx.externalCacheDir
+        val name = fileName.substringAfterLast("/")
+        val destination = File(fileDir, "$date $pkgName $name")
 
-    fun backupFile(backup: String, fileName: String, ctx: Context): Boolean {
-        Log.d(TAG, String.format("backupFile(%s, %s)", backup, fileName))
-        val destination = File(ctx.filesDir, backup)
-        Shell.cmd(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
-        Log.d(TAG, "backupFile --> $destination")
-        return true
+        Timber.tag(TAG).d("backupFile(%s, %s)", date, name)
+        val job = Shell.cmd(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
+
+        Timber.tag(TAG).d("backupFile --> %s", destination)
+        return job.isSuccess
     }
 
     fun restoreFile(ctx: Context, backup: String, fileName: String, packageName: String): Boolean {
-        Log.d(TAG, String.format("restoreFile(%s, %s, %s)", backup, fileName, packageName))
+        Timber.tag(TAG).d("restoreFile(%s, %s, %s)", backup, fileName, packageName)
         val backupFile = File(ctx.filesDir, backup)
         Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
-            Log.e(TAG, "Error fixUserAndGroupId")
+            Timber.tag(TAG).e("Error fixUserAndGroupId")
             return false
         }
 
@@ -338,14 +247,8 @@ object Utils {
             packageName
         )
 
-        Log.d(TAG, "restoreFile --> $fileName")
+        Timber.tag(TAG).d("restoreFile --> $fileName")
         return true
-    }
-
-    fun extractFileName(s: String): String? {
-        return if (TextUtils.isEmpty(s)) {
-            null
-        } else s.substring(s.lastIndexOf(FILE_SEPARATOR!!) + 1)
     }
 
     fun savePreferences(
@@ -354,20 +257,20 @@ object Utils {
         packageName: String,
         ctx: Context
     ): Boolean {
-        Log.d(TAG, String.format("savePreferences(%s, %s)", file, packageName))
+        Timber.tag(TAG).d("savePreferences(%s, %s)", file, packageName)
         if (preferenceFile == null) {
-            Log.e(TAG, "Error preferenceFile is null")
+            Timber.tag(TAG).e("Error preferenceFile is null")
             return false
         }
 
         if (!preferenceFile.isValid) {
-            Log.e(TAG, "Error preferenceFile is not valid")
+            Timber.tag(TAG).e("Error preferenceFile is not valid")
             return false
         }
 
         val preferences = preferenceFile.toXml()
         if (TextUtils.isEmpty(preferences)) {
-            Log.e(TAG, "Error preferences is empty")
+            Timber.tag(TAG).e("Error preferences is empty")
             return false
         }
 
@@ -378,25 +281,25 @@ object Utils {
             outputStreamWriter.write(preferences)
             outputStreamWriter.close()
         } catch (e: IOException) {
-            Log.e(TAG, "Error writing temporary file", e)
+            Timber.tag(TAG).e(e, "Error writing temporary file")
             return false
         }
 
         Shell.cmd(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
 
         if (!fixUserAndGroupId(ctx, file, packageName)) {
-            Log.e(TAG, "Error fixUserAndGroupId")
+            Timber.tag(TAG).e("Error fixUserAndGroupId")
             return false
         }
 
         if (!tmpFile.delete()) {
-            Log.e(TAG, "Error deleting temporary file")
+            Timber.tag(TAG).e("Error deleting temporary file")
         }
 
         (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(
             packageName
         )
-        Log.d(TAG, "Preferences correctly updated")
+        Timber.tag(TAG).d("Preferences correctly updated")
         return true
     }
 
@@ -409,19 +312,19 @@ object Utils {
      * @return true if success
      */
     private fun fixUserAndGroupId(ctx: Context, file: String, packageName: String): Boolean {
-        Log.d(TAG, String.format("fixUserAndGroupId(%s, %s)", file, packageName))
+        Timber.tag(TAG).d("fixUserAndGroupId(%s, %s)", file, packageName)
         val uid: String
         val pm = ctx.packageManager ?: return false
         try {
             val appInfo = pm.getApplicationInfo(packageName, 0)
             uid = appInfo.uid.toString()
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "error while getting uid", e)
+            Timber.tag(TAG).e(e, "error while getting uid")
             return false
         }
 
         if (TextUtils.isEmpty(uid)) {
-            Log.d(TAG, "uid is undefined")
+            Timber.tag(TAG).d("uid is undefined")
             return false
         }
 

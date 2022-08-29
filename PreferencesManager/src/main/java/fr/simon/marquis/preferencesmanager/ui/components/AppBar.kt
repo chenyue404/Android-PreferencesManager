@@ -45,6 +45,7 @@ private val slideIn = {
 
     )
 }
+
 private val slideUp = {
     slideOut(
         targetOffset = { IntOffset(0, -it.height) },
@@ -59,7 +60,7 @@ private val slideUp = {
 fun AppBar(
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    onNavIconPressed: () -> Unit = { },
+    navigationIcon: @Composable () -> Unit = {},
     title: @Composable () -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
     textState: MutableStateFlow<TextFieldValue>,
@@ -92,7 +93,7 @@ fun AppBar(
             },
             scrollBehavior = scrollBehavior,
             colors = foregroundColors,
-            navigationIcon = { /* TODO */ }
+            navigationIcon = navigationIcon
         )
 
         AnimatedVisibility(
@@ -179,8 +180,6 @@ fun Preview_Dark_AppBar(
     appName: String = stringResource(id = R.string.app_name)
 ) {
     val textState = MutableStateFlow(TextFieldValue(""))
-    val context = LocalContext.current
-    PrefManager.init(context)
 
     AppTheme(isDarkTheme = true) {
         AppBar(title = { Text(appName) }, textState = textState)

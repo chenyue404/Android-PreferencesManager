@@ -36,6 +36,8 @@ import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorTagEnum.*
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorThemeEnum
 import fr.simon.marquis.preferencesmanager.model.XmlFontSize
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_FILE
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
 import fr.simon.marquis.preferencesmanager.util.Utils
 import java.util.regex.Pattern
 
@@ -88,9 +90,9 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mEditText = findViewById(R.id.editText)
-        mFile = intent.getString(PreferencesFragment.ARG_FILE)
-        mTitle = Utils.extractFileName(mFile!!)
-        mPackageName = intent.getString(PreferencesFragment.ARG_PACKAGE_NAME)
+        mFile = intent.getString(KEY_FILE)
+        mTitle = extractFileName(mFile!!)
+        mPackageName = intent.getString(KEY_PACKAGE_NAME)
 
         // Hack to prevent EditText to request focus when the Activity is created
         mEditText!!.post {
@@ -227,6 +229,13 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             R.id.action_size_extra_large -> setXmlFontSize(XmlFontSize.EXTRA_LARGE)
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun extractFileName(s: String): String? {
+        val fileSeparator = System.getProperty("file.separator")
+        return if (TextUtils.isEmpty(s)) {
+            null
+        } else s.substring(s.lastIndexOf(fileSeparator!!) + 1)
     }
 
     private fun setXmlFontSize(size: XmlFontSize) {

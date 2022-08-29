@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 
@@ -20,6 +21,12 @@ fun AppTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val view = LocalView.current
+    if (view.isInEditMode) {
+        val context = LocalContext.current
+        PrefManager.init(context)
+    }
+
     val colorScheme = when (PrefManager.themePreference) {
         0 -> lightColors
         1 -> darkColors

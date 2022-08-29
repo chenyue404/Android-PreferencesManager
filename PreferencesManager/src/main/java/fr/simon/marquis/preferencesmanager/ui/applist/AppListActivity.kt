@@ -13,6 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.os.Bundle
@@ -40,24 +42,21 @@ import fr.simon.marquis.preferencesmanager.ui.components.DialogAbout
 import fr.simon.marquis.preferencesmanager.ui.components.DialogNoRoot
 import fr.simon.marquis.preferencesmanager.ui.components.DialogTheme
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
+import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-// TODO some composables should be hoisted and broken apart
 class AppListActivity : ComponentActivity() {
 
     private val viewModel: AppListViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         viewModel.checkRoot()
-
-        Utils.checkBackups(applicationContext)
 
         if (savedInstanceState == null || Utils.previousApps == null) {
             viewModel.run {
@@ -70,12 +69,9 @@ class AppListActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState
 
-            val context = LocalContext.current
             val scope = rememberCoroutineScope()
-            val scrollState = rememberLazyListState()
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
-            var isMenuShowing by remember { mutableStateOf(false) }
 
             val windowInset = Modifier
                 .statusBarsPadding()
@@ -84,14 +80,6 @@ class AppListActivity : ComponentActivity() {
                         .navigationBars
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                 )
-
-            // TODO live theme change
-            val dialogThemeState = rememberMaterialDialogState()
-            DialogTheme(dialogState = dialogThemeState) {}
-
-            // TODO using AndroidView
-            val dialogAboutState = rememberMaterialDialogState()
-            DialogAbout(dialogState = dialogAboutState)
 
             val dialogNoRootState = rememberMaterialDialogState()
             DialogNoRoot(dialogState = dialogNoRootState)
@@ -108,81 +96,117 @@ class AppListActivity : ComponentActivity() {
                 Scaffold(
                     modifier = windowInset,
                     topBar = {
-                        AppBar(
-                            scrollBehavior = scrollBehavior,
-                            title = { Text(text = stringResource(id = R.string.app_name)) },
-                            actions = {
-                                AppListMenu(
-                                    isMenuShowing = isMenuShowing,
-                                    setMenuShowing = { isMenuShowing = it },
-                                    onSearch = { viewModel.setIsSearching(true) },
-                                    onShowSystemApps = {
-                                        Utils.setShowSystemApps(
-                                            context,
-                                            !Utils.isShowSystemApps(context)
-                                        )
-                                        viewModel.startTask(context)
-                                    },
-                                    onSwitchTheme = { dialogThemeState.show() },
-                                    onAbout = { dialogAboutState.show() }
-                                )
-                            },
-                            textState = viewModel.searchText,
-                            isSearching = uiState.isSearching
-                        ) { viewModel.setIsSearching(false) }
+                        AppListAppBar(scrollBehavior = scrollBehavior, viewModel = viewModel)
                     }
                 ) { paddingValues ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                    ) {
-                        Column(
-                            Modifier
-                                .fillMaxSize()
-                                .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        ) {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxWidth(),
-                                state = scrollState,
-                                contentPadding = PaddingValues(bottom = 112.dp)
-                            ) {
-                                val items = uiState.filteredAppList.groupBy { it.headerChar }
-                                items.forEach { (letter, item) ->
-                                    stickyHeader {
-                                        AppEntryHeader(
-                                            modifier = Modifier, // .animateItemPlacement(),
-                                            letter = letter
-                                        )
-                                    }
-                                    items(item) { entry ->
-                                        AppEntryItem(
-                                            modifier = Modifier.animateItemPlacement(),
-                                            entry = entry,
-                                            onClick = { viewModel.launchPreference(context, entry) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                    AppListLayout(
+                        paddingValues = paddingValues,
+                        scrollBehavior = scrollBehavior,
+                        viewModel = viewModel
+                    )
+                }
+            }
+        }
+    }
+}
 
-                        val showBackUpButton = remember {
-                            derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
-                        }
-                        ScrollBackUp(
-                            modifier = Modifier
-                                .navigationBarsPadding()
-                                .align(Alignment.BottomCenter),
-                            enabled = showBackUpButton.value,
-                            onClicked = {
-                                scope.launch {
-                                    scrollState.animateScrollToItem(0)
-                                }
-                            }
+@Composable
+fun AppListAppBar(
+    scrollBehavior: TopAppBarScrollBehavior,
+    viewModel: AppListViewModel,
+) {
+    val context = LocalContext.current
+    val uiState by viewModel.uiState
+
+    // TODO live theme change
+    val dialogThemeState = rememberMaterialDialogState()
+    DialogTheme(dialogState = dialogThemeState) {}
+
+    // TODO using AndroidView
+    val dialogAboutState = rememberMaterialDialogState()
+    DialogAbout(dialogState = dialogAboutState)
+
+    AppBar(
+        scrollBehavior = scrollBehavior,
+        title = { Text(text = stringResource(id = R.string.app_name)) },
+        actions = {
+            AppListMenu(
+                onSearch = { viewModel.setIsSearching(true) },
+                onShowSystemApps = {
+                    val currentValue = PrefManager.showSystemApps
+                    PrefManager.showSystemApps = !currentValue
+
+                    viewModel.startTask(context)
+                },
+                onSwitchTheme = { dialogThemeState.show() },
+                onAbout = { dialogAboutState.show() }
+            )
+        },
+        textState = viewModel.searchText,
+        isSearching = uiState.isSearching,
+        onSearchClose = { viewModel.setIsSearching(false) }
+    )
+}
+
+@Composable
+fun AppListLayout(
+    paddingValues: PaddingValues,
+    scrollBehavior: TopAppBarScrollBehavior,
+    viewModel: AppListViewModel,
+
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val scrollState = rememberLazyListState()
+    val uiState by viewModel.uiState
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                state = scrollState,
+                contentPadding = PaddingValues(bottom = 112.dp)
+            ) {
+                val items = uiState.filteredAppList.groupBy { it.headerChar }
+                items.forEach { (letter, item) ->
+                    stickyHeader {
+                        AppEntryHeader(
+                            modifier = Modifier, // .animateItemPlacement(),
+                            letter = letter
+                        )
+                    }
+                    items(item) { entry ->
+                        AppEntryItem(
+                            modifier = Modifier.animateItemPlacement(),
+                            entry = entry,
+                            onClick = { viewModel.launchPreference(context, entry) }
                         )
                     }
                 }
             }
         }
+
+        val showBackUpButton = remember {
+            derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
+        }
+        ScrollBackUp(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .align(Alignment.BottomCenter),
+            enabled = showBackUpButton.value,
+            onClicked = {
+                scope.launch {
+                    scrollState.animateScrollToItem(0)
+                }
+            }
+        )
     }
 }

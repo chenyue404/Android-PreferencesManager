@@ -27,7 +27,7 @@ class App : Application() {
         Shell.setDefaultBuilder(
             Shell.Builder.create()
                 .setFlags(Shell.FLAG_REDIRECT_STDERR)
-                .setFlags(Shell.FLAG_MOUNT_MASTER) // Android R fix
+                .setFlags(Shell.FLAG_MOUNT_MASTER) // Android R+
                 .setTimeout(10)
         )
     }
