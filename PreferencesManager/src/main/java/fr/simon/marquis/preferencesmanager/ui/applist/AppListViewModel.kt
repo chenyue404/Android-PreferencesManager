@@ -2,6 +2,8 @@ package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
@@ -102,5 +104,18 @@ class AppListViewModel : ViewModel() {
                 startActivity(intent)
             }
         }
+    }
+
+    fun launchAppSettings(context: Context, app: AppEntry) {
+        val intent = Intent().apply {
+            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            data = Uri.fromParts("package", app.applicationInfo.packageName, null)
+        }
+
+        context.startActivity(intent)
     }
 }

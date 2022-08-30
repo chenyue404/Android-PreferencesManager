@@ -1,9 +1,11 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.pm.ApplicationInfo
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -28,13 +30,17 @@ import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 fun AppEntryItem(
     modifier: Modifier = Modifier,
     entry: AppEntry,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     ListItem(
         modifier = modifier
             .height(72.dp)
             .fillMaxWidth(1f)
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
         headlineText = {
             Text(
                 text = entry.label,
@@ -80,6 +86,6 @@ private fun Preview_AppEntryItem() {
     val entry = AppEntry(appInfo, context)
 
     AppTheme {
-        AppEntryItem(entry = entry, onClick = {})
+        AppEntryItem(entry = entry, onClick = {}, onLongClick = {})
     }
 }

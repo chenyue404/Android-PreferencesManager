@@ -30,8 +30,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -156,6 +158,7 @@ fun AppListLayout(
 
 ) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState
@@ -187,7 +190,11 @@ fun AppListLayout(
                         AppEntryItem(
                             modifier = Modifier.animateItemPlacement(),
                             entry = entry,
-                            onClick = { viewModel.launchPreference(context, entry) }
+                            onClick = { viewModel.launchPreference(context, entry) },
+                            onLongClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.launchAppSettings(context, entry)
+                            }
                         )
                     }
                 }
