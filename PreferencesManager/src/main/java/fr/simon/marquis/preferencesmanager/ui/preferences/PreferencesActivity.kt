@@ -331,7 +331,7 @@ fun PreferenceEmptyView() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
+        Icon(
             painter = painterResource(id = R.drawable.empty_view),
             contentDescription = null
         )

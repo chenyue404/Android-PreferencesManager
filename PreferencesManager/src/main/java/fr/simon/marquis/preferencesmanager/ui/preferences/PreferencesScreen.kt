@@ -2,8 +2,8 @@
 
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -64,7 +64,7 @@ private fun PreferenceEmptyView(isEmpty: Boolean) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.empty_view),
                 contentDescription = null
             )
@@ -74,7 +74,10 @@ private fun PreferenceEmptyView(isEmpty: Boolean) {
     }
 }
 
-@Preview
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
+    showBackground = true
+)
 @Composable
 private fun Preview_PreferenceEmptyView() {
     AppTheme {

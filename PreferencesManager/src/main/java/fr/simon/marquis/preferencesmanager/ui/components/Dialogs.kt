@@ -1,8 +1,12 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package fr.simon.marquis.preferencesmanager.ui.components
 
 import android.app.Activity
 import android.graphics.Color
 import android.widget.TextView
+import androidx.annotation.IntegerRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -11,10 +15,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ import androidx.core.text.HtmlCompat
 import com.vanpra.composematerialdialogs.*
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
+import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 
 @Composable
@@ -158,12 +160,129 @@ fun DialogRestore(
     }
 }
 
+enum class EPreferenceEditType(
+    @StringRes val addTitle: Int,
+    @StringRes val editTitle: Int,
+) {
+    UNSUPPORTED(0, 0),
+    BOOLEAN(R.string.title_add_boolean, R.string.title_edit_boolean),
+    STRING(R.string.title_add_string, R.string.title_edit_string),
+    INT(R.string.title_add_int, R.string.title_edit_int),
+    FLOAT(R.string.title_add_float, R.string.title_edit_float),
+    LONG(R.string.title_add_long, R.string.title_edit_long),
+    STRINGSET(R.string.title_add_stringset, R.string.title_edit_stringset)
+    ;
+
+    companion object {
+        fun fromObject(obj: Any): EPreferenceEditType {
+            return when (obj) {
+                is String -> STRING
+                is Int -> INT
+                is Long -> LONG
+                is Float -> FLOAT
+                is Boolean -> BOOLEAN
+                is Set<*> -> STRINGSET
+                else -> UNSUPPORTED
+            }
+        }
+    }
+}
+
+@Composable
+private fun DialogViewTextValue(
+    modifier: Modifier = Modifier,
+    isEdit: Boolean,
+    editKey: String? = null,
+    editValue: String? = null,
+    onUpdate: () -> Unit,
+    onDelete: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    if (isEdit && editKey == null && editValue == null) {
+        throw java.lang.NullPointerException("Preference KeyValue was null on edit")
+    }
+
+
+    var textKey by remember { mutableStateOf(editKey ?: "") }
+    var textValue by remember { mutableStateOf(editValue ?: "") }
+
+
+    Column(
+        modifier = modifier.padding(top = 5.dp, bottom = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = textKey,
+            onValueChange = { textKey = it },
+            label = { Text(text = stringResource(id = R.string.hint_key)) }
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        OutlinedTextField(
+            value = textValue,
+            onValueChange = { textValue = it },
+            label = { Text("Label") }
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            OutlinedButton(onClick = onCancel) {
+                Text(text = stringResource(id = R.string.dialog_cancel))
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            if (isEdit) {
+                OutlinedButton(onClick = onDelete) {
+                    Text(text = stringResource(id = R.string.dialog_delete))
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            OutlinedButton(onClick = onUpdate) {
+                val textId = if (isEdit) R.string.dialog_update else R.string.dialog_add
+                Text(text = stringResource(id = textId))
+            }
+        }
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview_DialogViewStringValue(
+
+) {
+    AppTheme {
+        DialogViewTextValue(
+            isEdit = true,
+            editKey = "Some Cool Key",
+            editValue = "Some Cool Value",
+            onUpdate = {},
+            onDelete = {},
+            onCancel = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview_DialogViewStringValue_2(
+
+) {
+    AppTheme {
+        DialogViewTextValue(
+            isEdit = false,
+            onUpdate = {},
+            onDelete = {},
+            onCancel = {},
+        )
+    }
+}
+
 /**
  * Custom "Single Item List" but with a custom view.
  */
 @Suppress("ComposableNaming")
 @Composable
-fun MaterialDialogScope.listItemsCustomSingleChoice(
+private fun MaterialDialogScope.listItemsCustomSingleChoice(
     list: List<String>,
     state: LazyListState = rememberLazyListState(),
     disabledIndices: Set<Int> = setOf(),

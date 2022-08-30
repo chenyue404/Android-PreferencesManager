@@ -93,7 +93,7 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_update">Update</string>
     <string name="dialog_restore">Restore</string>
-    <string name="dialog_suppr">Delete</string>
+    <string name="dialog_delete">Delete</string>
 
     <string name="action_search">Search an app</string>
     <string name="show_system_apps">Show system apps</string>
