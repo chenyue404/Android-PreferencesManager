@@ -15,45 +15,45 @@
  */
 package fr.simon.marquis.preferencesmanager.model
 
-import fr.simon.marquis.preferencesmanager.R
-
-enum class PreferenceType(
-    val dialogTitleAdd: Int,
-    val dialogTitleEdit: Int,
-    private val mCardBackground: Int
-) {
-
-    UNSUPPORTED(0, 0, R.drawable.card_unknown),
-    BOOLEAN(R.string.title_add_boolean, R.string.title_edit_boolean, R.drawable.card_purpleborder),
-    STRING(R.string.title_add_string, R.string.title_edit_string, R.drawable.card_greenborder),
-    INT(R.string.title_add_int, R.string.title_edit_int, R.drawable.card_redborder),
-    FLOAT(R.string.title_add_float, R.string.title_edit_float, R.drawable.card_navyborder),
-    LONG(R.string.title_add_long, R.string.title_edit_long, R.drawable.card_tealborder),
-    STRINGSET(
-        R.string.title_add_stringset,
-        R.string.title_edit_stringset,
-        R.drawable.card_goldborder
-    );
-
-    val cardBackground: Int
-        get() = mCardBackground
-
-    companion object {
-
-        fun fromObject(obj: Any): PreferenceType {
-            return when (obj) {
-                is String -> STRING
-                is Int -> INT
-                is Long -> LONG
-                is Float -> FLOAT
-                is Boolean -> BOOLEAN
-                is Set<*> -> STRINGSET
-                else -> UNSUPPORTED
-            }
-        }
-
-        fun getDialogLayout(obj: Any): Int {
-            return fromObject(obj).cardBackground
-        }
-    }
-}
+// import fr.simon.marquis.preferencesmanager.R
+//
+// enum class PreferenceType(
+//    val dialogTitleAdd: Int,
+//    val dialogTitleEdit: Int,
+//    private val mCardBackground: Int
+// ) {
+//
+//    UNSUPPORTED(0, 0, R.drawable.card_unknown),
+//    BOOLEAN(R.string.title_add_boolean, R.string.title_edit_boolean, R.drawable.card_purpleborder),
+//    STRING(R.string.title_add_string, R.string.title_edit_string, R.drawable.card_greenborder),
+//    INT(R.string.title_add_int, R.string.title_edit_int, R.drawable.card_redborder),
+//    FLOAT(R.string.title_add_float, R.string.title_edit_float, R.drawable.card_navyborder),
+//    LONG(R.string.title_add_long, R.string.title_edit_long, R.drawable.card_tealborder),
+//    STRINGSET(
+//        R.string.title_add_stringset,
+//        R.string.title_edit_stringset,
+//        R.drawable.card_goldborder
+//    );
+//
+//    val cardBackground: Int
+//        get() = mCardBackground
+//
+//    companion object {
+//
+//        fun fromObject(obj: Any): PreferenceType {
+//            return when (obj) {
+//                is String -> STRING
+//                is Int -> INT
+//                is Long -> LONG
+//                is Float -> FLOAT
+//                is Boolean -> BOOLEAN
+//                is Set<*> -> STRINGSET
+//                else -> UNSUPPORTED
+//            }
+//        }
+//
+//        fun getDialogLayout(obj: Any): Int {
+//            return fromObject(obj).cardBackground
+//        }
+//    }
+// }

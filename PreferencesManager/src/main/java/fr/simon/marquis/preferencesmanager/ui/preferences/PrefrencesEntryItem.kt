@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import fr.simon.marquis.preferencesmanager.ui.components.getColorFromObjet
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import java.util.ArrayList
-import timber.log.Timber
 
 @Composable
 fun PreferencesEntryItem(
@@ -26,7 +25,7 @@ fun PreferencesEntryItem(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    Timber.d("Item: ${item.key}, ${item.value}")
+    // Timber.d("Item: ${item.key}, ${item.value}")
     Card(
         modifier = modifier
             .fillMaxWidth()

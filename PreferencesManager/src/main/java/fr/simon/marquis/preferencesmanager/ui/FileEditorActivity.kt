@@ -29,7 +29,6 @@ import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.afollestad.materialdialogs.MaterialDialog
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
@@ -326,18 +325,19 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
     }
 
     private fun showSavePopup() {
-        MaterialDialog(this).show {
-            title(text = mTitle)
-            message(R.string.popup_edit_message)
-            icon(R.drawable.ic_action_edit)
-            positiveButton(R.string.yes) {
-                if (save())
-                    finish()
-            }
-            negativeButton(R.string.no) {
-                finish()
-            }
-        }
+        TODO("Re-implement save popup")
+//        MaterialDialog(this).show {
+//            title(text = mTitle)
+//            message(R.string.popup_edit_message)
+//            icon(R.drawable.ic_action_edit)
+//            positiveButton(R.string.yes) {
+//                if (save())
+//                    finish()
+//            }
+//            negativeButton(R.string.no) {
+//                finish()
+//            }
+//        }
     }
 
     @Suppress("RegExpRedundantEscape")

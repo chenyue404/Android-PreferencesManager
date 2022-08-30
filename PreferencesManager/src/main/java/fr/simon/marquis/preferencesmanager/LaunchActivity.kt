@@ -13,6 +13,7 @@ class LaunchActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // libsu shell
         Shell.getShell {
             val intent = Intent(this, AppListActivity::class.java)
             startActivity(intent)

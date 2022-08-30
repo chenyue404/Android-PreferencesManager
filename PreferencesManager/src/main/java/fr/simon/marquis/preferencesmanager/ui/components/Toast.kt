@@ -4,12 +4,11 @@ import android.content.Context
 import android.widget.Toast
 import androidx.annotation.StringRes
 
-fun Context.showToast(@StringRes res: Int? = null, text: String? = null) {
-    val message = res?.let {
-        this.getString(it)
-    }?.let {
-        text
-    }
+fun Context.showToast(@StringRes res: Int) {
+    val string = getString(res)
+    showToast(string)
+}
 
-    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+fun Context.showToast(text: String) {
+    Toast.makeText(this, text, Toast.LENGTH_LONG).show()
 }

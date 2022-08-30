@@ -15,7 +15,8 @@
  */
 package fr.simon.marquis.preferencesmanager.model
 
-import java.io.File
+import java.text.DateFormat
+import java.util.Date
 
 data class BackupContainer(
     val pkgName: String,
@@ -24,18 +25,15 @@ data class BackupContainer(
 
 data class BackupContainerInfo(
     val backupDate: String, // Date of backup from millis
-    val backupFile: File, // The path of the backup file
+    val backupFile: String, // The path of the backup file
     val backupXmlName: String, // The xml file of the package backup
     val size: Long, // Size of the file
 ) {
-    override fun toString(): String {
-        return StringBuilder()
-            .append("BackupContainerInfo:\n")
-            .append("backupDate=$backupDate\n")
-            .append("backupFile=${backupFile.path}\n")
-            .append("backupXmlName=$backupXmlName\n")
-            .append("size=$size\n")
-            .append("----")
-            .toString()
+    fun timeSinceBackup(): String {
+        val date = Date().apply {
+            time = backupDate.toLong()
+        }
+
+        return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(date)
     }
 }

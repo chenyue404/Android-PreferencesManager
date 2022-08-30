@@ -20,12 +20,11 @@ import timber.log.Timber
 data class PreferencesState(
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
-    val tabList: List<TabItem> = listOf(),
-    val backupContainer: List<BackupContainer> = listOf(),
-    val pkgTitle: String = "",
-    val pkgName: String = "",
     val pkgIcon: Uri? = null,
-    val restoreData: BackupContainer? = null
+    val pkgName: String = "",
+    val pkgTitle: String = "",
+    val restoreData: BackupContainer? = null,
+    val tabList: List<TabItem> = listOf(),
 )
 
 class PreferencesViewModel : ViewModel() {
@@ -46,10 +45,6 @@ class PreferencesViewModel : ViewModel() {
 
     fun setIsSearching(value: Boolean) {
         _uiState.value = uiState.value.copy(isSearching = value)
-    }
-
-    fun setRestoreData(container: BackupContainer) {
-        _uiState.value = uiState.value.copy(restoreData = container)
     }
 
     fun clearRestoreData() {
@@ -87,5 +82,37 @@ class PreferencesViewModel : ViewModel() {
             val result = Utils.backupFile(context, date.time, pkgName, file)
             Timber.d("Backup: $result")
         }
+    }
+
+    fun findFilesToRestore(
+        context: Context,
+        file: String,
+        hasResult: (value: Boolean) -> Unit = {}
+    ) {
+        val container = Utils.getBackups(context, file)
+
+        Timber.d("Restore has ${container.backupList.size} items")
+
+        _uiState.value = uiState.value.copy(restoreData = container)
+
+        hasResult(container.backupList.isNotEmpty())
+    }
+
+    fun performFileRestore(
+        ctx: Context,
+        fileName: String,
+        packageName: String,
+    ) {
+        val result = Utils.restoreFile(ctx, fileName, packageName)
+
+        Timber.d("File Restore: $result")
+        getTabsAndPreferences()
+    }
+
+    fun deleteFile(context: Context, fileName: String, pkgName: String) {
+        val result = Utils.deleteFile(fileName)
+
+        Timber.d("File Delete: $result")
+        findFilesToRestore(context, pkgName)
     }
 }

@@ -57,7 +57,6 @@ import fr.simon.marquis.preferencesmanager.ui.components.DialogRestore
 import fr.simon.marquis.preferencesmanager.ui.components.showToast
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
-import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.getParcelable
 import timber.log.Timber
 
@@ -65,6 +64,9 @@ const val KEY_ICON_URI = "KEY_ICON_URI"
 const val KEY_PACKAGE_NAME = "KEY_PACKAGE_NAME"
 const val KEY_TITLE = "KEY_TITLE"
 const val KEY_FILE = "KEY_FILE"
+
+// TODO: Add cab selection again, or some multi select option.
+// TODO: Add columns to list if either a tablet or landscape mode.
 
 class PreferencesActivity : ComponentActivity() {
 
@@ -118,7 +120,16 @@ class PreferencesActivity : ComponentActivity() {
             DialogRestore(
                 dialogState = restoreDialogState,
                 container = uiState.value.restoreData,
-                onDelete = {
+                onRestore = { fileName ->
+                    val pkgName = uiState.value.pkgName
+                    viewModel.performFileRestore(context, fileName, pkgName)
+                },
+                onDelete = { fileName ->
+                    val currentPage = pagerState.currentPage
+                    val currentTab = uiState.value.tabList[currentPage]
+                    val file = currentTab.preferenceFile!!.file
+
+                    viewModel.deleteFile(context, fileName, file)
                 }
             )
 
@@ -149,20 +160,15 @@ class PreferencesActivity : ComponentActivity() {
                                     EPreferencesOverflow.SHORTCUT -> TODO()
                                     EPreferencesOverflow.BACKUP -> {
                                         val pkgName = uiState.value.pkgName
-                                        viewModel.backupFile(
-                                            this@PreferencesActivity,
-                                            pkgName,
-                                            file
-                                        )
+                                        viewModel.backupFile(this, pkgName, file)
                                     }
                                     EPreferencesOverflow.RESTORE -> {
-                                        val container = Utils.getBackups(this, file)
-
-                                        if (container.backupList.isEmpty()) {
-                                            context.showToast(res = R.string.empty_restore)
-                                        } else {
-                                            viewModel.setRestoreData(container)
-                                            restoreDialogState.show()
+                                        viewModel.findFilesToRestore(this, file) { hasResult ->
+                                            if (hasResult) {
+                                                restoreDialogState.show()
+                                            } else {
+                                                context.showToast(res = R.string.empty_restore)
+                                            }
                                         }
                                     }
                                 }

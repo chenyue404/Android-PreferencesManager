@@ -4,19 +4,18 @@ import android.app.Activity
 import android.graphics.Color
 import android.widget.TextView
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +30,6 @@ import com.vanpra.composematerialdialogs.*
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.util.PrefManager
-import timber.log.Timber
 
 @Composable
 fun DialogTheme(dialogState: MaterialDialogState, onPositive: () -> Unit) {
@@ -128,55 +126,150 @@ fun DialogNoRoot(
 fun DialogRestore(
     dialogState: MaterialDialogState,
     container: BackupContainer?,
-    onDelete: () -> Unit,
+    onDelete: (file: String) -> Unit,
+    onRestore: (file: String) -> Unit,
 ) {
-    if (container == null) {
-        Timber.w("BackupContainer was null when passing to DialogRestore")
+    if (container == null)
         return
-    }
+
+    if (container.backupList.isEmpty())
+        dialogState.hide()
 
     MaterialDialog(
         dialogState = dialogState,
         autoDismiss = true,
         buttons = {
-            positiveButton(res = R.string.dialog_restore) {
-            }
+            positiveButton(res = R.string.dialog_restore)
             negativeButton(res = R.string.dialog_cancel)
         }
     ) {
-        val listState = rememberLazyListState()
         title(res = R.string.pick_restore)
-        customView {
-            LazyColumn(state = listState) {
-                items(container.backupList) {
-                    RestoreItem {
-                        // TODO
-                    }
-                }
+        listItemsCustomSingleChoice(
+            list = container.backupList.map { it.timeSinceBackup() },
+            onChoiceDelete = {
+                val file = container.backupList[it].backupFile
+                onDelete(file)
+            },
+            onChoiceChange = {
+                val file = container.backupList[it].backupFile
+                onRestore(file)
+            }
+        )
+    }
+}
+
+/**
+ * Custom "Single Item List" but with a custom view.
+ */
+@Suppress("ComposableNaming")
+@Composable
+fun MaterialDialogScope.listItemsCustomSingleChoice(
+    list: List<String>,
+    state: LazyListState = rememberLazyListState(),
+    disabledIndices: Set<Int> = setOf(),
+    initialSelection: Int? = null,
+    waitForPositiveButton: Boolean = true,
+    onChoiceDelete: (selected: Int) -> Unit = {},
+    onChoiceChange: (selected: Int) -> Unit = {},
+) {
+    var selectedItem by remember { mutableStateOf(initialSelection) }
+    PositiveButtonEnabled(valid = selectedItem != null) {}
+
+    if (waitForPositiveButton) {
+        DialogCallback { onChoiceChange(selectedItem!!) }
+    }
+
+    val onSelect = { index: Int ->
+        if (index !in disabledIndices) {
+            selectedItem = index
+
+            if (!waitForPositiveButton) {
+                onChoiceChange(selectedItem!!)
             }
         }
+    }
+
+    val onDelete = { index: Int ->
+        onChoiceDelete(index)
+    }
+
+    val isEnabled = remember(disabledIndices) { { index: Int -> index !in disabledIndices } }
+    listItems(
+        list = list,
+        state = state,
+        closeOnClick = false,
+        onClick = { index, _ -> onSelect(index) },
+        isEnabled = isEnabled
+    ) { index, item ->
+        val enabled = remember(disabledIndices) { index !in disabledIndices }
+        val selected = remember(selectedItem) { index == selectedItem }
+
+        CustomViewChoiceItem(
+            item = item,
+            index = index,
+            selected = selected,
+            enabled = enabled,
+            onSelect = onSelect,
+            onDelete = onDelete,
+        )
     }
 }
 
 @Composable
-private fun RestoreItem(
-    onDelete: () -> Unit
+private fun CustomViewChoiceItem(
+    item: String,
+    index: Int,
+    selected: Boolean,
+    enabled: Boolean,
+    onSelect: (index: Int) -> Unit,
+    onDelete: (index: Int) -> Unit
 ) {
     Row(
-        modifier = Modifier
+        Modifier
+            .fillMaxWidth()
             .height(48.dp)
-            .fillMaxWidth(),
+            .padding(start = 12.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp)
-                .fillMaxWidth(.9f),
-            text = "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH",
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+        RadioButton(
+            selected = selected,
+            onClick = {
+                if (enabled) {
+                    onSelect(index)
+                }
+            },
+            enabled = enabled
         )
-        IconButton(onClick = onDelete) {
+        Spacer(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(32.dp)
+        )
+        Text(
+            item,
+            modifier = Modifier.weight(1f),
+            color = if (enabled) {
+                MaterialTheme.colors.onSurface
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            },
+            style = MaterialTheme.typography.body1,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(32.dp)
+        )
+        IconButton(
+            onClick = {
+                if (enabled) {
+                    onDelete(index)
+                }
+            },
+            enabled = enabled
+        ) {
             Icon(Icons.Default.Delete, null)
         }
     }
@@ -185,5 +278,12 @@ private fun RestoreItem(
 @Preview
 @Composable
 private fun Preview_RestoreItem() {
-    RestoreItem(onDelete = {})
+    CustomViewChoiceItem(
+        item = "00/00/00 12:34:56PM",
+        index = 1,
+        selected = true,
+        enabled = true,
+        onDelete = {},
+        onSelect = {}
+    )
 }

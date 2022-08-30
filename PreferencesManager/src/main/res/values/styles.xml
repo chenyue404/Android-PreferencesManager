@@ -14,17 +14,6 @@
 -->
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-
-        <item name="md_corner_radius">16dp</item>
-        <item name="md_background_color">@color/gray</item>
-        <item name="md_color_title">@color/md_title</item>
-        <item name="md_color_content">@color/md_content</item>
-        <item name="md_color_button_text">@color/md_button</item>
-
-        <item name="android:textColor">?attr/colorOnBackground</item>
-
-        <item name="colorSurface">@color/colorSurface</item>
-    </style>
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar" />
 
 </resources>

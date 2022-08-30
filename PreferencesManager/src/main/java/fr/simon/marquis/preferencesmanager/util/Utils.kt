@@ -19,7 +19,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -204,13 +203,10 @@ object Utils {
 
             val currentFile = it.name.split(" ")
             if (packageName.contains(currentFile[1]) && packageName.contains(currentFile[2])) {
-                val dateFormat = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.getDefault())
-                val dateString = dateFormat.format(Date(currentFile[0].toLong()))
-
                 container.backupList.add(
                     BackupContainerInfo(
-                        backupDate = dateString,
-                        backupFile = File(it.absolutePath),
+                        backupDate = currentFile[0],
+                        backupFile = it.absolutePath,
                         backupXmlName = currentFile[2],
                         size = it.length()
                     )
@@ -233,9 +229,9 @@ object Utils {
         return job.isSuccess
     }
 
-    fun restoreFile(ctx: Context, backup: String, fileName: String, packageName: String): Boolean {
-        Timber.tag(TAG).d("restoreFile(%s, %s, %s)", backup, fileName, packageName)
-        val backupFile = File(ctx.filesDir, backup)
+    fun restoreFile(ctx: Context, fileName: String, packageName: String): Boolean {
+        Timber.tag(TAG).d("restoreFile(%s, %s)", fileName, packageName)
+        val backupFile = File(fileName)
         Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
@@ -243,12 +239,23 @@ object Utils {
             return false
         }
 
-        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(
-            packageName
-        )
+        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
+            .killBackgroundProcesses(packageName)
 
         Timber.tag(TAG).d("restoreFile --> $fileName")
         return true
+    }
+
+    fun deleteFile(fileName: String): Boolean {
+        Timber.tag(TAG).d("deleteFile(%s)", fileName)
+        val deleteFile = File(fileName)
+
+        if (deleteFile.isDirectory) {
+            Timber.w("Tried to delete a folder.")
+            return false
+        }
+
+        return deleteFile.delete()
     }
 
     fun savePreferences(
@@ -296,9 +303,9 @@ object Utils {
             Timber.tag(TAG).e("Error deleting temporary file")
         }
 
-        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).killBackgroundProcesses(
-            packageName
-        )
+        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
+            .killBackgroundProcesses(packageName)
+
         Timber.tag(TAG).d("Preferences correctly updated")
         return true
     }
