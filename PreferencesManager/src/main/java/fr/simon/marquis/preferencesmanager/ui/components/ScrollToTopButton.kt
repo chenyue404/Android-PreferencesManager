@@ -1,4 +1,4 @@
-package fr.simon.marquis.preferencesmanager.ui.applist
+package fr.simon.marquis.preferencesmanager.ui.components
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -10,17 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.ScrollButtonVisibility
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
-
-private enum class Visibility {
-    Visible,
-    Gone,
-}
 
 @Composable
 fun ScrollBackUp(
@@ -29,12 +24,12 @@ fun ScrollBackUp(
     modifier: Modifier = Modifier
 ) {
     val transition = updateTransition(
-        if (enabled) Visibility.Visible else Visibility.Gone,
+        if (enabled) ScrollButtonVisibility.Visible else ScrollButtonVisibility.Gone,
         label = "ScrollBackUp Transition"
     )
 
     val bottomOffset by transition.animateDp(label = "ScrollBackUp offset") {
-        if (it == Visibility.Gone) {
+        if (it == ScrollButtonVisibility.Gone) {
             (-24).dp
         } else {
             24.dp
@@ -54,7 +49,6 @@ fun ScrollBackUp(
                 Text(text = stringResource(id = R.string.scrollUp))
             },
             onClick = onClicked,
-            contentColor = Color.White,
             modifier = modifier
                 .offset(x = 0.dp, y = -bottomOffset)
                 .height(36.dp)

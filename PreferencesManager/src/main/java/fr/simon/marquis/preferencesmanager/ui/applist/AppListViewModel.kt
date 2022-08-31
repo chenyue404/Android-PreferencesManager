@@ -58,7 +58,8 @@ class AppListViewModel : ViewModel() {
     }
 
     private fun searchText(value: String) {
-        val list = if (uiState.value.isSearching && searchText.value.text.isNotEmpty()) {
+        val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
+        val list = if (isSearching) {
             uiState.value.appList.filter {
                 it.label
                     .lowercase(Locale.getDefault())
@@ -95,14 +96,13 @@ class AppListViewModel : ViewModel() {
         if (!uiState.value.isRootGranted) {
             Timber.e("We don't have root to continue!")
         } else {
-            context.run {
-                val intent = Intent(this, PreferencesActivity::class.java).apply {
-                    putExtra(KEY_ICON_URI, app.iconUri)
-                    putExtra(KEY_TITLE, app.label)
-                    putExtra(KEY_PACKAGE_NAME, app.applicationInfo.packageName)
-                }
-                startActivity(intent)
+            val intent = Intent(context, PreferencesActivity::class.java).apply {
+                putExtra(KEY_ICON_URI, app.iconUri)
+                putExtra(KEY_PACKAGE_NAME, app.applicationInfo.packageName)
+                putExtra(KEY_TITLE, app.label)
             }
+
+            context.startActivity(intent)
         }
     }
 

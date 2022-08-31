@@ -5,8 +5,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 
 fun Context.showToast(@StringRes res: Int) {
-    val string = getString(res)
-    showToast(string)
+    showToast(text = getString(res))
 }
 
 fun Context.showToast(text: String) {

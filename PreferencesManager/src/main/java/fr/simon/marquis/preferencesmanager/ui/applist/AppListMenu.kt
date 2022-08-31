@@ -39,8 +39,11 @@ fun AppListMenu(
         } else {
             R.string.show_system_apps
         }
+
         DropdownMenuItem(
-            text = { Text(text = stringResource(id = menuText)) },
+            text = {
+                Text(text = stringResource(id = menuText))
+            },
             leadingIcon = {
                 Icon(Icons.Default.SettingsSuggest, contentDescription = null)
             },
@@ -50,7 +53,9 @@ fun AppListMenu(
             }
         )
         DropdownMenuItem(
-            text = { Text(text = stringResource(id = R.string.switch_theme)) },
+            text = {
+                Text(text = stringResource(id = R.string.switch_theme))
+            },
             leadingIcon = {
                 Icon(Icons.Default.DarkMode, contentDescription = null)
             },
@@ -60,7 +65,9 @@ fun AppListMenu(
             }
         )
         DropdownMenuItem(
-            text = { Text(text = stringResource(id = R.string.show_popup)) },
+            text = {
+                Text(text = stringResource(id = R.string.show_popup))
+            },
             leadingIcon = {
                 Icon(Icons.Default.Info, contentDescription = null)
             },
@@ -75,10 +82,9 @@ fun AppListMenu(
 @Preview
 @Composable
 private fun Preview_AppListMenu(
-    appName: String = stringResource(id = R.string.app_name)
+    appName: String = stringResource(id = R.string.app_name),
+    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {
-    val textState = MutableStateFlow(TextFieldValue(""))
-
     AppTheme {
         AppBar(
             title = { Text(text = appName) },

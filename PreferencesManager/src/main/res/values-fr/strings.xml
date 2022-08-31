@@ -14,13 +14,13 @@
 -->
 <resources>
 
-    <string name="about_body"><![CDATA[
-        Preferences Manager est une application Open Source qui permet de facilement modifier les préférences des applications. Si vous souhaitez plus d\'informations, visitez ces liens :<br><br>
-        <b>&bull;&nbsp;&nbsp;<a href="https://plus.google.com/u/0/communities/112244514442534711821">Communauté Google+</a></b> <i>Partagez vos bugs, vos améliorations, …</i><br>
-        <b>&bull;&nbsp;&nbsp;<a href="http://simonmarquis.github.io/Android-PreferencesManager/">Page Github</a></b> <i>Description du projet</i><br>
-        <b>&bull;&nbsp;&nbsp;<a href="https://github.com/SimonMarquis/Android-PreferencesManager">Repository Github</a></b> <i>Code source du projet</i><br>
-        <b>&bull;&nbsp;&nbsp;<a href="http://www.simon-marquis.fr">Mon site internet</a></b> <i>A propos de moi, et de mes autres projets</i>
-    ]]></string>
+    <string name="about_body">
+        Preferences Manager est une application Open Source qui permet de facilement modifier les préférences des applications..\n
+        Si vous souhaitez plus d\'informations, visitez ces liens \n\n
+        &#8226;<b><a href="http://simonmarquis.github.io/Android-PreferencesManager/">Page Github</a></b> <i>Description du projet</i>\n
+        &#8226;<b><a href="https://github.com/SimonMarquis/Android-PreferencesManager">Repository Github</a></b> <i>Code source du projet</i>\n
+        &#8226;<b><a href="http://www.simon-marquis.fr">Mon site internet</a></b> <i>A propos de moi, et de mes autres projets</i>\n
+    </string>
 
     <string name="close">Fermer</string>
     <string name="exit">Quitter</string>

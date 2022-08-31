@@ -3,6 +3,11 @@ package fr.simon.marquis.preferencesmanager.model
 import androidx.annotation.StringRes
 import fr.simon.marquis.preferencesmanager.R
 
+enum class ScrollButtonVisibility {
+    Visible,
+    Gone,
+}
+
 enum class EPreferencesAdd {
     INTEGER, STRING, BOOLEAN, FLOAT, LONG, STRINGSET
 }

@@ -49,6 +49,7 @@ fun AppEntryItem(
         },
         leadingContent = {
             var errorState by remember { mutableStateOf(false) }
+
             AsyncImage(
                 modifier = Modifier.size(40.dp),
                 model = entry.iconUri,

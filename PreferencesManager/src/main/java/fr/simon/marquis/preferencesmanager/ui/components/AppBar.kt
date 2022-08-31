@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
@@ -32,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
-import fr.simon.marquis.preferencesmanager.util.PrefManager
 import kotlinx.coroutines.flow.MutableStateFlow
 
 private val slideIn = {
@@ -63,7 +61,7 @@ fun AppBar(
     navigationIcon: @Composable () -> Unit = {},
     title: @Composable () -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
-    textState: MutableStateFlow<TextFieldValue>,
+    textState: MutableStateFlow<TextFieldValue>? = null,
     isSearching: Boolean = false,
     onSearchClose: () -> Unit = {}
 ) {
@@ -96,16 +94,18 @@ fun AppBar(
             navigationIcon = navigationIcon
         )
 
-        AnimatedVisibility(
-            visible = isSearching,
-            enter = slideIn(),
-            exit = slideUp(),
-        ) {
-            SearchView(
-                backgroundColor = backgroundColor,
-                state = textState,
-                onClose = onSearchClose
-            )
+        if (textState != null) {
+            AnimatedVisibility(
+                visible = isSearching,
+                enter = slideIn(),
+                exit = slideUp(),
+            ) {
+                SearchView(
+                    backgroundColor = backgroundColor,
+                    state = textState,
+                    onClose = onSearchClose
+                )
+            }
         }
     }
 }
@@ -163,25 +163,27 @@ fun SearchView(
 @Preview
 @Composable
 private fun Preview_AppBar(
-    appName: String = stringResource(id = R.string.app_name)
+    appName: String = stringResource(id = R.string.app_name),
+    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {
-    val textState = MutableStateFlow(TextFieldValue(""))
-    val context = LocalContext.current
-    PrefManager.init(context)
-
     AppTheme {
-        AppBar(title = { Text(appName) }, textState = textState)
+        AppBar(
+            title = { Text(appName) },
+            textState = textState
+        )
     }
 }
 
 @Preview
 @Composable
 fun Preview_Dark_AppBar(
-    appName: String = stringResource(id = R.string.app_name)
+    appName: String = stringResource(id = R.string.app_name),
+    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {
-    val textState = MutableStateFlow(TextFieldValue(""))
-
     AppTheme(isDarkTheme = true) {
-        AppBar(title = { Text(appName) }, textState = textState)
+        AppBar(
+            title = { Text(appName) },
+            textState = textState
+        )
     }
 }

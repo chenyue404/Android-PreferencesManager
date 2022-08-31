@@ -79,6 +79,7 @@ class PreferencesActivity : ComponentActivity() {
     private var resultFileEdit = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
+        // TODO: This should reflect any changes once were back.
         viewModel.getTabsAndPreferences()
     }
 
@@ -209,10 +210,12 @@ class PreferencesActivity : ComponentActivity() {
     }
 
     private fun editFile(file: String) {
-        val intent = Intent(this, FileEditorActivity::class.java)
-        intent.putExtra(KEY_ICON_URI, viewModel.uiState.value.pkgIcon)
-        intent.putExtra(KEY_PACKAGE_NAME, viewModel.uiState.value.pkgName)
-        intent.putExtra(KEY_FILE, file)
+        val intent = Intent(this, FileEditorActivity::class.java).apply {
+            putExtra(KEY_FILE, file)
+            putExtra(KEY_ICON_URI, viewModel.uiState.value.pkgIcon)
+            putExtra(KEY_PACKAGE_NAME, viewModel.uiState.value.pkgName)
+        }
+
         resultFileEdit.launch(intent)
     }
 }

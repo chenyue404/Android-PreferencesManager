@@ -125,6 +125,7 @@ class FileEditorActivity : AppCompatActivity(), TextWatcher {
             mColorTheme = ColorThemeEnum.valueOf(arg0.getString(KEY_COLOR_THEME)!!)
             setXmlFontSize(XmlFontSize.generateSize(arg0.getInt(KEY_FONT_SIZE)))
         }
+
         mXmlColorTheme = XmlColorTheme.createTheme(this, mColorTheme!!)
 
         updateTitle()

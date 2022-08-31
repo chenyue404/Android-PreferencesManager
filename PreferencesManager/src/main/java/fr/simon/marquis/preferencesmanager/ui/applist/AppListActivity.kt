@@ -39,10 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import fr.simon.marquis.preferencesmanager.R
-import fr.simon.marquis.preferencesmanager.ui.components.AppBar
-import fr.simon.marquis.preferencesmanager.ui.components.DialogAbout
-import fr.simon.marquis.preferencesmanager.ui.components.DialogNoRoot
-import fr.simon.marquis.preferencesmanager.ui.components.DialogTheme
+import fr.simon.marquis.preferencesmanager.ui.components.*
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
@@ -113,7 +110,7 @@ class AppListActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppListAppBar(
+private fun AppListAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
 ) {
@@ -124,7 +121,6 @@ fun AppListAppBar(
     val dialogThemeState = rememberMaterialDialogState()
     DialogTheme(dialogState = dialogThemeState) {}
 
-    // TODO using AndroidView
     val dialogAboutState = rememberMaterialDialogState()
     DialogAbout(dialogState = dialogAboutState)
 
@@ -151,11 +147,10 @@ fun AppListAppBar(
 }
 
 @Composable
-fun AppListLayout(
+private fun AppListLayout(
     paddingValues: PaddingValues,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
-
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
-import timber.log.Timber
 
 @Composable
 fun PreferenceFragment(
@@ -59,8 +58,6 @@ fun PreferenceFragment(
                         onClick = onClick,
                         onLongClick = onLongClick
                     )
-
-                    Timber.d("YEE: $item")
                 }
             }
         }
