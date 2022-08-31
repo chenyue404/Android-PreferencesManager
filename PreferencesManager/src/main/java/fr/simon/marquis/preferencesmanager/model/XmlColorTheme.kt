@@ -19,6 +19,7 @@ package fr.simon.marquis.preferencesmanager.model
 import android.content.Context
 import androidx.core.content.ContextCompat
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.ui.editor.EFontTheme
 
 class XmlColorTheme(
     context: Context,
@@ -58,9 +59,9 @@ class XmlColorTheme(
 
     companion object {
 
-        fun createTheme(context: Context, theme: ColorThemeEnum): XmlColorTheme {
+        fun createTheme(context: Context, theme: EFontTheme): XmlColorTheme {
             return when (theme) {
-                ColorThemeEnum.ECLIPSE ->
+                EFontTheme.ECLIPSE ->
                     XmlColorTheme(
                         context,
                         R.color.xml_eclipse_tag,
@@ -70,7 +71,7 @@ class XmlColorTheme(
                         R.color.xml_eclipse_value,
                         R.color.xml_eclipse_default
                     )
-                ColorThemeEnum.GOOGLE ->
+                EFontTheme.GOOGLE ->
                     XmlColorTheme(
                         context,
                         R.color.xml_google_tag,
@@ -80,7 +81,7 @@ class XmlColorTheme(
                         R.color.xml_google_value,
                         R.color.xml_google_default
                     )
-                ColorThemeEnum.NETBEANS ->
+                EFontTheme.NETBEANS ->
                     XmlColorTheme(
                         context,
                         R.color.xml_netbeans_tag,
@@ -90,7 +91,7 @@ class XmlColorTheme(
                         R.color.xml_netbeans_value,
                         R.color.xml_netbeans_default
                     )
-                ColorThemeEnum.NOTEPAD ->
+                EFontTheme.NOTEPAD ->
                     XmlColorTheme(
                         context,
                         R.color.xml_notepad_tag,
@@ -100,7 +101,7 @@ class XmlColorTheme(
                         R.color.xml_notepad_value,
                         R.color.xml_notepad_default
                     )
-                ColorThemeEnum.ROBOTICKET ->
+                EFontTheme.ROBOTICKET ->
                     XmlColorTheme(
                         context,
                         R.color.xml_roboticket_tag,

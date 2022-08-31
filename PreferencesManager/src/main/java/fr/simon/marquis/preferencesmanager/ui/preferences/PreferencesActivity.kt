@@ -54,10 +54,10 @@ import fr.simon.marquis.preferencesmanager.model.EPreferencesAdd
 import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
 import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
-import fr.simon.marquis.preferencesmanager.ui.FileEditorActivity
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
 import fr.simon.marquis.preferencesmanager.ui.components.DialogRestore
 import fr.simon.marquis.preferencesmanager.ui.components.showToast
+import fr.simon.marquis.preferencesmanager.ui.editor.FileEditorActivity
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.getParcelable

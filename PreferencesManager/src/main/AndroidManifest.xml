@@ -56,7 +56,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="fr.simon.marquis.preferencesmanager.ui.FileEditorActivity"
+            android:name="fr.simon.marquis.preferencesmanager.ui.editor.FileEditorActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
     </application>
