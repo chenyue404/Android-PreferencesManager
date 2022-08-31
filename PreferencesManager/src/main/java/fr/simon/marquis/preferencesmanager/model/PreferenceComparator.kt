@@ -16,15 +16,11 @@ package fr.simon.marquis.preferencesmanager.model
  * the License.
  */
 
-import fr.simon.marquis.preferencesmanager.ui.preferences.EPreferencesSort
-import java.util.Comparator
-import kotlin.collections.Map.Entry
-
 internal class PreferenceComparator(
     private val mType: EPreferencesSort
-) : Comparator<Entry<Any, Any>> {
+) : Comparator<KeyValueIndex> {
 
-    override fun compare(lhs: Entry<Any, Any>?, rhs: Entry<Any, Any>?): Int {
+    override fun compare(lhs: KeyValueIndex?, rhs: KeyValueIndex?): Int {
         if (mType == EPreferencesSort.TYPE_AND_ALPHANUMERIC) {
             val l = lhs?.value?.javaClass?.name ?: ""
             val r = rhs?.value?.javaClass?.name ?: ""

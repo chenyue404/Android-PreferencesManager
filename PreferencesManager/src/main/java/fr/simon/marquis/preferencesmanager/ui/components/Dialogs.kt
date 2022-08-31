@@ -5,8 +5,6 @@ package fr.simon.marquis.preferencesmanager.ui.components
 import android.app.Activity
 import android.graphics.Color
 import android.widget.TextView
-import androidx.annotation.IntegerRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -30,6 +28,7 @@ import androidx.core.text.HtmlCompat
 import com.vanpra.composematerialdialogs.*
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
+import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 
@@ -160,32 +159,11 @@ fun DialogRestore(
     }
 }
 
-enum class EPreferenceEditType(
-    @StringRes val addTitle: Int,
-    @StringRes val editTitle: Int,
+@Composable
+fun DialogEditPreference(
+    dialogState: MaterialDialogState,
+    preferenceFile: PreferenceFile,
 ) {
-    UNSUPPORTED(0, 0),
-    BOOLEAN(R.string.title_add_boolean, R.string.title_edit_boolean),
-    STRING(R.string.title_add_string, R.string.title_edit_string),
-    INT(R.string.title_add_int, R.string.title_edit_int),
-    FLOAT(R.string.title_add_float, R.string.title_edit_float),
-    LONG(R.string.title_add_long, R.string.title_edit_long),
-    STRINGSET(R.string.title_add_stringset, R.string.title_edit_stringset)
-    ;
-
-    companion object {
-        fun fromObject(obj: Any): EPreferenceEditType {
-            return when (obj) {
-                is String -> STRING
-                is Int -> INT
-                is Long -> LONG
-                is Float -> FLOAT
-                is Boolean -> BOOLEAN
-                is Set<*> -> STRINGSET
-                else -> UNSUPPORTED
-            }
-        }
-    }
 }
 
 @Composable
@@ -202,10 +180,8 @@ private fun DialogViewTextValue(
         throw java.lang.NullPointerException("Preference KeyValue was null on edit")
     }
 
-
     var textKey by remember { mutableStateOf(editKey ?: "") }
     var textValue by remember { mutableStateOf(editValue ?: "") }
-
 
     Column(
         modifier = modifier.padding(top = 5.dp, bottom = 5.dp),
@@ -216,12 +192,13 @@ private fun DialogViewTextValue(
             onValueChange = { textKey = it },
             label = { Text(text = stringResource(id = R.string.hint_key)) }
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
             value = textValue,
             onValueChange = { textValue = it },
             label = { Text("Label") }
         )
+        Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -242,38 +219,65 @@ private fun DialogViewTextValue(
             }
         }
     }
-
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun Preview_DialogViewStringValue(
-
+fun DialogViewBooleanValue(
+    modifier: Modifier = Modifier,
+    isEdit: Boolean,
+    editKey: String? = null,
+    editValue: Boolean? = null,
+    onUpdate: () -> Unit,
+    onDelete: () -> Unit,
+    onCancel: () -> Unit,
 ) {
-    AppTheme {
-        DialogViewTextValue(
-            isEdit = true,
-            editKey = "Some Cool Key",
-            editValue = "Some Cool Value",
-            onUpdate = {},
-            onDelete = {},
-            onCancel = {},
-        )
+    if (isEdit && editKey == null && editValue == null) {
+        throw java.lang.NullPointerException("Preference KeyValue was null on edit")
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-private fun Preview_DialogViewStringValue_2(
+    var textKey by remember { mutableStateOf(editKey ?: "") }
+    var textValue by remember { mutableStateOf(editValue ?: false) }
 
-) {
-    AppTheme {
-        DialogViewTextValue(
-            isEdit = false,
-            onUpdate = {},
-            onDelete = {},
-            onCancel = {},
+    Column(
+        modifier = modifier.padding(top = 5.dp, bottom = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = textKey,
+            onValueChange = { textKey = it },
+            label = { Text(text = stringResource(id = R.string.hint_key)) }
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "False")
+            Spacer(modifier = Modifier.width(6.dp))
+            Switch(
+                checked = textValue,
+                onCheckedChange = { textValue = it }
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = "True")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            OutlinedButton(onClick = onCancel) {
+                Text(text = stringResource(id = R.string.dialog_cancel))
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            if (isEdit) {
+                OutlinedButton(onClick = onDelete) {
+                    Text(text = stringResource(id = R.string.dialog_delete))
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            OutlinedButton(onClick = onUpdate) {
+                val textId = if (isEdit) R.string.dialog_update else R.string.dialog_add
+                Text(text = stringResource(id = textId))
+            }
+        }
     }
 }
 
@@ -405,4 +409,60 @@ private fun Preview_RestoreItem() {
         onDelete = {},
         onSelect = {}
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview_DialogViewStringValue_1() {
+    AppTheme {
+        DialogViewTextValue(
+            isEdit = true,
+            editKey = "Some Cool Key",
+            editValue = "Some Cool Value",
+            onUpdate = {},
+            onDelete = {},
+            onCancel = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview_DialogViewStringValue_2() {
+    AppTheme {
+        DialogViewTextValue(
+            isEdit = false,
+            onUpdate = {},
+            onDelete = {},
+            onCancel = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview_DialogViewBooleanValue_1() {
+    AppTheme {
+        DialogViewBooleanValue(
+            isEdit = true,
+            editKey = "Some Cool Key",
+            editValue = true,
+            onUpdate = {},
+            onDelete = {},
+            onCancel = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview_DialogViewBooleanValue_2() {
+    AppTheme {
+        DialogViewBooleanValue(
+            isEdit = false,
+            onUpdate = {},
+            onDelete = {},
+            onCancel = {},
+        )
+    }
 }

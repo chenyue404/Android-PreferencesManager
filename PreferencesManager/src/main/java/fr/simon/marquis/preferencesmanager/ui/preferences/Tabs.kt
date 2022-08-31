@@ -25,7 +25,7 @@ data class TabItem(
     val preferenceFile: PreferenceFile? = null,
     val screen: ScreenFragment = { onClick, onLongClick ->
         PreferenceFragment(
-            list = preferenceFile?.list,
+            list = preferenceFile?.list.orEmpty(),
             onClick = { onClick(preferenceFile) },
             onLongClick = { onLongClick(preferenceFile) }
         )

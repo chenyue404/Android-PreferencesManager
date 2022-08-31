@@ -50,6 +50,9 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.EPreferencesAdd
+import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
+import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.ui.FileEditorActivity
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
@@ -133,6 +136,12 @@ class PreferencesActivity : ComponentActivity() {
                 }
             )
 
+            // val editDialogState = rememberMaterialDialogState()
+            // DialogEditPreference(
+            //     dialogState = editDialogState,
+            //     preferenceFile =
+            // )
+
             AppTheme {
                 Scaffold(
                     modifier = windowInset,
@@ -157,7 +166,6 @@ class PreferencesActivity : ComponentActivity() {
 
                                 when (it) {
                                     EPreferencesOverflow.EDIT -> editFile(file)
-                                    EPreferencesOverflow.SHORTCUT -> TODO()
                                     EPreferencesOverflow.BACKUP -> {
                                         val pkgName = uiState.value.pkgName
                                         viewModel.backupFile(this, pkgName, file)
@@ -188,9 +196,11 @@ class PreferencesActivity : ComponentActivity() {
                         pagerState = pagerState,
                         viewModel = viewModel,
                         onClick = {
+                            /* TODO */
                         },
                         onLongClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // TODO multi select.
                         }
                     )
                 }

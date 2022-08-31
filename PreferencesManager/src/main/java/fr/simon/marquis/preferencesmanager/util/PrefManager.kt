@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import fr.simon.marquis.preferencesmanager.ui.preferences.EPreferencesSort
+import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
 
 object PrefManager {
 

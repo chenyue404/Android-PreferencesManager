@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
 import fr.simon.marquis.preferencesmanager.ui.components.getColorFromObjet
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import java.util.ArrayList
@@ -21,7 +22,7 @@ import java.util.ArrayList
 @Composable
 fun PreferencesEntryItem(
     modifier: Modifier = Modifier,
-    item: MutableMap.MutableEntry<Any, Any>,
+    item: KeyValueIndex,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -67,8 +68,8 @@ private fun Preview_PreferencesEntryItem(
     key: String = "Hello World",
     value: String = "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh",
 ) {
-    val preferences: MutableMap<Any, Any> = hashMapOf(key to value)
-    val list = ArrayList(preferences.entries)
+    val preferences: List<KeyValueIndex> = listOf(KeyValueIndex(key = key, value = value))
+    val list = ArrayList(preferences)
 
     AppTheme {
         Column(modifier = Modifier.fillMaxWidth()) {

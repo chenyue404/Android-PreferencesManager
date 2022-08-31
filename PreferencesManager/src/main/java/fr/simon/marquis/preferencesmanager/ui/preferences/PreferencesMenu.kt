@@ -8,20 +8,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.EPreferencesAdd
+import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
+import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
-
-enum class EPreferencesAdd {
-    INTEGER, STRING, BOOLEAN, FLOAT, LONG, STRINGSET
-}
-
-enum class EPreferencesOverflow {
-    EDIT, SHORTCUT, BACKUP, RESTORE
-}
-
-enum class EPreferencesSort {
-    ALPHANUMERIC, TYPE_AND_ALPHANUMERIC
-}
 
 @Composable
 fun PreferencesMenu(
@@ -137,16 +128,16 @@ fun PreferencesMenu(
                 isOverflowMenuSowing = false
             }
         )
-        DropdownMenuItem(
-            text = { Text(text = stringResource(id = R.string.action_shortcut)) },
-            leadingIcon = {
-                Icon(Icons.Default.AppShortcut, contentDescription = null)
-            },
-            onClick = {
-                onOverflowClicked(EPreferencesOverflow.SHORTCUT)
-                isOverflowMenuSowing = false
-            }
-        )
+        // DropdownMenuItem(
+        //     text = { Text(text = stringResource(id = R.string.action_shortcut)) },
+        //     leadingIcon = {
+        //         Icon(Icons.Default.AppShortcut, contentDescription = null)
+        //     },
+        //     onClick = {
+        //         onOverflowClicked(EPreferencesOverflow.SHORTCUT)
+        //         isOverflowMenuSowing = false
+        //     }
+        // )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_backup_file)) },
             leadingIcon = {

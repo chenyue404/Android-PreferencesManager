@@ -16,7 +16,6 @@
 package fr.simon.marquis.preferencesmanager.model
 
 import android.text.TextUtils
-import fr.simon.marquis.preferencesmanager.ui.preferences.EPreferencesSort
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.XmlUtils
 import java.io.ByteArrayInputStream
@@ -25,14 +24,20 @@ import java.io.IOException
 import java.util.*
 import org.xmlpull.v1.XmlPullParserException
 
+data class KeyValueIndex(
+    var index: Int? = null,
+    var key: Any,
+    var value: Any,
+)
+
 class PreferenceFile {
 
     private var mPreferences: MutableMap<Any, Any>? = null
-    private var mList: MutableList<MutableMap.MutableEntry<Any, Any>>? = null
+    private var mList: MutableList<KeyValueIndex>? = null
 
     lateinit var file: String
 
-    var list: MutableList<MutableMap.MutableEntry<Any, Any>>
+    var list: MutableList<KeyValueIndex>
         get() {
             if (mList == null) {
                 mList = ArrayList()
@@ -42,8 +47,9 @@ class PreferenceFile {
         set(mList) {
             this.mList = mList
             this.mPreferences = HashMap()
-            for ((key, value) in mList) {
-                mPreferences!![key] = value
+
+            mList.map {
+                mPreferences!![it.key] = it.value
             }
 
             updateSort()
@@ -66,7 +72,9 @@ class PreferenceFile {
 
     private fun setPreferences(map: HashMap<Any, Any>?) {
         mPreferences = map
-        mList = ArrayList(mPreferences!!.entries)
+        mList = map?.map {
+            KeyValueIndex(key = it.key, value = it.value)
+        }?.toMutableList()
         updateSort()
     }
 
@@ -84,7 +92,7 @@ class PreferenceFile {
     private fun updateValue(key: String, value: Any) {
         for (entry in mList!!) {
             if (entry.key == key) {
-                entry.setValue(value)
+                entry.value = value
                 break
             }
         }
@@ -103,7 +111,7 @@ class PreferenceFile {
     }
 
     private fun createAndAddValue(key: String, value: Any) {
-        mList!!.add(0, AbstractMap.SimpleEntry(key, value))
+        mList!!.add(0, KeyValueIndex(key = key, value = value))
         mPreferences!![key] = value
         updateSort()
     }
