@@ -29,7 +29,7 @@
     <string name="no_root_message">"Votre appareil ne semble pas être rooté !\n\n • Votre appareil est-il rooté ?\n • La requête a-t-elle était autorisée ?"</string>
     <string name="no_root_button">Quitter</string>
 
-    <string name="popup_edit_message">Ce fichier a été modifié.\nSouhaitez-vous sauvegarder ces changements ?</string>
+    <string name="popup_edit_message">Ce fichier a été modifié.\nSouhaitez-vous sauvegarder ces changements ? Remarque : une sauvegarde sera effectuée avant d\'appliquer les nouvelles modifications.</string>
     <string name="toast_shortcut">Raccourci créé</string>
     <string name="toast_backup_success">Backup effectué</string>
     <string name="toast_backup_fail">Backup échoué</string>
@@ -121,4 +121,6 @@
 
     <string name="switch_theme">TODO THEME</string>
     <string name="switch_text">TODO SWITCH</string>
+    <string name="scrollUp">Faire défiler vers le haut</string>
+
 </resources>

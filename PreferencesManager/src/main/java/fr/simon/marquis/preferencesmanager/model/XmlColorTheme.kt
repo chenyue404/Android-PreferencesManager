@@ -16,101 +16,85 @@ package fr.simon.marquis.preferencesmanager.model
  * the License.
  */
 
-import android.content.Context
-import androidx.core.content.ContextCompat
-import fr.simon.marquis.preferencesmanager.R
-import fr.simon.marquis.preferencesmanager.ui.editor.EFontTheme
+import androidx.compose.ui.graphics.Color
+import fr.simon.marquis.preferencesmanager.ui.components.*
 
 class XmlColorTheme(
-    context: Context,
-    xmlTag: Int,
-    xmlAttributeName: Int,
-    xmlAttributeValue: Int,
-    xmlComment: Int,
-    xmlValue: Int,
-    xmlDefault: Int
+    private val xmlTag: Color,
+    private val xmlAttributeName: Color,
+    private val xmlAttributeValue: Color,
+    private val xmlComment: Color,
+    private val xmlValue: Color,
+    private val xmlDefault: Color
 ) {
-
-    private val tag: Int = ContextCompat.getColor(context, xmlTag)
-    private val attributeName: Int = ContextCompat.getColor(context, xmlAttributeName)
-    private val attributeValue: Int = ContextCompat.getColor(context, xmlAttributeValue)
-    private val comment: Int = ContextCompat.getColor(context, xmlComment)
-    private val value: Int = ContextCompat.getColor(context, xmlValue)
-    private val defaultColor: Int = ContextCompat.getColor(context, xmlDefault)
-
-    enum class ColorThemeEnum {
-        ECLIPSE, GOOGLE, ROBOTICKET, NOTEPAD, NETBEANS
-    }
-
     enum class ColorTagEnum {
         TAG, ATTR_NAME, ATTR_VALUE, COMMENT, VALUE, DEFAULT
     }
 
-    fun getColor(type: ColorTagEnum): Int {
+    fun getColor(type: ColorTagEnum): Color {
         return when (type) {
-            ColorTagEnum.TAG -> tag
-            ColorTagEnum.ATTR_NAME -> attributeName
-            ColorTagEnum.ATTR_VALUE -> attributeValue
-            ColorTagEnum.COMMENT -> comment
-            ColorTagEnum.VALUE -> value
-            ColorTagEnum.DEFAULT -> defaultColor
+            ColorTagEnum.TAG -> xmlTag
+            ColorTagEnum.ATTR_NAME -> xmlAttributeName
+            ColorTagEnum.ATTR_VALUE -> xmlAttributeValue
+            ColorTagEnum.COMMENT -> xmlComment
+            ColorTagEnum.VALUE -> xmlValue
+            ColorTagEnum.DEFAULT -> xmlDefault
         }
     }
 
     companion object {
-
-        fun createTheme(context: Context, theme: EFontTheme): XmlColorTheme {
+        fun createTheme(theme: EFontTheme): XmlColorTheme {
             return when (theme) {
-                EFontTheme.ECLIPSE ->
+                EFontTheme.ECLIPSE -> {
                     XmlColorTheme(
-                        context,
-                        R.color.xml_eclipse_tag,
-                        R.color.xml_eclipse_attribute_name,
-                        R.color.xml_eclipse_attribute_value,
-                        R.color.xml_eclipse_comment,
-                        R.color.xml_eclipse_value,
-                        R.color.xml_eclipse_default
+                        xmlEclipseTag,
+                        xmlEclipseAttributeName,
+                        xmlEclipseAttributeValue,
+                        xmlEclipseComment,
+                        xmlEclipseValue,
+                        xmlEclipseDefault,
                     )
-                EFontTheme.GOOGLE ->
+                }
+                EFontTheme.GOOGLE -> {
                     XmlColorTheme(
-                        context,
-                        R.color.xml_google_tag,
-                        R.color.xml_google_attribute_name,
-                        R.color.xml_google_attribute_value,
-                        R.color.xml_google_comment,
-                        R.color.xml_google_value,
-                        R.color.xml_google_default
+                        xmlGoogleTag,
+                        xmlGoogleAttributeName,
+                        xmlGoogleAttributeValue,
+                        xmlGoogleComment,
+                        xmlGoogleValue,
+                        xmlGoogleDefault,
                     )
-                EFontTheme.NETBEANS ->
+                }
+                EFontTheme.ROBOTICKET -> {
                     XmlColorTheme(
-                        context,
-                        R.color.xml_netbeans_tag,
-                        R.color.xml_netbeans_attribute_name,
-                        R.color.xml_netbeans_attribute_value,
-                        R.color.xml_netbeans_comment,
-                        R.color.xml_netbeans_value,
-                        R.color.xml_netbeans_default
+                        xmlRoboticketTag,
+                        xmlRoboticketAttributeName,
+                        xmlRoboticketAttributeValue,
+                        xmlRoboticketComment,
+                        xmlRoboticketValue,
+                        xmlRoboticketDefault,
                     )
-                EFontTheme.NOTEPAD ->
+                }
+                EFontTheme.NOTEPAD -> {
                     XmlColorTheme(
-                        context,
-                        R.color.xml_notepad_tag,
-                        R.color.xml_notepad_attribute_name,
-                        R.color.xml_notepad_attribute_value,
-                        R.color.xml_notepad_comment,
-                        R.color.xml_notepad_value,
-                        R.color.xml_notepad_default
+                        xmlNotepadTag,
+                        xmlNotepadAttributeName,
+                        xmlNotepadAttributeValue,
+                        xmlNotepadComment,
+                        xmlNotepadValue,
+                        xmlNotepadDefault,
                     )
-                EFontTheme.ROBOTICKET ->
+                }
+                EFontTheme.NETBEANS -> {
                     XmlColorTheme(
-                        context,
-                        R.color.xml_roboticket_tag,
-                        R.color.xml_roboticket_attribute_name,
-                        R.color.xml_roboticket_attribute_value,
-                        R.color.xml_roboticket_comment,
-                        R.color.xml_roboticket_value,
-                        R.color.xml_roboticket_default
+                        xmlNetbeansTag,
+                        xmlNetbeansAttributeName,
+                        xmlNetbeansAttributeValue,
+                        xmlNetbeansComment,
+                        xmlNetbeansValue,
+                        xmlNetbeansDefault,
                     )
+                }
             }
         }
     }

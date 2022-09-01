@@ -10,17 +10,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.EFontSize
+import fr.simon.marquis.preferencesmanager.model.EFontTheme
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
-
-enum class EFontTheme {
-    ECLIPSE, GOOGLE, ROBOTICKET, NOTEPAD, NETBEANS
-}
-
-enum class EFontSize(val size: Int) {
-    EXTRA_SMALL(10), SMALL(13), MEDIUM(16), LARGE(20), EXTRA_LARGE(24);
-}
 
 @Composable
 fun FileEditorMenu(

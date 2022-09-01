@@ -259,10 +259,10 @@ object Utils {
     }
 
     fun savePreferences(
+        ctx: Context,
         preferenceFile: PreferenceFile?,
         file: String,
         packageName: String,
-        ctx: Context
     ): Boolean {
         Timber.tag(TAG).d("savePreferences(%s, %s)", file, packageName)
         if (preferenceFile == null) {

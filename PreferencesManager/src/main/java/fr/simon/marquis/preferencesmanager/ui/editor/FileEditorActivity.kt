@@ -19,8 +19,6 @@ package fr.simon.marquis.preferencesmanager.ui.editor
  */
 
 import android.os.Bundle
-import android.text.*
-import android.text.style.ForegroundColorSpan
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -28,16 +26,30 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.message
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.title
+import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.EFontTheme
+import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
+import fr.simon.marquis.preferencesmanager.ui.components.showToast
 import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_FILE
 import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
-import java.util.regex.Pattern
+import fr.simon.marquis.preferencesmanager.util.PrefManager
 import timber.log.Timber
 
 class FileEditorActivity : ComponentActivity() {
@@ -71,17 +83,38 @@ class FileEditorActivity : ComponentActivity() {
                 val pkgName = intent.getString(KEY_PACKAGE_NAME)
 
                 viewModel.setPackageInfo(file, title, pkgName)
-                viewModel.setXmlColorTheme(this@FileEditorActivity)
-                viewModel.highlightXmlText()
             }
 
             val windowInset = Modifier
-                .statusBarsPadding()
+                .systemBarsPadding()
                 .windowInsetsPadding(
                     WindowInsets
-                        .navigationBars
+                        .systemBars
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                 )
+
+            val saveChangesState = rememberMaterialDialogState()
+            MaterialDialog(
+                dialogState = saveChangesState,
+                buttons = {
+                    positiveButton(res = R.string.yes) {
+                        if (viewModel.saveChanges(this@FileEditorActivity)) {
+                            showToast(R.string.save_success)
+                            setResult(RESULT_OK)
+                            finish()
+                        } else {
+                            showToast(R.string.save_fail)
+                        }
+                    }
+                    negativeButton(res = R.string.no) {
+                        @Suppress("DEPRECATION")
+                        onBackPressed()
+                    }
+                }
+            ) {
+                title(text = "Unsaved Changes")
+                message(res = R.string.popup_edit_message)
+            }
 
             AppTheme {
                 Scaffold(
@@ -99,7 +132,10 @@ class FileEditorActivity : ComponentActivity() {
                             navigationIcon = {
                                 IconButton(
                                     onClick = {
-                                        // TODO: Check if text was ever changed, show dialog if true. Or just exit.
+                                        if (uiState.textChanged) {
+                                            saveChangesState.show()
+                                            return@IconButton
+                                        }
 
                                         @Suppress("DEPRECATION")
                                         onBackPressed()
@@ -110,9 +146,23 @@ class FileEditorActivity : ComponentActivity() {
                             },
                             actions = {
                                 FileEditorMenu(
-                                    onSave = { /*TODO*/ },
-                                    onFontTheme = { /*TODO*/ },
-                                    onFontSize = { /*TODO*/ }
+                                    onSave = {
+                                        if (!uiState.textChanged) {
+                                            showToast(R.string.toast_no_changes)
+                                            return@FileEditorMenu
+                                        }
+
+                                        if (viewModel.saveChanges(this@FileEditorActivity))
+                                            showToast(R.string.save_success)
+                                        else
+                                            showToast(R.string.save_fail)
+                                    },
+                                    onFontTheme = {
+                                        viewModel.setFontTheme(it)
+                                    },
+                                    onFontSize = {
+                                        viewModel.setFontSize(it)
+                                    }
                                 )
                             },
                         )
@@ -120,35 +170,13 @@ class FileEditorActivity : ComponentActivity() {
                 ) { paddingValues ->
                     FileEditorLayout(
                         paddingValues = paddingValues,
-                    )
-                }
-            }
-        }
-    }
-
-    @Suppress("RegExpRedundantEscape")
-    companion object {
-        private val TAG_START = Pattern.compile("</?[-\\w\\?]+", Pattern.CASE_INSENSITIVE)
-        private val TAG_END = Pattern.compile("\\??/?>")
-        private val TAG_ATTRIBUTE_NAME = Pattern.compile("\\s(\\w*)\\=")
-        private val TAG_ATTRIBUTE_VALUE = Pattern.compile("[a-z\\-]*\\=(\"[^\"]*\")")
-        private val TAG_ATTRIBUTE_VALUE_2 = Pattern.compile("[a-z\\-]*\\=(\'[^\']*\')")
-        private val COMMENT_START = Pattern.compile("<!--")
-        private val COMMENT_END = Pattern.compile("-->")
-
-        private fun generateSpan(source: Spannable, p: Pattern, color: Int) {
-            val matcher = p.matcher(source)
-            var start: Int
-            var end: Int
-            while (matcher.find()) {
-                start = matcher.start()
-                end = matcher.end()
-                if (start != end) {
-                    source.setSpan(
-                        ForegroundColorSpan(color),
-                        matcher.start(),
-                        matcher.end(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        scrollBehavior = scrollBehavior,
+                        xmlColorTheme = uiState.xmlColorTheme!!,
+                        textSize = uiState.fontSize.size,
+                        text = uiState.editText ?: "[This should not be empty!]",
+                        onValueChange = {
+                            viewModel.setTextChanged(it)
+                        }
                     )
                 }
             }
@@ -159,14 +187,25 @@ class FileEditorActivity : ComponentActivity() {
 @Composable
 private fun FileEditorLayout(
     paddingValues: PaddingValues,
-    text: String = "",
+    xmlColorTheme: XmlColorTheme,
+    textSize: Int,
+    scrollBehavior: TopAppBarScrollBehavior,
+    text: String,
+    onValueChange: (String) -> Unit,
 ) {
-    var editText by remember { mutableStateOf("Hello") }
-    Column(modifier = Modifier.padding(paddingValues)) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+            .imePadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+    ) {
         TextField(
             modifier = Modifier.fillMaxSize(),
-            value = editText,
-            onValueChange = { editText = it },
+            textStyle = TextStyle.Default.copy(fontSize = textSize.sp),
+            value = text,
+            onValueChange = onValueChange,
+            visualTransformation = XmlTransformation(xmlColorTheme)
         )
     }
 }
@@ -174,7 +213,19 @@ private fun FileEditorLayout(
 @Preview
 @Composable
 private fun Preview_FileEditorLayout() {
+    val topBarState = rememberTopAppBarState()
+    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+
+    val xmlColorTheme = XmlColorTheme.createTheme(EFontTheme.ECLIPSE)
+
     AppTheme {
-        FileEditorLayout(paddingValues = PaddingValues())
+        FileEditorLayout(
+            paddingValues = PaddingValues(),
+            xmlColorTheme = xmlColorTheme,
+            textSize = PrefManager.keyFontSize,
+            scrollBehavior = scrollBehavior,
+            text = "Hello!",
+            onValueChange = {},
+        )
     }
 }

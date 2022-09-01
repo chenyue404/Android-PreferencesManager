@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import fr.simon.marquis.preferencesmanager.model.EFontSize
+import fr.simon.marquis.preferencesmanager.model.EFontTheme
 import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
-import fr.simon.marquis.preferencesmanager.ui.editor.EFontSize
-import fr.simon.marquis.preferencesmanager.ui.editor.EFontTheme
 
 object PrefManager {
 
@@ -40,6 +40,6 @@ object PrefManager {
         set(value) = prefs.edit { putInt(KEY_COLOR_THEME, value) }
 
     var keyFontSize: Int
-        get() = prefs.getInt(KEY_FONT_SIZE, EFontSize.MEDIUM.ordinal)
+        get() = prefs.getInt(KEY_FONT_SIZE, EFontSize.MEDIUM.size)
         set(value) = prefs.edit { putInt(KEY_FONT_SIZE, value) }
 }
