@@ -22,6 +22,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -38,15 +39,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import dagger.hilt.android.AndroidEntryPoint
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.EAppTheme
+import fr.simon.marquis.preferencesmanager.model.ThemeSettings
 import fr.simon.marquis.preferencesmanager.ui.components.*
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@AndroidEntryPoint
 class AppListActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var themeSettings: ThemeSettings
 
     private val viewModel: AppListViewModel by viewModels()
 
@@ -72,6 +81,16 @@ class AppListActivity : ComponentActivity() {
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
 
+            val dialogNoRootState = rememberMaterialDialogState()
+            DialogNoRoot(dialogState = dialogNoRootState)
+
+            val theme = themeSettings.themeStream.collectAsState()
+            val isDarkTheme = when (theme.value) {
+                EAppTheme.AUTO -> isSystemInDarkTheme()
+                EAppTheme.DAY -> false
+                EAppTheme.NIGHT -> true
+            }
+
             val windowInset = Modifier
                 .statusBarsPadding()
                 .windowInsetsPadding(
@@ -79,9 +98,6 @@ class AppListActivity : ComponentActivity() {
                         .navigationBars
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                 )
-
-            val dialogNoRootState = rememberMaterialDialogState()
-            DialogNoRoot(dialogState = dialogNoRootState)
 
             if (!uiState.isRootGranted) {
                 LaunchedEffect(Unit) {
@@ -91,11 +107,15 @@ class AppListActivity : ComponentActivity() {
                 }
             }
 
-            AppTheme {
+            AppTheme(isDarkTheme = isDarkTheme) {
                 Scaffold(
                     modifier = windowInset,
                     topBar = {
-                        AppListAppBar(scrollBehavior = scrollBehavior, viewModel = viewModel)
+                        AppListAppBar(
+                            scrollBehavior = scrollBehavior,
+                            viewModel = viewModel,
+                            themeSettings = themeSettings,
+                        )
                     }
                 ) { paddingValues ->
                     AppListLayout(
@@ -113,13 +133,19 @@ class AppListActivity : ComponentActivity() {
 private fun AppListAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
+    themeSettings: ThemeSettings,
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState
 
-    // TODO live theme change
     val dialogThemeState = rememberMaterialDialogState()
-    DialogTheme(dialogState = dialogThemeState) {}
+    DialogTheme(
+        dialogState = dialogThemeState,
+        initialSelection = PrefManager.themePreference,
+    ) {
+        themeSettings.theme = EAppTheme.getAppTheme(it)
+        PrefManager.themePreference = it
+    }
 
     val dialogAboutState = rememberMaterialDialogState()
     DialogAbout(dialogState = dialogAboutState)

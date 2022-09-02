@@ -22,6 +22,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -42,6 +43,7 @@ import com.vanpra.composematerialdialogs.message
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.EFontTheme
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
@@ -116,7 +118,12 @@ class FileEditorActivity : ComponentActivity() {
                 message(res = R.string.popup_edit_message)
             }
 
-            AppTheme {
+            val isDarkTheme = when (EAppTheme.getAppTheme(PrefManager.themePreference)) {
+                EAppTheme.AUTO -> isSystemInDarkTheme()
+                EAppTheme.DAY -> false
+                EAppTheme.NIGHT -> true
+            }
+            AppTheme(isDarkTheme = isDarkTheme) {
                 Scaffold(
                     modifier = windowInset,
                     topBar = {
@@ -218,7 +225,7 @@ private fun Preview_FileEditorLayout() {
 
     val xmlColorTheme = XmlColorTheme.createTheme(EFontTheme.ECLIPSE)
 
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         FileEditorLayout(
             paddingValues = PaddingValues(),
             xmlColorTheme = xmlColorTheme,

@@ -17,7 +17,7 @@ private val lightColors = lightColorScheme()
 
 @Composable
 fun AppTheme(
-    isDarkTheme: Boolean = isSystemInDarkTheme(),
+    isDarkTheme: Boolean,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -27,22 +27,16 @@ fun AppTheme(
         PrefManager.init(context)
     }
 
-    val colorScheme = when (PrefManager.themePreference) {
-        0 -> lightColors
-        1 -> darkColors
-        else -> {
-            when {
-                dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                    val context = LocalContext.current
-                    if (isDarkTheme)
-                        dynamicDarkColorScheme(context)
-                    else
-                        dynamicLightColorScheme(context)
-                }
-                isDarkTheme -> darkColors
-                else -> lightColors
-            }
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (isDarkTheme)
+                dynamicDarkColorScheme(context)
+            else
+                dynamicLightColorScheme(context)
         }
+        isDarkTheme -> darkColors
+        else -> lightColors
     }
 
     val systemUiController = rememberSystemUiController()

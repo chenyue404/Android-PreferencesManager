@@ -2,6 +2,7 @@
 
 package fr.simon.marquis.preferencesmanager.ui.editor
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -174,7 +175,7 @@ private fun Preview_FileEditorMenu(
     appName: String = stringResource(id = R.string.app_name),
     textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         AppBar(
             title = { Text(text = appName) },
             actions = {

@@ -22,9 +22,9 @@ object PrefManager {
         prefs = PreferenceManager.getDefaultSharedPreferences(context)
     }
 
-    // Light: 0, Dark: 1, Auto: 2
+    // Auto: 0, Day: 1, Night: 2
     var themePreference: Int
-        get() = prefs.getInt(APP_THEME_PREF, 2)
+        get() = prefs.getInt(APP_THEME_PREF, 0)
         set(value) = prefs.edit { putInt(APP_THEME_PREF, value) }
 
     var showSystemApps: Boolean

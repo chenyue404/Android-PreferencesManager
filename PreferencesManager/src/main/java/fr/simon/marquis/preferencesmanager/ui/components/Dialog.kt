@@ -13,10 +13,13 @@ import de.charlex.compose.HtmlText
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
-import fr.simon.marquis.preferencesmanager.util.PrefManager
 
 @Composable
-fun DialogTheme(dialogState: MaterialDialogState, onPositive: () -> Unit) {
+fun DialogTheme(
+    dialogState: MaterialDialogState,
+    initialSelection: Int,
+    onPositive: (it: Int) -> Unit,
+) {
     MaterialDialog(
         dialogState = dialogState,
         buttons = {
@@ -26,16 +29,15 @@ fun DialogTheme(dialogState: MaterialDialogState, onPositive: () -> Unit) {
     ) {
         // This is heavily coupled with PrefManager.themePreference
         val themeItems = listOf(
+            stringResource(id = R.string.system_theme),
             stringResource(id = R.string.light_theme),
             stringResource(id = R.string.dark_theme),
-            stringResource(id = R.string.system_theme),
         )
         listItemsSingleChoice(
             list = themeItems,
-            initialSelection = PrefManager.themePreference
+            initialSelection = initialSelection
         ) {
-            PrefManager.themePreference = it
-            onPositive()
+            onPositive(it)
         }
     }
 }

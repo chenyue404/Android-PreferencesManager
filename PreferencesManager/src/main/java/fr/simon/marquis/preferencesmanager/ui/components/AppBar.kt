@@ -2,6 +2,7 @@
 
 package fr.simon.marquis.preferencesmanager.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
@@ -10,6 +11,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -166,7 +168,7 @@ private fun Preview_AppBar(
     appName: String = stringResource(id = R.string.app_name),
     textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         AppBar(
             title = { Text(appName) },
             textState = textState
@@ -174,13 +176,13 @@ private fun Preview_AppBar(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun Preview_Dark_AppBar(
     appName: String = stringResource(id = R.string.app_name),
     textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {
-    AppTheme(isDarkTheme = true) {
+    AppTheme(isSystemInDarkTheme()) {
         AppBar(
             title = { Text(appName) },
             textState = textState

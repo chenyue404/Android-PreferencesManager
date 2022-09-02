@@ -1,6 +1,7 @@
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,7 +45,7 @@ fun AppEntryHeader(
 private fun Preview_AppEntryHeader(
     letter: String = "Some Cool App"
 ) {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             AppEntryHeader(letter = letter[0])
         }

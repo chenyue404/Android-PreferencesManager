@@ -2,6 +2,7 @@ package fr.simon.marquis.preferencesmanager.ui.components
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
@@ -59,7 +60,7 @@ fun ScrollBackUp(
 @Preview
 @Composable
 private fun ScrollBackUpPreview() {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         ScrollBackUp(true, {})
     }
 }

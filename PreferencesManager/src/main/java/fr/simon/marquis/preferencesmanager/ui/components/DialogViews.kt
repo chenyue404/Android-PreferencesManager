@@ -2,6 +2,7 @@
 
 package fr.simon.marquis.preferencesmanager.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -193,23 +194,25 @@ internal fun DialogViewBooleanValue(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun Preview_RestoreItem() {
-    CustomViewChoiceItem(
-        item = "00/00/00 12:34:56PM",
-        index = 1,
-        selected = true,
-        enabled = true,
-        onDelete = {},
-        onSelect = {}
-    )
+    AppTheme(isSystemInDarkTheme()) {
+        CustomViewChoiceItem(
+            item = "00/00/00 12:34:56PM",
+            index = 1,
+            selected = true,
+            enabled = true,
+            onDelete = {},
+            onSelect = {}
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewStringValue_Edit() {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         DialogViewTextValue(
             isEdit = true,
             editKey = "Some Cool Key",
@@ -224,7 +227,7 @@ private fun Preview_DialogViewStringValue_Edit() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewStringValue_New() {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         DialogViewTextValue(
             isEdit = false,
             onUpdate = {},
@@ -237,7 +240,7 @@ private fun Preview_DialogViewStringValue_New() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewBooleanValue_Edit() {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         DialogViewBooleanValue(
             isEdit = true,
             editKey = "Some Cool Key",
@@ -252,7 +255,7 @@ private fun Preview_DialogViewBooleanValue_Edit() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewBooleanValue_New() {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         DialogViewBooleanValue(
             isEdit = false,
             onUpdate = {},

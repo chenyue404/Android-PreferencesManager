@@ -5,6 +5,7 @@ package fr.simon.marquis.preferencesmanager.ui.applist
 import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -85,7 +86,7 @@ private fun Preview_AppEntryItem() {
     val context = LocalContext.current
     val entry = AppEntry(appInfo, context)
 
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         AppEntryItem(entry = entry, onClick = {}, onLongClick = {})
     }
 }

@@ -1,5 +1,6 @@
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -200,7 +201,7 @@ private fun Preview_PreferencesMenu(
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
 
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         PreferencesAppBar(
             scrollBehavior = scrollBehavior,
             viewModel = viewModel,

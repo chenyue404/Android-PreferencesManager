@@ -4,6 +4,7 @@ package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -71,7 +72,7 @@ private fun Preview_PreferencesEntryItem(
     val preferences: List<KeyValueIndex> = listOf(KeyValueIndex(key = key, value = value))
     val list = ArrayList(preferences)
 
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         Column(modifier = Modifier.fillMaxWidth()) {
             PreferencesEntryItem(item = list.first())
         }

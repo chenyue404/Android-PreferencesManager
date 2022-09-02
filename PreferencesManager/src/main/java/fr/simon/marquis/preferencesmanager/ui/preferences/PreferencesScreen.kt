@@ -4,6 +4,7 @@ package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -88,7 +89,7 @@ private fun PreferenceEmptyView(isEmpty: Boolean) {
 )
 @Composable
 private fun Preview_PreferenceEmptyView() {
-    AppTheme {
+    AppTheme(isSystemInDarkTheme()) {
         PreferenceEmptyView(true)
     }
 }

@@ -3,12 +3,19 @@ package fr.simon.marquis.preferencesmanager.model
 import androidx.annotation.StringRes
 import fr.simon.marquis.preferencesmanager.R
 
+enum class EAppTheme {
+    AUTO, DAY, NIGHT;
+
+    companion object {
+        fun getAppTheme(value: Int): EAppTheme = values().find { it.ordinal == value }!!
+    }
+}
+
 enum class EFontTheme {
     ECLIPSE, GOOGLE, ROBOTICKET, NOTEPAD, NETBEANS;
 
     companion object {
         fun getByTheme(value: Int): EFontTheme = values().find { it.ordinal == value }!!
-
     }
 }
 

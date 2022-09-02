@@ -25,6 +25,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -50,10 +51,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import fr.simon.marquis.preferencesmanager.R
-import fr.simon.marquis.preferencesmanager.model.EPreferencesAdd
-import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
-import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
-import fr.simon.marquis.preferencesmanager.model.PreferenceFile
+import fr.simon.marquis.preferencesmanager.model.*
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
 import fr.simon.marquis.preferencesmanager.ui.components.DialogRestore
 import fr.simon.marquis.preferencesmanager.ui.components.showToast
@@ -143,7 +141,12 @@ class PreferencesActivity : ComponentActivity() {
             //     preferenceFile =
             // )
 
-            AppTheme {
+            val isDarkTheme = when (EAppTheme.getAppTheme(PrefManager.themePreference)) {
+                EAppTheme.AUTO -> isSystemInDarkTheme()
+                EAppTheme.DAY -> false
+                EAppTheme.NIGHT -> true
+            }
+            AppTheme(isDarkTheme = isDarkTheme) {
                 Scaffold(
                     modifier = windowInset,
                     topBar = {

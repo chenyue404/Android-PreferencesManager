@@ -17,9 +17,11 @@ package fr.simon.marquis.preferencesmanager
 
 import android.app.Application
 import com.topjohnwu.superuser.Shell
+import dagger.hilt.android.HiltAndroidApp
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import timber.log.Timber
 
+@HiltAndroidApp
 class App : Application() {
 
     init {
