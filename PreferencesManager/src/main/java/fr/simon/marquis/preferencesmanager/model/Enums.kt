@@ -7,14 +7,7 @@ enum class EFontTheme {
     ECLIPSE, GOOGLE, ROBOTICKET, NOTEPAD, NETBEANS;
 
     companion object {
-        fun getByTheme(value: Int): EFontTheme {
-            values().forEach {
-                if (it.ordinal == value)
-                    return it
-            }
-
-            throw IllegalArgumentException("$value is not a valid EFontTheme")
-        }
+        fun getByTheme(value: Int) = values()[value]
     }
 }
 
@@ -22,14 +15,7 @@ enum class EFontSize(val size: Int) {
     EXTRA_SMALL(10), SMALL(13), MEDIUM(16), LARGE(20), EXTRA_LARGE(24);
 
     companion object {
-        fun getBySize(value: Int): EFontSize {
-            values().forEach {
-                if (it.size == value)
-                    return it
-            }
-
-            throw IllegalArgumentException("$value is not a valid EFontSize")
-        }
+        fun getBySize(value: Int) = values()[value]
     }
 }
 

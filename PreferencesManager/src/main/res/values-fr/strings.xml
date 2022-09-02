@@ -88,7 +88,7 @@
     <string name="dialog_add">Ajouter</string>
     <string name="dialog_cancel">Annuler</string>
     <string name="dialog_update">Valider</string>
-    <string name="dialog_suppr">Effacer</string>
+    <string name="dialog_delete">Effacer</string>
 
     <string name="action_search">Chercher une application</string>
     <string name="show_system_apps">Afficher les applications Système</string>
