@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.model.AppEntry
+import fr.simon.marquis.preferencesmanager.model.ThemeSettingsImpl
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.*
@@ -26,6 +27,9 @@ data class AppListState(
 
 class AppListViewModel : ViewModel() {
 
+    var themeSettings: ThemeSettingsImpl
+        private set
+
     private val _uiState = mutableStateOf(AppListState())
     val uiState: State<AppListState> = _uiState
 
@@ -38,6 +42,8 @@ class AppListViewModel : ViewModel() {
                 searchText(it.text)
             }
         }
+
+        themeSettings = ThemeSettingsImpl()
     }
 
     fun setIsSearching(value: Boolean) {

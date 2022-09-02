@@ -23,7 +23,6 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -44,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import dagger.hilt.android.AndroidEntryPoint
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
@@ -57,15 +55,10 @@ import fr.simon.marquis.preferencesmanager.ui.preferences.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
-import javax.inject.Inject
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-@AndroidEntryPoint
 class AppListActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var themeSettings: ThemeSettings
 
     private val viewModel: AppListViewModel by viewModels()
 
@@ -105,7 +98,7 @@ class AppListActivity : ComponentActivity() {
             val dialogNoRootState = rememberMaterialDialogState()
             DialogNoRoot(dialogState = dialogNoRootState)
 
-            val theme = themeSettings.themeStream.collectAsState()
+            val theme = viewModel.themeSettings.themeStream.collectAsState()
             val isDarkTheme = when (theme.value) {
                 EAppTheme.AUTO -> isSystemInDarkTheme()
                 EAppTheme.DAY -> false
@@ -135,7 +128,7 @@ class AppListActivity : ComponentActivity() {
                         AppListAppBar(
                             scrollBehavior = scrollBehavior,
                             viewModel = viewModel,
-                            themeSettings = themeSettings,
+                            themeSettings = viewModel.themeSettings,
                         )
                     }
                 ) { paddingValues ->
