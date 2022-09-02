@@ -43,7 +43,7 @@ fun PreferenceFragment(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 state = scrollState,
-                contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
+                contentPadding = WindowInsets.navigationBars.asPaddingValues()
             ) {
                 itemsIndexed(
                     items = list,
