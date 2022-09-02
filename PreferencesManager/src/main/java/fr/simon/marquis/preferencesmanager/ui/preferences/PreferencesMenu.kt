@@ -17,6 +17,7 @@ import fr.simon.marquis.preferencesmanager.util.PrefManager
 
 @Composable
 fun PreferencesMenu(
+    isFavorite: Boolean,
     onSearch: () -> Unit,
     onAddClicked: (value: EPreferencesAdd) -> Unit,
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
@@ -129,16 +130,24 @@ fun PreferencesMenu(
                 isOverflowMenuSowing = false
             }
         )
-        // DropdownMenuItem(
-        //     text = { Text(text = stringResource(id = R.string.action_shortcut)) },
-        //     leadingIcon = {
-        //         Icon(Icons.Default.AppShortcut, contentDescription = null)
-        //     },
-        //     onClick = {
-        //         onOverflowClicked(EPreferencesOverflow.SHORTCUT)
-        //         isOverflowMenuSowing = false
-        //     }
-        // )
+        DropdownMenuItem(
+            text = {
+                if (isFavorite)
+                    Text(text = stringResource(id = R.string.action_unfav))
+                else
+                    Text(text = stringResource(id = R.string.action_fav))
+            },
+            leadingIcon = {
+                if (isFavorite)
+                    Icon(Icons.Default.FavoriteBorder, contentDescription = null)
+                else
+                    Icon(Icons.Default.Favorite, contentDescription = null)
+            },
+            onClick = {
+                onOverflowClicked(EPreferencesOverflow.FAV)
+                isOverflowMenuSowing = false
+            }
+        )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_backup_file)) },
             leadingIcon = {

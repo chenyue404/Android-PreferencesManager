@@ -58,6 +58,7 @@ import fr.simon.marquis.preferencesmanager.ui.components.showToast
 import fr.simon.marquis.preferencesmanager.ui.editor.FileEditorActivity
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
+import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.getParcelable
 import timber.log.Timber
 
@@ -170,6 +171,11 @@ class PreferencesActivity : ComponentActivity() {
 
                                 when (it) {
                                     EPreferencesOverflow.EDIT -> editFile(file)
+                                    EPreferencesOverflow.FAV -> {
+                                        val pkgName = uiState.value.pkgName
+                                        val favorite = Utils.isFavorite(pkgName)
+                                        Utils.setFavorite(pkgName, !favorite)
+                                    }
                                     EPreferencesOverflow.BACKUP -> {
                                         val pkgName = uiState.value.pkgName
                                         viewModel.backupFile(this, pkgName, file)
@@ -276,6 +282,7 @@ fun PreferencesAppBar(
         },
         actions = {
             PreferencesMenu(
+                isFavorite = Utils.isFavorite(uiState.pkgName),
                 onSearch = { viewModel.setIsSearching(true) },
                 onAddClicked = onAddClicked,
                 onOverflowClicked = onOverflowClicked,

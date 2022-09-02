@@ -60,17 +60,18 @@ class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
         private set
 
     init {
-        isFavorite = Utils.isFavorite(applicationInfo.packageName, context)
+        isFavorite = Utils.isFavorite(applicationInfo.packageName)
         mApkFile = File(applicationInfo.sourceDir)
         loadLabels(context)
         buildIconUri(applicationInfo)
     }
 
     private fun buildIconUri(info: ApplicationInfo) {
-        val builder = Uri.Builder()
-        builder.scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-        builder.authority(info.packageName)
-        builder.appendPath(info.icon.toString())
+        val builder = Uri.Builder().apply {
+            scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            authority(info.packageName)
+            appendPath(info.icon.toString())
+        }
         iconUri = builder.build()
     }
 

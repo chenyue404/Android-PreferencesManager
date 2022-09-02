@@ -20,6 +20,7 @@ import timber.log.Timber
 data class PreferencesState(
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
+    val isFavorite: Boolean = false,
     val pkgIcon: Uri? = null,
     val pkgName: String = "",
     val pkgTitle: String = "",

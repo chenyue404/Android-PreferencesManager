@@ -1,9 +1,6 @@
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
@@ -11,10 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.model.AppEntry
-import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_ICON_URI
-import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
-import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_TITLE
-import fr.simon.marquis.preferencesmanager.ui.preferences.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.*
@@ -90,32 +83,5 @@ class AppListViewModel : ViewModel() {
             onProgressUpdate = {
             }
         )
-    }
-
-    fun launchPreference(context: Context, app: AppEntry) {
-        if (!uiState.value.isRootGranted) {
-            Timber.e("We don't have root to continue!")
-        } else {
-            val intent = Intent(context, PreferencesActivity::class.java).apply {
-                putExtra(KEY_ICON_URI, app.iconUri)
-                putExtra(KEY_PACKAGE_NAME, app.applicationInfo.packageName)
-                putExtra(KEY_TITLE, app.label)
-            }
-
-            context.startActivity(intent)
-        }
-    }
-
-    fun launchAppSettings(context: Context, app: AppEntry) {
-        val intent = Intent().apply {
-            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            addCategory(Intent.CATEGORY_DEFAULT)
-            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-            data = Uri.fromParts("package", app.applicationInfo.packageName, null)
-        }
-
-        context.startActivity(intent)
     }
 }

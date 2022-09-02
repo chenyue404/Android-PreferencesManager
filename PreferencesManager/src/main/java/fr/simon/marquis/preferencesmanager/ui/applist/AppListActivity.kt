@@ -17,9 +17,14 @@
 
 package fr.simon.marquis.preferencesmanager.ui.applist
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -41,9 +46,14 @@ import androidx.core.view.WindowCompat
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import dagger.hilt.android.AndroidEntryPoint
 import fr.simon.marquis.preferencesmanager.R
+import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.ThemeSettings
 import fr.simon.marquis.preferencesmanager.ui.components.*
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_ICON_URI
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
+import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_TITLE
+import fr.simon.marquis.preferencesmanager.ui.preferences.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
@@ -59,6 +69,15 @@ class AppListActivity : ComponentActivity() {
 
     private val viewModel: AppListViewModel by viewModels()
 
+    private var activityResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.run {
+            if (uiState.value.isRootGranted)
+                startTask(this@AppListActivity)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,7 +87,7 @@ class AppListActivity : ComponentActivity() {
 
         if (savedInstanceState == null || Utils.previousApps == null) {
             viewModel.run {
-                if (viewModel.uiState.value.isRootGranted)
+                if (uiState.value.isRootGranted)
                     startTask(this@AppListActivity)
             }
         }
@@ -77,6 +96,8 @@ class AppListActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState
 
+            val context = LocalContext.current
+            val haptic = LocalHapticFeedback.current
             val scope = rememberCoroutineScope()
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
@@ -121,7 +142,42 @@ class AppListActivity : ComponentActivity() {
                     AppListLayout(
                         paddingValues = paddingValues,
                         scrollBehavior = scrollBehavior,
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        onClick = { entry ->
+                            if (!uiState.isRootGranted) {
+                                Timber.e("We don't have root to continue!")
+                            } else {
+                                val intent =
+                                    Intent(context, PreferencesActivity::class.java).apply {
+                                        putExtra(KEY_ICON_URI, entry.iconUri)
+                                        putExtra(
+                                            KEY_PACKAGE_NAME,
+                                            entry.applicationInfo.packageName
+                                        )
+                                        putExtra(KEY_TITLE, entry.label)
+                                    }
+
+                                activityResult.launch(intent)
+                            }
+                        },
+                        onLongClick = { entry ->
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                            val intent = Intent().apply {
+                                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                                data = Uri.fromParts(
+                                    "package",
+                                    entry.applicationInfo.packageName,
+                                    null
+                                )
+                            }
+
+                            activityResult.launch(intent)
+                        }
                     )
                 }
             }
@@ -177,9 +233,9 @@ private fun AppListLayout(
     paddingValues: PaddingValues,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
+    onClick: (entry: AppEntry) -> Unit,
+    onLongClick: (entry: AppEntry) -> Unit,
 ) {
-    val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState
@@ -211,11 +267,8 @@ private fun AppListLayout(
                         AppEntryItem(
                             modifier = Modifier.animateItemPlacement(),
                             entry = entry,
-                            onClick = { viewModel.launchPreference(context, entry) },
-                            onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                viewModel.launchAppSettings(context, entry)
-                            }
+                            onClick = { onClick(entry) },
+                            onLongClick = { onLongClick(entry) }
                         )
                     }
                 }

@@ -37,7 +37,7 @@ enum class EPreferencesAdd {
 }
 
 enum class EPreferencesOverflow {
-    EDIT, /* SHORTCUT, */ BACKUP, RESTORE
+    EDIT, FAV, BACKUP, RESTORE
 }
 
 enum class EPreferencesSort {

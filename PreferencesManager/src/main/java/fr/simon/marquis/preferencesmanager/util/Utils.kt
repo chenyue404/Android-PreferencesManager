@@ -22,7 +22,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import androidx.preference.PreferenceManager
 import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
@@ -71,7 +70,7 @@ fun <P, R> CoroutineScope.executeAsyncTask(
 object Utils {
 
     private val TAG: String = Utils::class.java.simpleName
-    private const val FAVORITES_KEY = "FAVORITES_KEY"
+
     private const val CMD_FIND_XML_FILES = "find /data/data/%s -type f -name \\*.xml"
     private const val CMD_CHOWN = "chown %s.%s \"%s\""
     private const val CMD_CAT_FILE = "cat \"%s\""
@@ -90,8 +89,9 @@ object Utils {
         if (pm == null) {
             previousApps = ArrayList()
         } else {
-            var appsInfo: MutableList<ApplicationInfo> =
-                pm.getInstalledApplications(PackageManager.GET_META_DATA)
+            val flags =
+                PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
+            var appsInfo: MutableList<ApplicationInfo> = pm.getInstalledApplications(flags)
 
             if (appsInfo.isEmpty()) {
                 appsInfo = ArrayList()
@@ -111,27 +111,6 @@ object Utils {
         return previousApps!!
     }
 
-    fun setFavorite(packageName: String, favorite: Boolean, ctx: Context) {
-        Timber.tag(TAG).d("setFavorite(%s, %s)", packageName, favorite)
-        initFavorites(ctx)
-
-        if (favorite) {
-            favorites!!.add(packageName)
-        } else {
-            favorites!!.remove(packageName)
-        }
-
-        val ed = PreferenceManager.getDefaultSharedPreferences(ctx).edit()
-        if (favorites!!.isEmpty()) {
-            ed.remove(FAVORITES_KEY)
-        } else {
-            ed.putString(FAVORITES_KEY, JSONArray(favorites).toString())
-        }
-
-        ed.apply()
-        updateApplicationInfo(packageName, favorite)
-    }
-
     private fun updateApplicationInfo(packageName: String, favorite: Boolean) {
         Timber.tag(TAG).d("updateApplicationInfo(%s, %s)", packageName, favorite)
         for (a in previousApps!!) {
@@ -142,20 +121,38 @@ object Utils {
         }
     }
 
-    fun isFavorite(packageName: String, ctx: Context): Boolean {
-        initFavorites(ctx)
+    fun setFavorite(packageName: String, favorite: Boolean) {
+        Timber.tag(TAG).d("setFavorite(%s, %s)", packageName, favorite)
+        initFavorites()
+
+        if (favorite) {
+            favorites!!.add(packageName)
+        } else {
+            favorites!!.remove(packageName)
+        }
+
+        if (favorites!!.isEmpty()) {
+            PrefManager.clearFavorites()
+        } else {
+            PrefManager.favorites = JSONArray(favorites).toString()
+        }
+
+        updateApplicationInfo(packageName, favorite)
+    }
+
+    fun isFavorite(packageName: String): Boolean {
+        initFavorites()
         return favorites!!.contains(packageName)
     }
 
-    private fun initFavorites(ctx: Context) {
+    private fun initFavorites() {
         if (favorites == null) {
             favorites = HashSet()
 
-            val sp = PreferenceManager.getDefaultSharedPreferences(ctx)
-
-            if (sp.contains(FAVORITES_KEY)) {
+            val preferencesFavorite = PrefManager.favorites
+            if (preferencesFavorite != null) {
                 try {
-                    val array = JSONArray(sp.getString(FAVORITES_KEY, "[]"))
+                    val array = JSONArray(preferencesFavorite)
                     for (i in 0 until array.length()) {
                         favorites!!.add(array.optString(i))
                     }
@@ -323,7 +320,8 @@ object Utils {
         val uid: String
         val pm = ctx.packageManager ?: return false
         try {
-            val appInfo = pm.getApplicationInfo(packageName, 0)
+            val flags = PackageManager.ApplicationInfoFlags.of(0)
+            val appInfo = pm.getApplicationInfo(packageName, flags)
             uid = appInfo.uid.toString()
         } catch (e: PackageManager.NameNotFoundException) {
             Timber.tag(TAG).e(e, "error while getting uid")
