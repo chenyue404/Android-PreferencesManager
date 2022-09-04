@@ -24,7 +24,7 @@ object PrefManager {
     }
 
     fun clearFavorites() {
-        prefs.edit().remove(FAVORITES_KEY).apply()
+        prefs.edit { remove(FAVORITES_KEY) }
     }
 
     // Auto: 0, Day: 1, Night: 2

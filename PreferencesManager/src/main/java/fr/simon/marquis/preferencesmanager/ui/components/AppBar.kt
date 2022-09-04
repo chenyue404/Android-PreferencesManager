@@ -162,23 +162,20 @@ fun SearchView(
     )
 }
 
-@Preview
 @Composable
-private fun Preview_AppBar(
-    appName: String = stringResource(id = R.string.app_name),
-    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
+fun NavigationBack(
+    onClick: () -> Unit,
 ) {
-    AppTheme(isSystemInDarkTheme()) {
-        AppBar(
-            title = { Text(appName) },
-            textState = textState
-        )
-    }
+    IconButton(
+        onClick = onClick,
+        content = { Icon(Icons.Default.ArrowBack, contentDescription = null) }
+    )
 }
 
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-fun Preview_Dark_AppBar(
+private fun Preview_AppBar(
     appName: String = stringResource(id = R.string.app_name),
     textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 ) {

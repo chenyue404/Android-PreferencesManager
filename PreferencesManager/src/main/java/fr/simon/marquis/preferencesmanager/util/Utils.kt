@@ -19,6 +19,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -30,6 +31,7 @@ import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
+import java.text.Collator
 import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -89,9 +91,13 @@ object Utils {
         if (pm == null) {
             previousApps = ArrayList()
         } else {
-            val flags =
-                PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
-            var appsInfo: MutableList<ApplicationInfo> = pm.getInstalledApplications(flags)
+            var appsInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val flags = ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
+                pm.getInstalledApplications(flags)
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getInstalledApplications(0)
+            }
 
             if (appsInfo.isEmpty()) {
                 appsInfo = ArrayList()
@@ -104,7 +110,19 @@ object Utils {
                 }
             }
 
-            Collections.sort(entries, MyComparator())
+            val comparator = object : Comparator<AppEntry> {
+                private val sCollator = Collator.getInstance()
+
+                init {
+                    // Ignore case and accents
+                    sCollator.strength = Collator.SECONDARY
+                }
+
+                override fun compare(obj1: AppEntry, obj2: AppEntry): Int =
+                    sCollator.compare(obj1.sortingValue, obj2.sortingValue)
+            }
+
+            Collections.sort(entries, comparator)
             previousApps = ArrayList(entries)
         }
         Timber.tag(TAG).d("Applications: %s", previousApps!!.toTypedArray().contentToString())
@@ -320,8 +338,13 @@ object Utils {
         val uid: String
         val pm = ctx.packageManager ?: return false
         try {
-            val flags = PackageManager.ApplicationInfoFlags.of(0)
-            val appInfo = pm.getApplicationInfo(packageName, flags)
+            val appInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val flags = ApplicationInfoFlags.of(0)
+                pm.getApplicationInfo(packageName, flags)
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getApplicationInfo(packageName, 0)
+            }
             uid = appInfo.uid.toString()
         } catch (e: PackageManager.NameNotFoundException) {
             Timber.tag(TAG).e(e, "error while getting uid")

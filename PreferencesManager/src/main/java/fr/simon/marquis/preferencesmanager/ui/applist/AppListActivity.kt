@@ -29,6 +29,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
@@ -188,13 +189,7 @@ private fun AppListAppBar(
     val uiState by viewModel.uiState
 
     val dialogThemeState = rememberMaterialDialogState()
-    DialogTheme(
-        dialogState = dialogThemeState,
-        initialSelection = PrefManager.themePreference,
-    ) {
-        themeSettings.theme = EAppTheme.getAppTheme(it)
-        PrefManager.themePreference = it
-    }
+    DialogTheme(dialogThemeState, PrefManager.themePreference, themeSettings)
 
     val dialogAboutState = rememberMaterialDialogState()
     DialogAbout(dialogState = dialogAboutState)
@@ -229,7 +224,6 @@ private fun AppListLayout(
     onClick: (entry: AppEntry) -> Unit,
     onLongClick: (entry: AppEntry) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState
 
@@ -251,10 +245,7 @@ private fun AppListLayout(
                 val items = uiState.filteredAppList.groupBy { it.headerChar }
                 items.forEach { (letter, item) ->
                     stickyHeader {
-                        AppEntryHeader(
-                            modifier = Modifier, // .animateItemPlacement(),
-                            letter = letter
-                        )
+                        AppEntryHeader(letter = letter)
                     }
                     items(item) { entry ->
                         AppEntryItem(
@@ -268,19 +259,31 @@ private fun AppListLayout(
             }
         }
 
-        val showBackUpButton = remember {
-            derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
-        }
-        ScrollBackUp(
-            modifier = Modifier
-                .navigationBarsPadding()
-                .align(Alignment.BottomCenter),
-            enabled = showBackUpButton.value,
-            onClicked = {
-                scope.launch {
-                    scrollState.animateScrollToItem(0)
-                }
-            }
+        ScrollUpLayout(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            scrollState = scrollState,
         )
     }
+}
+
+@Composable
+private fun ScrollUpLayout(
+    modifier: Modifier = Modifier,
+    scrollState: LazyListState,
+) {
+    val scope = rememberCoroutineScope()
+    val showBackUpButton = remember {
+        derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
+    }
+    ScrollBackUp(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .then(modifier),
+        enabled = showBackUpButton.value,
+        onClicked = {
+            scope.launch {
+                scrollState.animateScrollToItem(0)
+            }
+        }
+    )
 }

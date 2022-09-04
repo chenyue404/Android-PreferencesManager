@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
-import fr.simon.marquis.preferencesmanager.ui.components.getColorFromObjet
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
+import fr.simon.marquis.preferencesmanager.ui.theme.getColorFromObjet
 import java.util.ArrayList
 
 @Composable

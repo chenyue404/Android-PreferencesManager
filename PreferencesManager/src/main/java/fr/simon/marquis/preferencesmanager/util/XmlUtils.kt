@@ -25,124 +25,13 @@ import org.xmlpull.v1.XmlPullParser.*
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 
-/**
- * {@hide}
- */
 object XmlUtils {
-
-//    @Throws(XmlPullParserException::class, IOException::class)
-//    fun skipCurrentTag(parser: XmlPullParser) {
-//        val outerDepth = parser.depth
-//        var type: Int
-//        while ((type = parser.next()) != END_DOCUMENT && (type != END_TAG || parser.depth > outerDepth)) {
-//        }
-//    }
-
-//    fun convertValueToList(value: CharSequence?, options: Array<String>, defaultValue: Int): Int {
-//        if (null != value) {
-//            for (i in options.indices) {
-//                if (value == options[i])
-//                    return i
-//            }
-//        }
-//
-//        return defaultValue
-//    }
-
-//    fun convertValueToBoolean(value: CharSequence?, defaultValue: Boolean): Boolean {
-//        var result = false
-//
-//        if (null == value)
-//            return defaultValue
-//
-//        if (value == "1" || value == "true" || value == "TRUE")
-//            result = true
-//
-//        return result
-//    }
-
-//    fun convertValueToInt(charSeq: CharSequence?, defaultValue: Int): Int {
-//        if (null == charSeq)
-//            return defaultValue
-//
-//        val nm = charSeq.toString()
-//
-//        // XXX This code is copied from Integer.decode() so we don't
-//        // have to instantiate an Integer!
-//
-//        val value: Int
-//        var sign = 1
-//        var index = 0
-//        val len = nm.length
-//        var base = 10
-//
-//        if ('-' == nm[0]) {
-//            sign = -1
-//            index++
-//        }
-//
-//        if ('0' == nm[index]) {
-//            // Quick check for a zero by itself
-//            if (index == len - 1)
-//                return 0
-//
-//            val c = nm[index + 1]
-//
-//            if ('x' == c || 'X' == c) {
-//                index += 2
-//                base = 16
-//            } else {
-//                index++
-//                base = 8
-//            }
-//        } else if ('#' == nm[index]) {
-//            index++
-//            base = 16
-//        }
-//
-//        return Integer.parseInt(nm.substring(index), base) * sign
-//    }
-
-//    fun convertValueToUnsignedInt(value: String?, defaultValue: Int): Int {
-//        return value?.let { parseUnsignedIntAttribute(it) } ?: defaultValue
-//
-//    }
-
-//    fun parseUnsignedIntAttribute(charSeq: CharSequence): Int {
-//        val value = charSeq.toString()
-//
-//        val bits: Long
-//        var index = 0
-//        val len = value.length
-//        var base = 10
-//
-//        if ('0' == value[index]) {
-//            // Quick check for zero by itself
-//            if (index == len - 1)
-//                return 0
-//
-//            val c = value[index + 1]
-//
-//            if ('x' == c || 'X' == c) { // check for hex
-//                index += 2
-//                base = 16
-//            } else { // check for octal
-//                index++
-//                base = 8
-//            }
-//        } else if ('#' == value[index]) {
-//            index++
-//            base = 16
-//        }
-//
-//        return java.lang.Long.parseLong(value.substring(index), base).toInt()
-//    }
 
     /**
      * Flatten a Map into an output stream as XML. The map can later be read
      * back with readMapXml().
      *
-     * @param `val` The map to be flattened.
+     * @param value The map to be flattened.
      * @param out Where to write the XML data.
      * @see .writeMapXml
      * @see .writeListXml
@@ -152,43 +41,20 @@ object XmlUtils {
      * @see .readMapXml
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun writeMapXml(`val`: MutableMap<Any, Any>?, out: OutputStream) {
+    fun writeMapXml(value: MutableMap<Any, Any>?, out: OutputStream) {
         val serializer = FastXmlSerializer()
         serializer.setOutput(out, "utf-8")
         serializer.startDocument(null, true)
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-        writeMapXml(`val`, null, serializer)
+        writeMapXml(value, null, serializer)
         serializer.endDocument()
     }
-
-//    /**
-//     * Flatten a List into an output stream as XML. The list can later be read
-//     * back with readListXml().
-//     *
-//     * @param val The list to be flattened.
-//     * @param out Where to write the XML data.
-//     * @see .writeListXml
-//     * @see .writeMapXml
-//     *
-//     * @see .writeValueXml
-//     *
-//     * @see .readListXml
-//     */
-//    @Throws(XmlPullParserException::class, java.io.IOException::class)
-//    fun writeListXml(`val`: List<*>, out: OutputStream) {
-//        val serializer = Xml.newSerializer()
-//        serializer.setOutput(out, "utf-8")
-//        serializer.startDocument(null, true)
-//        serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-//        writeListXml(`val`, null, serializer)
-//        serializer.endDocument()
-//    }
 
     /**
      * Flatten a Map into an XmlSerializer. The map can later be read back with
      * readThisMapXml().
      *
-     * @param val  The map to be flattened.
+     * @param value  The map to be flattened.
      * @param name Name attribute to include with this list's tag, or null for
      * none.
      * @param out  XmlSerializer to write the map into.
@@ -200,14 +66,14 @@ object XmlUtils {
      * @see .readMapXml
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun writeMapXml(`val`: Map<*, *>?, name: String?, out: XmlSerializer) {
-        if (`val` == null) {
+    fun writeMapXml(value: Map<*, *>?, name: String?, out: XmlSerializer) {
+        if (value == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
             return
         }
 
-        val s = `val`.entries
+        val s = value.entries
         val i = s.iterator()
 
         out.startTag(null, "map")
@@ -227,7 +93,7 @@ object XmlUtils {
      * Flatten a List into an XmlSerializer. The list can later be read back
      * with readThisListXml().
      *
-     * @param val  The list to be flattened.
+     * @param value  The list to be flattened.
      * @param name Name attribute to include with this list's tag, or null for
      * none.
      * @param out  XmlSerializer to write the list into.
@@ -239,8 +105,8 @@ object XmlUtils {
      * @see .readListXml
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun writeListXml(`val`: List<*>?, name: String?, out: XmlSerializer) {
-        if (`val` == null) {
+    fun writeListXml(value: List<*>?, name: String?, out: XmlSerializer) {
+        if (value == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
             return
@@ -251,10 +117,10 @@ object XmlUtils {
             out.attribute(null, "name", name)
         }
 
-        val n = `val`.size
+        val n = value.size
         var i = 0
         while (i < n) {
-            writeValueXml(`val`[i], null, out)
+            writeValueXml(value[i], null, out)
             i++
         }
 
@@ -262,8 +128,8 @@ object XmlUtils {
     }
 
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun writeSetXml(`val`: Set<*>?, name: String?, out: XmlSerializer) {
-        if (`val` == null) {
+    fun writeSetXml(value: Set<*>?, name: String?, out: XmlSerializer) {
+        if (value == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
             return
@@ -274,7 +140,7 @@ object XmlUtils {
             out.attribute(null, "name", name)
         }
 
-        for (v in `val`) {
+        for (v in value) {
             writeValueXml(v, null, out)
         }
 
@@ -285,7 +151,7 @@ object XmlUtils {
      * Flatten a byte[] into an XmlSerializer. The list can later be read back
      * with readThisByteArrayXml().
      *
-     * @param `val`  The byte array to be flattened.
+     * @param byteArray  The byte array to be flattened.
      * @param name Name attribute to include with this array's tag, or null for
      * none.
      * @param out  XmlSerializer to write the array into.
@@ -328,7 +194,7 @@ object XmlUtils {
      * Flatten an int[] into an XmlSerializer. The list can later be read back
      * with readThisIntArrayXml().
      *
-     * @param val  The int array to be flattened.
+     * @param value  The int array to be flattened.
      * @param name Name attribute to include with this array's tag, or null for
      * none.
      * @param out  XmlSerializer to write the array into.
@@ -339,9 +205,9 @@ object XmlUtils {
      * @see .readThisIntArrayXml
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun writeIntArrayXml(`val`: IntArray?, name: String?, out: XmlSerializer) {
+    fun writeIntArrayXml(value: IntArray?, name: String?, out: XmlSerializer) {
 
-        if (`val` == null) {
+        if (value == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
             return
@@ -352,12 +218,12 @@ object XmlUtils {
             out.attribute(null, "name", name)
         }
 
-        val n = `val`.size
+        val n = value.size
         out.attribute(null, "num", n.toString())
 
         for (i in 0 until n) {
             out.startTag(null, "item")
-            out.attribute(null, "value", `val`[i].toString())
+            out.attribute(null, "value", value[i].toString())
             out.endTag(null, "item")
         }
 
@@ -471,48 +337,6 @@ object XmlUtils {
         return readValueXml(parser, arrayOfNulls(1)) as HashMap<Any, Any>?
     }
 
-//    /**
-//     * Read an ArrayList from an InputStream containing XML. The stream can
-//     * previously have been written by writeListXml().
-//     *
-//     * @param in The InputStream from which to read.
-//     * @return ArrayList The resulting list.
-//     * @see .readMapXml
-//     *
-//     * @see .readValueXml
-//     *
-//     * @see .readThisListXml
-//     *
-//     * @see .writeListXml
-//     */
-//      @Throws(XmlPullParserException::class, java.io.IOException::class)
-//      fun readListXml(`in`: InputStream): ArrayList<*> {
-//          val parser = Xml.newPullParser()
-//          parser.setInput(`in`, null)
-//          return (readValueXml(parser, arrayOfNulls(1)) as ArrayList<*>?)!!
-//      }
-
-//    /**
-//     * Read a HashSet from an InputStream containing XML. The stream can
-//     * previously have been written by writeSetXml().
-//     *
-//     * @param in The InputStream from which to read.
-//     * @return HashSet The resulting set.
-//     * @throws XmlPullParserException
-//     * @throws java.io.IOException
-//     * @see .readValueXml
-//     *
-//     * @see .readThisSetXml
-//     *
-//     * @see .writeSetXml
-//     */
-//    @Throws(XmlPullParserException::class, java.io.IOException::class)
-//    fun readSetXml(`in`: InputStream): HashSet<*>? {
-//        val parser = Xml.newPullParser()
-//        parser.setInput(`in`, null)
-//        return readValueXml(parser, arrayOfNulls(1)) as HashSet<*>?
-//    }
-
     /**
      * Read a HashMap object from an XmlPullParser. The XML data could
      * previously have been generated by writeMapXml(). The XmlPullParser must
@@ -532,11 +356,10 @@ object XmlUtils {
         var eventType = parser.eventType
         do {
             if (eventType == START_TAG) {
-                val `val` = readThisValueXml(parser, name)
+                val value = readThisValueXml(parser, name)
                 if (name[0] != null) {
-                    // System.out.println("Adding to map: " + name + " -> " +
-                    // val);
-                    map[name[0]!!] = `val`!!
+                    // System.out.println("Adding to map: " + name + " -> " + val);
+                    map[name[0]!!] = value!!
                 } else {
                     throw XmlPullParserException("Map value without name attribute: " + parser.name)
                 }
@@ -571,8 +394,8 @@ object XmlUtils {
         var eventType = parser.eventType
         do {
             if (eventType == START_TAG) {
-                val `val` = readThisValueXml(parser, name)
-                list.add(`val`!!)
+                val value = readThisValueXml(parser, name)
+                list.add(value!!)
                 // System.out.println("Adding to list: " + val);
             } else if (eventType == END_TAG) {
                 if (parser.name == endTag) {
@@ -607,8 +430,8 @@ object XmlUtils {
         var eventType = parser.eventType
         do {
             if (eventType == START_TAG) {
-                val `val` = readThisValueXml(parser, name)
-                set.add(`val`!!)
+                val value = readThisValueXml(parser, name)
+                set.add(value!!)
                 // System.out.println("Adding to set: " + val);
             } else if (eventType == END_TAG) {
                 if (parser.name == endTag) {
@@ -715,8 +538,7 @@ object XmlUtils {
         val valueName = parser.getAttributeValue(null, "name")
         val tagName = parser.name
 
-        // System.out.println("Reading this value tag: " + tagName + ", name=" +
-        // valueName);
+        // System.out.println("Reading this value tag: " + tagName + ", name=" + valueName);
 
         val res: Any?
 
@@ -733,8 +555,7 @@ object XmlUtils {
                         END_TAG -> {
                             if (parser.name == "string") {
                                 name[0] = valueName
-                                // System.out.println("Returning value for " + valueName
-                                // + ": " + value);
+                                // System.out.println("Returning value for " + valueName + ": " + value);
                                 return value
                             }
                             throw XmlPullParserException(
@@ -759,32 +580,28 @@ object XmlUtils {
                 parser.next()
                 res = readThisIntArrayXml(parser, "int-array", name)
                 name[0] = valueName
-                // System.out.println("Returning value for " + valueName + ": " +
-                // res);
+                // System.out.println("Returning value for " + valueName + ": " + res);
                 return res
             }
             "map" -> {
                 parser.next()
                 res = readThisMapXml(parser, "map", name)
                 name[0] = valueName
-                // System.out.println("Returning value for " + valueName + ": " +
-                // res);
+                // System.out.println("Returning value for " + valueName + ": " + res);
                 return res
             }
             "list" -> {
                 parser.next()
                 res = readThisListXml(parser, "list", name)
                 name[0] = valueName
-                // System.out.println("Returning value for " + valueName + ": " +
-                // res);
+                // System.out.println("Returning value for " + valueName + ": " + res);
                 return res
             }
             "set" -> {
                 parser.next()
                 res = readThisSetXml(parser, "set", name)
                 name[0] = valueName
-                // System.out.println("Returning value for " + valueName + ": " +
-                // res);
+                // System.out.println("Returning value for " + valueName + ": " + res);
                 return res
             }
             else -> throw XmlPullParserException("Unknown tag: $tagName")
@@ -800,8 +617,7 @@ object XmlUtils {
                 END_TAG -> {
                     if (parser.name == tagName) {
                         name[0] = valueName
-                        // System.out.println("Returning value for " + valueName +
-                        // ": " + res);
+                        // System.out.println("Returning value for " + valueName + ": " + res);
                         return res
                     }
                     throw XmlPullParserException(
@@ -819,26 +635,4 @@ object XmlUtils {
 
         throw XmlPullParserException("Unexpected end of document in <$tagName>")
     }
-
-//    @Throws(XmlPullParserException::class, IOException::class)
-//    fun beginDocument(parser: XmlPullParser, firstElementName: String) {
-//        var type: Int
-//        while ((type = parser.next()) != START_TAG && type != END_DOCUMENT) {
-//        }
-//
-//        if (type != START_TAG) {
-//            throw XmlPullParserException("No start tag found")
-//        }
-//
-//        if (parser.name != firstElementName) {
-//            throw XmlPullParserException("Unexpected start tag: found " + parser.name + ", expected " + firstElementName)
-//        }
-//    }
-
-//    @Throws(XmlPullParserException::class, IOException::class)
-//    fun nextElement(parser: XmlPullParser) {
-//        var type: Int
-//        while ((type = parser.next()) != START_TAG && type != END_DOCUMENT) {
-//        }
-//    }
 }

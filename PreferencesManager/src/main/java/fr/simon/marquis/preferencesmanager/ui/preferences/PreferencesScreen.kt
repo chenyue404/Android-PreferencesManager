@@ -87,6 +87,10 @@ private fun PreferenceEmptyView(isEmpty: Boolean) {
     uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
     showBackground = true
 )
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+    showBackground = true
+)
 @Composable
 private fun Preview_PreferenceEmptyView() {
     AppTheme(isSystemInDarkTheme()) {

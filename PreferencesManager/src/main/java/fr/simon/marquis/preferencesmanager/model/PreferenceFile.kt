@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 import org.xmlpull.v1.XmlPullParserException
+import timber.log.Timber
 
 data class KeyValueIndex(
     var index: Int? = null,
@@ -34,7 +35,6 @@ class PreferenceFile {
 
     private var mPreferences: MutableMap<Any, Any>? = null
     private var mList: MutableList<KeyValueIndex>? = null
-
     lateinit var file: String
 
     var list: MutableList<KeyValueIndex>
@@ -82,8 +82,10 @@ class PreferenceFile {
         val out = ByteArrayOutputStream()
         try {
             XmlUtils.writeMapXml(mPreferences, out)
-        } catch (ignored: XmlPullParserException) {
-        } catch (ignored: IOException) {
+        } catch (exception: XmlPullParserException) {
+            Timber.e(exception)
+        } catch (exception: IOException) {
+            Timber.e(exception)
         }
 
         return out.toString()
@@ -93,18 +95,22 @@ class PreferenceFile {
         for (entry in mList!!) {
             if (entry.key == key) {
                 entry.value = value
+
                 break
             }
         }
+
         mPreferences!![key] = value
         updateSort()
     }
 
     private fun removeValue(key: String) {
         mPreferences!!.remove(key)
+
         for (entry in mList!!) {
             if (entry.key == key) {
                 mList!!.remove(entry)
+
                 break
             }
         }
@@ -113,6 +119,7 @@ class PreferenceFile {
     private fun createAndAddValue(key: String, value: Any) {
         mList!!.add(0, KeyValueIndex(key = key, value = value))
         mPreferences!![key] = value
+
         updateSort()
     }
 
@@ -145,6 +152,7 @@ class PreferenceFile {
     private fun updateSort() {
         val sortType = PrefManager.keySortType
         val comparator = PreferenceComparator(EPreferencesSort.values()[sortType])
+
         Collections.sort(list, comparator)
     }
 
@@ -168,8 +176,10 @@ class PreferenceFile {
                 preferenceFile.setPreferences(map)
 
                 return preferenceFile
-            } catch (ignored: XmlPullParserException) {
-            } catch (ignored: IOException) {
+            } catch (exception: XmlPullParserException) {
+                Timber.e(exception)
+            } catch (exception: IOException) {
+                Timber.e(exception)
             }
 
             return preferenceFile

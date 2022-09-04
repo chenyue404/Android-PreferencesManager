@@ -21,6 +21,8 @@ fun AppTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+
+    /* If were looking at edit previews, fool it and init preferences to render */
     val view = LocalView.current
     if (view.isInEditMode) {
         val context = LocalContext.current

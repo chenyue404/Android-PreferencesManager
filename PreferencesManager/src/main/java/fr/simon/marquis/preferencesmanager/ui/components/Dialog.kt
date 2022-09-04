@@ -12,13 +12,16 @@ import com.vanpra.composematerialdialogs.*
 import de.charlex.compose.HtmlText
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
+import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
+import fr.simon.marquis.preferencesmanager.model.ThemeSettings
+import fr.simon.marquis.preferencesmanager.util.PrefManager
 
 @Composable
 fun DialogTheme(
     dialogState: MaterialDialogState,
     initialSelection: Int,
-    onPositive: (it: Int) -> Unit,
+    themeSettings: ThemeSettings,
 ) {
     MaterialDialog(
         dialogState = dialogState,
@@ -37,7 +40,8 @@ fun DialogTheme(
             list = themeItems,
             initialSelection = initialSelection
         ) {
-            onPositive(it)
+            themeSettings.theme = EAppTheme.getAppTheme(it)
+            PrefManager.themePreference = it
         }
     }
 }
@@ -199,5 +203,23 @@ private fun MaterialDialogScope.listItemsCustomSingleChoice(
             onSelect = onSelect,
             onDelete = onDelete,
         )
+    }
+}
+
+@Composable
+fun DialogSaveChanges(
+    saveChangesState: MaterialDialogState,
+    onPositive: () -> Unit,
+    onNegative: () -> Unit,
+) {
+    MaterialDialog(
+        dialogState = saveChangesState,
+        buttons = {
+            positiveButton(res = R.string.yes, onClick = onPositive)
+            negativeButton(res = R.string.no, onClick = onNegative)
+        }
+    ) {
+        title(text = "Unsaved Changes")
+        message(res = R.string.popup_edit_message)
     }
 }

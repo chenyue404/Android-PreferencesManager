@@ -1,15 +1,16 @@
 package fr.simon.marquis.preferencesmanager.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,10 +58,18 @@ fun ScrollBackUp(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 private fun ScrollBackUpPreview() {
     AppTheme(isSystemInDarkTheme()) {
-        ScrollBackUp(true, {})
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            ScrollBackUp(enabled = true, {})
+        }
     }
 }

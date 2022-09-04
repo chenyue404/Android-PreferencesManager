@@ -17,7 +17,7 @@ package fr.simon.marquis.preferencesmanager.model
  */
 
 import androidx.compose.ui.graphics.Color
-import fr.simon.marquis.preferencesmanager.ui.components.*
+import fr.simon.marquis.preferencesmanager.ui.theme.*
 
 class XmlColorTheme(
     private val xmlTag: Color,

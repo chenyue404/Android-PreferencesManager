@@ -24,17 +24,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -45,8 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
@@ -244,28 +244,26 @@ fun PreferencesAppBar(
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
     onSortClicked: (value: EPreferencesSort) -> Unit
 ) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState
 
     AppBar(
         scrollBehavior = scrollBehavior,
         title = {
-            val painter = if (iconUri != null) {
-                rememberAsyncImagePainter(
-                    model = ImageRequest.Builder(context)
-                        .data(iconUri)
-                        .crossfade(true)
-                        .build(),
-                )
-            } else {
-                rememberVectorPainter(image = Icons.Default.Settings)
-            }
-
             Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
+                SubcomposeAsyncImage(
                     modifier = Modifier.size(48.dp),
-                    painter = painter,
-                    contentDescription = null
+                    model = iconUri,
+                    contentDescription = null,
+                    loading = {
+                        CircularProgressIndicator()
+                    },
+                    error = {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    },
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {

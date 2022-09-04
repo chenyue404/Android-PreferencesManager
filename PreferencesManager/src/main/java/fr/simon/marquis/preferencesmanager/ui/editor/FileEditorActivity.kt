@@ -24,8 +24,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,20 +31,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.message
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.EFontTheme
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
+import fr.simon.marquis.preferencesmanager.ui.components.DialogSaveChanges
+import fr.simon.marquis.preferencesmanager.ui.components.NavigationBack
 import fr.simon.marquis.preferencesmanager.ui.components.showToast
 import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_FILE
 import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
@@ -73,6 +72,7 @@ class FileEditorActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState
 
+            val context = LocalContext.current
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
 
@@ -96,27 +96,22 @@ class FileEditorActivity : ComponentActivity() {
                 )
 
             val saveChangesState = rememberMaterialDialogState()
-            MaterialDialog(
-                dialogState = saveChangesState,
-                buttons = {
-                    positiveButton(res = R.string.yes) {
-                        if (viewModel.saveChanges(this@FileEditorActivity)) {
-                            showToast(R.string.save_success)
-                            setResult(RESULT_OK)
-                            finish()
-                        } else {
-                            showToast(R.string.save_fail)
-                        }
+            DialogSaveChanges(
+                saveChangesState = saveChangesState,
+                onPositive = {
+                    if (viewModel.saveChanges(this@FileEditorActivity)) {
+                        showToast(R.string.save_success)
+                        setResult(ComponentActivity.RESULT_OK)
+                        finish()
+                    } else {
+                        showToast(R.string.save_fail)
                     }
-                    negativeButton(res = R.string.no) {
-                        @Suppress("DEPRECATION")
-                        onBackPressed()
-                    }
+                },
+                onNegative = {
+                    @Suppress("DEPRECATION")
+                    onBackPressed()
                 }
-            ) {
-                title(text = "Unsaved Changes")
-                message(res = R.string.popup_edit_message)
-            }
+            )
 
             val isDarkTheme = when (EAppTheme.getAppTheme(PrefManager.themePreference)) {
                 EAppTheme.AUTO -> isSystemInDarkTheme()
@@ -137,18 +132,14 @@ class FileEditorActivity : ComponentActivity() {
                                 )
                             },
                             navigationIcon = {
-                                IconButton(
-                                    onClick = {
-                                        if (uiState.textChanged) {
-                                            saveChangesState.show()
-                                            return@IconButton
-                                        }
-
-                                        @Suppress("DEPRECATION")
-                                        onBackPressed()
+                                NavigationBack {
+                                    if (uiState.textChanged) {
+                                        saveChangesState.show()
+                                        return@NavigationBack
                                     }
-                                ) {
-                                    Icon(Icons.Default.ArrowBack, contentDescription = null)
+
+                                    @Suppress("DEPRECATION")
+                                    onBackPressed()
                                 }
                             },
                             actions = {
@@ -159,7 +150,8 @@ class FileEditorActivity : ComponentActivity() {
                                             return@FileEditorMenu
                                         }
 
-                                        if (viewModel.saveChanges(this@FileEditorActivity))
+                                        val saveChanges = viewModel.saveChanges(context)
+                                        if (saveChanges)
                                             showToast(R.string.save_success)
                                         else
                                             showToast(R.string.save_fail)
@@ -231,7 +223,7 @@ private fun Preview_FileEditorLayout() {
             xmlColorTheme = xmlColorTheme,
             textSize = PrefManager.keyFontSize,
             scrollBehavior = scrollBehavior,
-            text = "Hello!",
+            text = stringResource(id = R.string.about_body),
             onValueChange = {},
         )
     }

@@ -2,6 +2,7 @@
 
 package fr.simon.marquis.preferencesmanager.ui.applist
 
+import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -31,6 +32,7 @@ fun AppListMenu(
     IconButton(onClick = { isMenuShowing = !isMenuShowing }) {
         Icon(Icons.Default.MoreVert, null)
     }
+
     DropdownMenu(
         expanded = isMenuShowing,
         onDismissRequest = { isMenuShowing = false }
@@ -80,7 +82,8 @@ fun AppListMenu(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 private fun Preview_AppListMenu(
     appName: String = stringResource(id = R.string.app_name),
