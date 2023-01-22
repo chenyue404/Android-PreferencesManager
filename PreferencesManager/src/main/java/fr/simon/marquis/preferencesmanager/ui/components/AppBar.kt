@@ -4,7 +4,6 @@ package fr.simon.marquis.preferencesmanager.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
@@ -30,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,23 +64,13 @@ fun AppBar(
     isSearching: Boolean = false,
     onSearchClose: () -> Unit = {}
 ) {
-    val backgroundColors = TopAppBarDefaults.centerAlignedTopAppBarColors()
-    val minColor = backgroundColors.containerColor(colorTransitionFraction = 0f).value
-    val maxColor = backgroundColors.containerColor(colorTransitionFraction = 1f).value
-    val easing = FastOutLinearInEasing.transform(scrollBehavior?.state?.overlappedFraction ?: 0f)
-    val backgroundColor = lerp(minColor, maxColor, easing)
-
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(backgroundColor)
-
-    val foregroundColors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-        containerColor = Color.Transparent,
-        scrolledContainerColor = Color.Transparent
-    )
-    Box(modifier = Modifier.background(backgroundColor)) {
-        SmallTopAppBar(
+    Box {
+        TopAppBar(
             modifier = modifier,
+            navigationIcon = navigationIcon,
             actions = actions,
+            // colors = foregroundColors,
+            scrollBehavior = scrollBehavior,
             title = {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -91,9 +78,6 @@ fun AppBar(
                     content = { title() }
                 )
             },
-            scrollBehavior = scrollBehavior,
-            colors = foregroundColors,
-            navigationIcon = navigationIcon
         )
 
         if (textState != null) {
@@ -103,7 +87,7 @@ fun AppBar(
                 exit = slideUp(),
             ) {
                 SearchView(
-                    backgroundColor = backgroundColor,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
                     state = textState,
                     onClose = onSearchClose
                 )
@@ -118,48 +102,55 @@ fun SearchView(
     state: MutableStateFlow<TextFieldValue>,
     onClose: () -> Unit
 ) {
-    TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredHeight(64.dp),
-        label = { Text("Search apps...") },
-        textStyle = TextStyle(fontSize = 18.sp),
-        singleLine = true,
-        shape = RectangleShape, // The TextFiled has rounded corners top left and right by default
-        value = state.collectAsState().value,
-        onValueChange = { value ->
-            state.value = value
-        },
-        leadingIcon = {
-            IconButton(
-                onClick = {
-                    onClose()
-                    state.value = TextFieldValue("")
-                }
-            ) {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = null,
+    Box(Modifier.background(backgroundColor)) {
+        TextField(
+            modifier = Modifier
+                .windowInsetsPadding(
+                    WindowInsets
+                        .statusBars
+                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                 )
-            }
-        },
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    // Remove text from TextField when you press the 'X' icon
-                    state.value = TextFieldValue("")
+                .fillMaxWidth()
+                .requiredHeight(64.dp),
+            label = { Text("Search apps...") },
+            textStyle = TextStyle(fontSize = 18.sp),
+            singleLine = true,
+            shape = RectangleShape,
+            value = state.collectAsState().value,
+            onValueChange = { value ->
+                state.value = value
+            },
+            leadingIcon = {
+                IconButton(
+                    onClick = {
+                        onClose()
+                        state.value = TextFieldValue("")
+                    }
+                ) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = null,
+                    )
                 }
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = null
-                )
-            }
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = backgroundColor
+            },
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        // Remove text from TextField when you press the 'X' icon
+                        state.value = TextFieldValue("")
+                    }
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = null
+                    )
+                }
+            },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = backgroundColor
+            )
         )
-    )
+    }
 }
 
 @Composable

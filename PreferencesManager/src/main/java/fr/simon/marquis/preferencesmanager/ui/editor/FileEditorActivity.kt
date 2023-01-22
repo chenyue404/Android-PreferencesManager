@@ -28,7 +28,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -74,7 +74,7 @@ class FileEditorActivity : ComponentActivity() {
 
             val context = LocalContext.current
             val topBarState = rememberTopAppBarState()
-            val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
             LaunchedEffect(Unit) {
                 val file = intent.getString(KEY_FILE)
@@ -87,21 +87,13 @@ class FileEditorActivity : ComponentActivity() {
                 viewModel.setPackageInfo(file, title, pkgName)
             }
 
-            val windowInset = Modifier
-                .systemBarsPadding()
-                .windowInsetsPadding(
-                    WindowInsets
-                        .systemBars
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                )
-
             val saveChangesState = rememberMaterialDialogState()
             DialogSaveChanges(
                 saveChangesState = saveChangesState,
                 onPositive = {
                     if (viewModel.saveChanges(this@FileEditorActivity)) {
                         showToast(R.string.save_success)
-                        setResult(ComponentActivity.RESULT_OK)
+                        setResult(RESULT_OK)
                         finish()
                     } else {
                         showToast(R.string.save_fail)
@@ -119,9 +111,21 @@ class FileEditorActivity : ComponentActivity() {
                 EAppTheme.NIGHT -> true
             }
             AppTheme(isDarkTheme = isDarkTheme) {
-                Scaffold(
-                    modifier = windowInset,
-                    topBar = {
+                Surface {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        FileEditorLayout(
+                            modifier = Modifier
+                                .systemBarsPadding()
+                                .padding(top = 64.dp), // TODO this can be measured
+                            scrollBehavior = scrollBehavior,
+                            xmlColorTheme = uiState.xmlColorTheme!!,
+                            textSize = uiState.fontSize.size,
+                            text = uiState.editText ?: "[This should not be empty!]",
+                            onValueChange = {
+                                viewModel.setTextChanged(it)
+                            }
+                        )
+
                         AppBar(
                             scrollBehavior = scrollBehavior,
                             title = {
@@ -166,17 +170,6 @@ class FileEditorActivity : ComponentActivity() {
                             },
                         )
                     }
-                ) { paddingValues ->
-                    FileEditorLayout(
-                        paddingValues = paddingValues,
-                        scrollBehavior = scrollBehavior,
-                        xmlColorTheme = uiState.xmlColorTheme!!,
-                        textSize = uiState.fontSize.size,
-                        text = uiState.editText ?: "[This should not be empty!]",
-                        onValueChange = {
-                            viewModel.setTextChanged(it)
-                        }
-                    )
                 }
             }
         }
@@ -185,7 +178,7 @@ class FileEditorActivity : ComponentActivity() {
 
 @Composable
 private fun FileEditorLayout(
-    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
     xmlColorTheme: XmlColorTheme,
     textSize: Int,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -193,8 +186,7 @@ private fun FileEditorLayout(
     onValueChange: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .padding(paddingValues)
+        modifier = modifier
             .fillMaxSize()
             .imePadding()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -213,13 +205,12 @@ private fun FileEditorLayout(
 @Composable
 private fun Preview_FileEditorLayout() {
     val topBarState = rememberTopAppBarState()
-    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
     val xmlColorTheme = XmlColorTheme.createTheme(EFontTheme.ECLIPSE)
 
     AppTheme(isSystemInDarkTheme()) {
         FileEditorLayout(
-            paddingValues = PaddingValues(),
             xmlColorTheme = xmlColorTheme,
             textSize = PrefManager.keyFontSize,
             scrollBehavior = scrollBehavior,

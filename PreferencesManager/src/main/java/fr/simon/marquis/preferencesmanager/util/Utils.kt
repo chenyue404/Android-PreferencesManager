@@ -104,9 +104,9 @@ object Utils {
             }
 
             val entries = ArrayList<AppEntry>(appsInfo.size)
-            for (a in appsInfo) {
-                if (PrefManager.showSystemApps || a.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
-                    entries.add(AppEntry(a, ctx))
+            appsInfo.forEach { app ->
+                if (PrefManager.showSystemApps || app.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
+                    entries.add(AppEntry(app, ctx))
                 }
             }
 
@@ -131,9 +131,9 @@ object Utils {
 
     private fun updateApplicationInfo(packageName: String, favorite: Boolean) {
         Timber.tag(TAG).d("updateApplicationInfo(%s, %s)", packageName, favorite)
-        for (a in previousApps!!) {
-            if (a.applicationInfo.packageName == packageName) {
-                a.setFavorite(favorite)
+        previousApps?.forEach { app ->
+            if (app.applicationInfo.packageName == packageName) {
+                app.setFavorite(favorite)
                 return
             }
         }
@@ -197,7 +197,7 @@ object Utils {
         val lines = ArrayList<String>()
         Shell.cmd(String.format(CMD_CAT_FILE, file)).to(lines).exec()
 
-        for (line in lines) {
+        lines.forEach { line ->
             sb.append(line)
             sb.append(LINE_SEPARATOR)
         }
@@ -247,7 +247,7 @@ object Utils {
     fun restoreFile(ctx: Context, fileName: String, packageName: String): Boolean {
         Timber.tag(TAG).d("restoreFile(%s, %s)", fileName, packageName)
         val backupFile = File(fileName)
-        Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
+        val job = Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
             Timber.tag(TAG).e("Error fixUserAndGroupId")
@@ -258,7 +258,7 @@ object Utils {
             .killBackgroundProcesses(packageName)
 
         Timber.tag(TAG).d("restoreFile --> $fileName")
-        return true
+        return job.isSuccess
     }
 
     fun deleteFile(fileName: String): Boolean {

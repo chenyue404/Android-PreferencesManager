@@ -210,12 +210,12 @@ private fun Preview_PreferencesMenu(
     title: String = "Some Cool App",
     pkgName: String = "com.some.cool.app"
 ) {
-    val topBarState = rememberTopAppBarState()
-    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+    // val topBarState = rememberTopAppBarState()
+    // val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
     AppTheme(isSystemInDarkTheme()) {
         PreferencesAppBar(
-            scrollBehavior = scrollBehavior,
+            scrollBehavior = null, // scrollBehavior,
             viewModel = viewModel,
             pkgTitle = title,
             pkgName = pkgName,

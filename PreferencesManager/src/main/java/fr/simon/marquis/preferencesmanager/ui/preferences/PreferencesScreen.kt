@@ -29,7 +29,7 @@ fun PreferenceFragment(
     onLongClick: () -> Unit,
 ) {
     val topBarState = rememberTopAppBarState()
-    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val scrollState = rememberLazyListState()
 
     Column(

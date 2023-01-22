@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -33,7 +33,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -68,7 +67,6 @@ const val KEY_PACKAGE_NAME = "KEY_PACKAGE_NAME"
 const val KEY_TITLE = "KEY_TITLE"
 const val KEY_FILE = "KEY_FILE"
 
-// TODO: Add cab selection again, or some multi select option.
 // TODO: Add columns to list if either a tablet or landscape mode.
 
 class PreferencesActivity : ComponentActivity() {
@@ -79,7 +77,6 @@ class PreferencesActivity : ComponentActivity() {
     private var resultFileEdit = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        // TODO: This should reflect any changes once were back.
         viewModel.getTabsAndPreferences()
     }
 
@@ -100,15 +97,8 @@ class PreferencesActivity : ComponentActivity() {
             val uiState = viewModel.uiState
 
             val topBarState = rememberTopAppBarState()
-            val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topBarState) }
+            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
             val pagerState = rememberPagerState()
-            val windowInset = Modifier
-                .statusBarsPadding()
-                .windowInsetsPadding(
-                    WindowInsets
-                        .navigationBars
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                )
 
             LaunchedEffect(Unit) {
                 val pkgTitle = intent.getString(KEY_TITLE)!!
@@ -150,12 +140,29 @@ class PreferencesActivity : ComponentActivity() {
                 EAppTheme.DAY -> false
                 EAppTheme.NIGHT -> true
             }
+
             AppTheme(isDarkTheme = isDarkTheme) {
-                Scaffold(
-                    modifier = windowInset,
-                    topBar = {
-                        PreferencesAppBar(
+                Surface {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val haptic = LocalHapticFeedback.current
+                        TabLayout(
+                            modifier = Modifier
+                                .statusBarsPadding()
+                                .padding(top = 64.dp), // TODO this can be measured
                             scrollBehavior = scrollBehavior,
+                            pagerState = pagerState,
+                            viewModel = viewModel,
+                            onClick = {
+                                /* TODO */
+                            },
+                            onLongClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                // TODO: Add cab selection again, or some multi select option.
+                            }
+                        )
+
+                        PreferencesAppBar(
+                            scrollBehavior = null, // scrollBehavior,
                             viewModel = viewModel,
                             pkgTitle = uiState.value.pkgTitle,
                             pkgName = uiState.value.pkgName,
@@ -179,12 +186,14 @@ class PreferencesActivity : ComponentActivity() {
                                         val favorite = Utils.isFavorite(pkgName)
                                         Utils.setFavorite(pkgName, !favorite)
                                     }
+
                                     EPreferencesOverflow.BACKUP -> {
                                         val pkgName = uiState.value.pkgName
-                                        viewModel.backupFile(this, pkgName, file)
+                                        viewModel.backupFile(context, pkgName, file)
                                     }
+
                                     EPreferencesOverflow.RESTORE -> {
-                                        viewModel.findFilesToRestore(this, file) { hasResult ->
+                                        viewModel.findFilesToRestore(context, file) { hasResult ->
                                             if (hasResult) {
                                                 restoreDialogState.show()
                                             } else {
@@ -200,22 +209,6 @@ class PreferencesActivity : ComponentActivity() {
                             },
                         )
                     }
-                ) { paddingValues ->
-                    val haptic = LocalHapticFeedback.current
-
-                    TabLayout(
-                        paddingValues = paddingValues,
-                        scrollBehavior = scrollBehavior,
-                        pagerState = pagerState,
-                        viewModel = viewModel,
-                        onClick = {
-                            /* TODO */
-                        },
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // TODO multi select.
-                        }
-                    )
                 }
             }
         }
@@ -234,7 +227,7 @@ class PreferencesActivity : ComponentActivity() {
 
 @Composable
 fun PreferencesAppBar(
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: TopAppBarScrollBehavior?,
     viewModel: PreferencesViewModel,
     pkgTitle: String,
     pkgName: String,
@@ -304,7 +297,6 @@ fun PreferencesAppBar(
 @Composable
 fun TabLayout(
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues,
     scrollBehavior: TopAppBarScrollBehavior,
     pagerState: PagerState,
     viewModel: PreferencesViewModel,
@@ -314,13 +306,11 @@ fun TabLayout(
     val uiState by viewModel.uiState
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+            modifier = Modifier
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         ) {
             val tabs = uiState.tabList
@@ -329,7 +319,6 @@ fun TabLayout(
                 PreferenceEmptyView()
             } else {
                 Tabs(
-                    scrollBehavior = scrollBehavior,
                     tabs = tabs,
                     pagerState = pagerState,
                 )

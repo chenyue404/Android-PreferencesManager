@@ -2,13 +2,16 @@
 
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.lerp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -45,18 +48,13 @@ fun TabsContent(
 }
 
 @Composable
-fun Tabs(scrollBehavior: TopAppBarScrollBehavior, tabs: List<TabItem>, pagerState: PagerState) {
+fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
-    val backgroundColors = TopAppBarDefaults.centerAlignedTopAppBarColors()
-    val minColor = backgroundColors.containerColor(colorTransitionFraction = 0f).value
-    val maxColor = backgroundColors.containerColor(colorTransitionFraction = 1f).value
-    val easing = FastOutLinearInEasing.transform(scrollBehavior.state.overlappedFraction)
-    val backgroundColor = lerp(minColor, maxColor, easing)
 
     ScrollableTabRow(
         modifier = Modifier.fillMaxWidth(),
         selectedTabIndex = pagerState.currentPage,
-        containerColor = backgroundColor,
+        containerColor = MaterialTheme.colorScheme.surface,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(Modifier.pagerTabIndicatorOffset(pagerState, tabPositions))
         }
