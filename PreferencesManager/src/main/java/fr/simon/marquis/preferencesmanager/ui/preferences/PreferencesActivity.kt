@@ -274,6 +274,7 @@ fun PreferencesAppBar(
             }
         },
         actions = {
+            // TODO this is recomposing unnecessarily when swiped
             PreferencesMenu(
                 isFavorite = Utils.isFavorite(uiState.pkgName),
                 onSearch = { viewModel.setIsSearching(true) },
@@ -283,6 +284,7 @@ fun PreferencesAppBar(
             )
         },
         navigationIcon = {
+            // TODO this is recomposing unnecessarily when swiped
             IconButton(onClick = onBackPressed) {
                 Icon(Icons.Default.ArrowBack, contentDescription = null)
             }
