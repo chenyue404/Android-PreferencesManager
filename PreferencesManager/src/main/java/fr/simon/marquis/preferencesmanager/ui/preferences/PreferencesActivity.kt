@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -115,14 +114,14 @@ class PreferencesActivity : ComponentActivity() {
             val restoreDialogState = rememberMaterialDialogState()
             DialogRestore(
                 dialogState = restoreDialogState,
-                container = uiState.value.restoreData,
+                container = uiState.restoreData,
                 onRestore = { fileName ->
-                    val pkgName = uiState.value.pkgName
+                    val pkgName = uiState.pkgName
                     viewModel.performFileRestore(context, fileName, pkgName)
                 },
                 onDelete = { fileName ->
                     val currentPage = pagerState.currentPage
-                    val currentTab = uiState.value.tabList[currentPage]
+                    val currentTab = uiState.tabList[currentPage]
                     val file = currentTab.preferenceFile!!.file
 
                     viewModel.deleteFile(context, fileName, file)
@@ -164,9 +163,9 @@ class PreferencesActivity : ComponentActivity() {
                         PreferencesAppBar(
                             scrollBehavior = null, // scrollBehavior,
                             viewModel = viewModel,
-                            pkgTitle = uiState.value.pkgTitle,
-                            pkgName = uiState.value.pkgName,
-                            iconUri = uiState.value.pkgIcon,
+                            pkgTitle = uiState.pkgTitle,
+                            pkgName = uiState.pkgName,
+                            iconUri = uiState.pkgIcon,
                             onBackPressed = {
                                 @Suppress("DEPRECATION")
                                 onBackPressed()
@@ -176,19 +175,19 @@ class PreferencesActivity : ComponentActivity() {
                             },
                             onOverflowClicked = {
                                 val currentPage = pagerState.currentPage
-                                val currentTab = uiState.value.tabList[currentPage]
+                                val currentTab = uiState.tabList[currentPage]
                                 val file = currentTab.preferenceFile!!.file
 
                                 when (it) {
                                     EPreferencesOverflow.EDIT -> editFile(file)
                                     EPreferencesOverflow.FAV -> {
-                                        val pkgName = uiState.value.pkgName
+                                        val pkgName = uiState.pkgName
                                         val favorite = Utils.isFavorite(pkgName)
                                         Utils.setFavorite(pkgName, !favorite)
                                     }
 
                                     EPreferencesOverflow.BACKUP -> {
-                                        val pkgName = uiState.value.pkgName
+                                        val pkgName = uiState.pkgName
                                         viewModel.backupFile(context, pkgName, file)
                                     }
 
@@ -217,8 +216,8 @@ class PreferencesActivity : ComponentActivity() {
     private fun editFile(file: String) {
         val intent = Intent(this, FileEditorActivity::class.java).apply {
             putExtra(KEY_FILE, file)
-            putExtra(KEY_ICON_URI, viewModel.uiState.value.pkgIcon)
-            putExtra(KEY_PACKAGE_NAME, viewModel.uiState.value.pkgName)
+            putExtra(KEY_ICON_URI, viewModel.uiState.pkgIcon)
+            putExtra(KEY_PACKAGE_NAME, viewModel.uiState.pkgName)
         }
 
         resultFileEdit.launch(intent)
@@ -237,7 +236,7 @@ fun PreferencesAppBar(
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
     onSortClicked: (value: EPreferencesSort) -> Unit
 ) {
-    val uiState by viewModel.uiState
+    val uiState by viewModel::uiState
 
     AppBar(
         scrollBehavior = scrollBehavior,
@@ -303,7 +302,7 @@ fun TabLayout(
     onClick: (preferenceFile: PreferenceFile?) -> Unit,
     onLongClick: (preferenceFile: PreferenceFile?) -> Unit
 ) {
-    val uiState by viewModel.uiState
+    val uiState by viewModel::uiState
 
     Box(
         modifier = modifier,

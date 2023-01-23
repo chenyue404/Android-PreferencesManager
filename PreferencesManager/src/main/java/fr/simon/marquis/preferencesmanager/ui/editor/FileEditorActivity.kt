@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -70,7 +69,7 @@ class FileEditorActivity : ComponentActivity() {
 
         Timber.i("onCreate")
         setContent {
-            val uiState by viewModel.uiState
+            val uiState by viewModel::uiState
 
             val context = LocalContext.current
             val topBarState = rememberTopAppBarState()

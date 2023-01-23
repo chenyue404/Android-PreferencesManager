@@ -47,7 +47,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -83,11 +82,11 @@ class AppListActivity : ComponentActivity() {
 
     private val viewModel: AppListViewModel by viewModels()
 
-    private var activityResult = registerForActivityResult(
+    private val activityResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.run {
-            if (uiState.value.isRootGranted)
+            if (uiState.isRootGranted)
                 startTask(this@AppListActivity)
         }
     }
@@ -101,14 +100,14 @@ class AppListActivity : ComponentActivity() {
 
         if (savedInstanceState == null || Utils.previousApps == null) {
             viewModel.run {
-                if (uiState.value.isRootGranted)
+                if (uiState.isRootGranted)
                     startTask(this@AppListActivity)
             }
         }
 
         Timber.i("onCreate")
         setContent {
-            val uiState by viewModel.uiState
+            val uiState by viewModel::uiState
 
             val context = LocalContext.current
             val haptic = LocalHapticFeedback.current
@@ -188,7 +187,7 @@ private fun AppListAppBar(
     themeSettings: ThemeSettings,
 ) {
     val context = LocalContext.current
-    val uiState by viewModel.uiState
+    val uiState by viewModel::uiState
 
     val dialogThemeState = rememberMaterialDialogState()
     DialogTheme(dialogThemeState, PrefManager.themePreference, themeSettings)
@@ -226,7 +225,7 @@ private fun AppListLayout(
     onClick: (entry: AppEntry) -> Unit,
     onLongClick: (entry: AppEntry) -> Unit,
 ) {
-    val uiState by viewModel.uiState
+    val uiState by viewModel::uiState
 
     Surface {
         Box(modifier = Modifier.fillMaxSize()) {

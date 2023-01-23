@@ -321,7 +321,7 @@ object XmlUtils {
      * Read a HashMap from an InputStream containing XML. The stream can
      * previously have been written by writeMapXml().
      *
-     * @param in The InputStream from which to read.
+     * @param inputStream The InputStream from which to read.
      * @return HashMap The resulting map.
      * @see .readListXml
      *
@@ -331,9 +331,9 @@ object XmlUtils {
      */
     @Suppress("Unchecked_Cast")
     @Throws(XmlPullParserException::class, java.io.IOException::class)
-    fun readMapXml(`in`: InputStream): HashMap<Any, Any>? {
+    fun readMapXml(inputStream: InputStream): HashMap<Any, Any>? {
         val parser = Xml.newPullParser()
-        parser.setInput(`in`, null)
+        parser.setInput(inputStream, null)
         return readValueXml(parser, arrayOfNulls(1)) as HashMap<Any, Any>?
     }
 

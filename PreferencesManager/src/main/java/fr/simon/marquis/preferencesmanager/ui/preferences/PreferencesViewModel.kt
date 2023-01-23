@@ -3,8 +3,9 @@ package fr.simon.marquis.preferencesmanager.ui.preferences
 import android.content.Context
 import android.net.Uri
 import android.util.Pair
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,10 +13,10 @@ import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
-import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.Date
 
 data class PreferencesState(
     val isLoading: Boolean = false,
@@ -30,14 +31,14 @@ data class PreferencesState(
 
 class PreferencesViewModel : ViewModel() {
 
-    private val _uiState = mutableStateOf(PreferencesState())
-    val uiState: State<PreferencesState> = _uiState
+    var uiState by mutableStateOf(PreferencesState())
+        private set
 
     private val _searchText = MutableStateFlow(TextFieldValue(""))
     val searchText: MutableStateFlow<TextFieldValue> = _searchText
 
     fun setPackageInfo(pkgTitle: String, pkgName: String, pkgIcon: Uri?) {
-        _uiState.value = uiState.value.copy(
+        uiState = uiState.copy(
             pkgTitle = pkgTitle,
             pkgName = pkgName,
             pkgIcon = pkgIcon
@@ -45,20 +46,20 @@ class PreferencesViewModel : ViewModel() {
     }
 
     fun setIsSearching(value: Boolean) {
-        _uiState.value = uiState.value.copy(isSearching = value)
+        uiState = uiState.copy(isSearching = value)
     }
 
     fun clearRestoreData() {
-        _uiState.value = uiState.value.copy(restoreData = null)
+        uiState = uiState.copy(restoreData = null)
     }
 
     fun getTabsAndPreferences() {
         viewModelScope.executeAsyncTask(
             onPreExecute = {
-                _uiState.value = uiState.value.copy(isLoading = true)
+                uiState = uiState.copy(isLoading = true)
             },
             doInBackground = { _: suspend (progress: Int) -> Unit ->
-                val xmlFiles = Utils.findXmlFiles(uiState.value.pkgName)
+                val xmlFiles = Utils.findXmlFiles(uiState.pkgName)
                 val xmlPreferences = xmlFiles.map { file ->
                     val content = Utils.readFile(file)
                     PreferenceFile.fromXml(content, file)
@@ -70,7 +71,7 @@ class PreferencesViewModel : ViewModel() {
                 val tabList = it.first.mapIndexed { index, string ->
                     TabItem(pkgName = string, preferenceFile = it.second[index])
                 }
-                _uiState.value = uiState.value.copy(tabList = tabList, isLoading = false)
+                uiState = uiState.copy(tabList = tabList, isLoading = false)
             },
             onProgressUpdate = {
             }
@@ -94,7 +95,7 @@ class PreferencesViewModel : ViewModel() {
 
         Timber.d("Restore has ${container.backupList.size} items")
 
-        _uiState.value = uiState.value.copy(restoreData = container)
+        uiState = uiState.copy(restoreData = container)
 
         hasResult(container.backupList.isNotEmpty())
     }
