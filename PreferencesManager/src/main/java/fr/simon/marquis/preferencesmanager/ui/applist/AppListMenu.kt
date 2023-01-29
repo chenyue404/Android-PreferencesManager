@@ -85,13 +85,10 @@ fun AppListMenu(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-private fun Preview_AppListMenu(
-    appName: String = stringResource(id = R.string.app_name),
-    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
-) {
+private fun Preview_AppListMenu() {
     AppTheme(isSystemInDarkTheme()) {
         AppBar(
-            title = { Text(text = appName) },
+            title = { Text(text = stringResource(id = R.string.app_name)) },
             actions = {
                 AppListMenu(
                     onSearch = {},
@@ -100,7 +97,7 @@ private fun Preview_AppListMenu(
                     onAbout = {}
                 )
             },
-            textState = textState
+            textState = MutableStateFlow(TextFieldValue(""))
         )
     }
 }

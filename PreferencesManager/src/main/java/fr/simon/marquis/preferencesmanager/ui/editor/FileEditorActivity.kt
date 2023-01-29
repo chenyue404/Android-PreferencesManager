@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -99,8 +98,7 @@ class FileEditorActivity : ComponentActivity() {
                     }
                 },
                 onNegative = {
-                    @Suppress("DEPRECATION")
-                    onBackPressed()
+                    onBackPressedDispatcher.onBackPressed()
                 }
             )
 
@@ -111,11 +109,54 @@ class FileEditorActivity : ComponentActivity() {
             }
             AppTheme(isDarkTheme = isDarkTheme) {
                 Surface {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Scaffold(
+                        topBar = {
+                            AppBar(
+                                scrollBehavior = scrollBehavior,
+                                title = {
+                                    Text(
+                                        text = uiState.title ?: "[Empty Package Name]",
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                navigationIcon = {
+                                    NavigationBack {
+                                        if (uiState.textChanged) {
+                                            saveChangesState.show()
+                                            return@NavigationBack
+                                        }
+
+                                        onBackPressedDispatcher.onBackPressed()
+                                    }
+                                },
+                                actions = {
+                                    FileEditorMenu(
+                                        onSave = {
+                                            if (!uiState.textChanged) {
+                                                showToast(R.string.toast_no_changes)
+                                                return@FileEditorMenu
+                                            }
+
+                                            val saveChanges = viewModel.saveChanges(context)
+                                            if (saveChanges)
+                                                showToast(R.string.save_success)
+                                            else
+                                                showToast(R.string.save_fail)
+                                        },
+                                        onFontTheme = {
+                                            viewModel.setFontTheme(it)
+                                        },
+                                        onFontSize = {
+                                            viewModel.setFontSize(it)
+                                        }
+                                    )
+                                },
+                            )
+                        }
+                    ) { paddingValues ->
                         FileEditorLayout(
-                            modifier = Modifier
-                                .systemBarsPadding()
-                                .padding(top = 64.dp), // TODO this can be measured
+                            modifier = Modifier.padding(paddingValues),
                             scrollBehavior = scrollBehavior,
                             xmlColorTheme = uiState.xmlColorTheme!!,
                             textSize = uiState.fontSize.size,
@@ -123,50 +164,6 @@ class FileEditorActivity : ComponentActivity() {
                             onValueChange = {
                                 viewModel.setTextChanged(it)
                             }
-                        )
-
-                        AppBar(
-                            scrollBehavior = scrollBehavior,
-                            title = {
-                                Text(
-                                    text = uiState.title ?: "[Empty Package Name]",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            navigationIcon = {
-                                NavigationBack {
-                                    if (uiState.textChanged) {
-                                        saveChangesState.show()
-                                        return@NavigationBack
-                                    }
-
-                                    @Suppress("DEPRECATION")
-                                    onBackPressed()
-                                }
-                            },
-                            actions = {
-                                FileEditorMenu(
-                                    onSave = {
-                                        if (!uiState.textChanged) {
-                                            showToast(R.string.toast_no_changes)
-                                            return@FileEditorMenu
-                                        }
-
-                                        val saveChanges = viewModel.saveChanges(context)
-                                        if (saveChanges)
-                                            showToast(R.string.save_success)
-                                        else
-                                            showToast(R.string.save_fail)
-                                    },
-                                    onFontTheme = {
-                                        viewModel.setFontTheme(it)
-                                    },
-                                    onFontSize = {
-                                        viewModel.setFontSize(it)
-                                    }
-                                )
-                            },
                         )
                     }
                 }
@@ -205,10 +202,9 @@ private fun FileEditorLayout(
 private fun Preview_FileEditorLayout() {
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
-
     val xmlColorTheme = XmlColorTheme.createTheme(EFontTheme.ECLIPSE)
 
-    AppTheme(isSystemInDarkTheme()) {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         FileEditorLayout(
             xmlColorTheme = xmlColorTheme,
             textSize = PrefManager.keyFontSize,

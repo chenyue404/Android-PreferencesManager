@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,10 +44,10 @@ fun AppEntryHeader(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-private fun Preview_AppEntryHeader(
-    letter: String = "Some Cool App"
-) {
-    AppTheme(isSystemInDarkTheme()) {
-        AppEntryHeader(letter = letter[0])
+private fun Preview_AppEntryHeader() {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
+        Surface {
+            AppEntryHeader(letter = 'S')
+        }
     }
 }

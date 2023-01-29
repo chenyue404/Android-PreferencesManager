@@ -83,17 +83,13 @@ private fun PreferenceEmptyView(isEmpty: Boolean) {
     }
 }
 
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
-    showBackground = true
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
-    showBackground = true
-)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 private fun Preview_PreferenceEmptyView() {
-    AppTheme(isSystemInDarkTheme()) {
-        PreferenceEmptyView(true)
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
+        Surface {
+            PreferenceEmptyView(true)
+        }
     }
 }

@@ -1,6 +1,8 @@
 package fr.simon.marquis.preferencesmanager.ui.components
 
 import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -52,8 +54,13 @@ fun DialogAbout(
 ) {
     val context = LocalContext.current
 
-    @Suppress("DEPRECATION")
-    val appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    val appVersion = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val flags = PackageManager.PackageInfoFlags.of(0L)
+        context.packageManager.getPackageInfo(context.packageName, flags).versionName
+    } else {
+        @Suppress("DEPRECATION")
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    }
     val appTitle = stringResource(R.string.app_name_and_version, appVersion)
 
     MaterialDialog(

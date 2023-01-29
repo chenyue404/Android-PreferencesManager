@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.ui.theme.getColorFromObjet
-import java.util.ArrayList
 
 @Composable
 fun PreferencesEntryItem(
@@ -65,16 +64,17 @@ fun PreferencesEntryItem(
 
 @Preview
 @Composable
-private fun Preview_PreferencesEntryItem(
-    key: String = "Hello World",
-    value: String = "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh",
-) {
-    val preferences: List<KeyValueIndex> = listOf(KeyValueIndex(key = key, value = value))
-    val list = ArrayList(preferences)
+private fun Preview_PreferencesEntryItem() {
+    val preferences = listOf(
+        KeyValueIndex(
+            key = "Hello World",
+            value = "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh"
+        )
+    )
 
-    AppTheme(isSystemInDarkTheme()) {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            PreferencesEntryItem(item = list.first())
+            PreferencesEntryItem(item = preferences.first())
         }
     }
 }

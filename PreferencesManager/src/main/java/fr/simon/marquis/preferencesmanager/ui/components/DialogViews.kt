@@ -90,7 +90,7 @@ private fun DialogViewTextValue(
     onCancel: () -> Unit,
 ) {
     if (isEdit && editKey == null && editValue == null) {
-        throw java.lang.NullPointerException("Preference KeyValue was null on edit")
+        throw NullPointerException("Preference KeyValue was null on edit")
     }
 
     var textKey by remember { mutableStateOf(editKey ?: "") }
@@ -212,7 +212,7 @@ private fun Preview_RestoreItem() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewStringValue_Edit() {
-    AppTheme(isSystemInDarkTheme()) {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         DialogViewTextValue(
             isEdit = true,
             editKey = "Some Cool Key",
@@ -227,7 +227,7 @@ private fun Preview_DialogViewStringValue_Edit() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewStringValue_New() {
-    AppTheme(isSystemInDarkTheme()) {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         DialogViewTextValue(
             isEdit = false,
             onUpdate = {},
@@ -240,7 +240,7 @@ private fun Preview_DialogViewStringValue_New() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewBooleanValue_Edit() {
-    AppTheme(isSystemInDarkTheme()) {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         DialogViewBooleanValue(
             isEdit = true,
             editKey = "Some Cool Key",
@@ -255,7 +255,7 @@ private fun Preview_DialogViewBooleanValue_Edit() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview_DialogViewBooleanValue_New() {
-    AppTheme(isSystemInDarkTheme()) {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         DialogViewBooleanValue(
             isEdit = false,
             onUpdate = {},

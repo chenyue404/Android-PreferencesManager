@@ -12,9 +12,9 @@ import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
+import java.util.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
 
 data class FileEditorState(
     val textChanged: Boolean = false,

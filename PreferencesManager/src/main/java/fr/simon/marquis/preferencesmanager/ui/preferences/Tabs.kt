@@ -67,7 +67,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
                     scope.launch {
                         pagerState.animateScrollToPage(index)
                     }
-                },
+                }
             )
         }
     }

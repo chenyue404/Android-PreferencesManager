@@ -205,20 +205,13 @@ fun PreferencesMenu(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-private fun Preview_PreferencesMenu(
-    viewModel: PreferencesViewModel = viewModel(),
-    title: String = "Some Cool App",
-    pkgName: String = "com.some.cool.app"
-) {
-    // val topBarState = rememberTopAppBarState()
-    // val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
-
-    AppTheme(isSystemInDarkTheme()) {
+private fun Preview_PreferencesMenu() {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         PreferencesAppBar(
-            scrollBehavior = null, // scrollBehavior,
-            viewModel = viewModel,
-            pkgTitle = title,
-            pkgName = pkgName,
+            scrollBehavior = null,
+            viewModel = viewModel(),
+            pkgTitle = "Some Cool App",
+            pkgName = "com.some.cool.app",
             iconUri = null,
             onBackPressed = {},
             onAddClicked = {},

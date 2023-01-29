@@ -27,17 +27,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -49,7 +49,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -145,11 +144,9 @@ class AppListActivity : ComponentActivity() {
                             Timber.e("We don't have root to continue!")
                         } else {
                             val intent = Intent(context, PreferencesActivity::class.java).apply {
+                                val pkgName = entry.applicationInfo.packageName
                                 putExtra(KEY_ICON_URI, entry.iconUri)
-                                putExtra(
-                                    KEY_PACKAGE_NAME,
-                                    entry.applicationInfo.packageName
-                                )
+                                putExtra(KEY_PACKAGE_NAME, pkgName)
                                 putExtra(KEY_TITLE, entry.label)
                             }
 
@@ -160,16 +157,13 @@ class AppListActivity : ComponentActivity() {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
                         val intent = Intent().apply {
+                            val pkgName = entry.applicationInfo.packageName
                             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                             addCategory(Intent.CATEGORY_DEFAULT)
                             addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                            data = Uri.fromParts(
-                                "package",
-                                entry.applicationInfo.packageName,
-                                null
-                            )
+                            data = Uri.fromParts("package", pkgName, null)
                         }
 
                         activityResult.launch(intent)
@@ -228,44 +222,44 @@ private fun AppListLayout(
     val uiState by viewModel::uiState
 
     Surface {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            floatingActionButton = {
+                ScrollUpLayout(scrollState = scrollState)
+            },
+            floatingActionButtonPosition = FabPosition.Center,
+            topBar = {
+                AppListAppBar(
+                    scrollBehavior = scrollBehavior,
+                    viewModel = viewModel,
+                    themeSettings = viewModel.themeSettings,
+                )
+            }
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxWidth(),
+                state = scrollState,
+                contentPadding = PaddingValues(bottom = 112.dp)
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = scrollState,
-                    contentPadding = PaddingValues(bottom = 112.dp)
-                ) {
-                    val items = uiState.filteredAppList.groupBy { it.headerChar }
-                    items.forEach { (letter, item) ->
-                        stickyHeader {
-                            AppEntryHeader(letter = letter)
-                        }
-                        items(item) { entry ->
-                            AppEntryItem(
-                                modifier = Modifier.animateItemPlacement(),
-                                entry = entry,
-                                onClick = { onClick(entry) },
-                                onLongClick = { onLongClick(entry) }
-                            )
-                        }
+                val items = uiState.filteredAppList.groupBy { it.headerChar }
+                items.forEach { (letter, item) ->
+                    stickyHeader {
+                        AppEntryHeader(letter = letter)
+                    }
+                    items(item) { entry ->
+                        AppEntryItem(
+                            modifier = Modifier.animateItemPlacement(),
+                            entry = entry,
+                            onClick = { onClick(entry) },
+                            onLongClick = { onLongClick(entry) }
+                        )
                     }
                 }
             }
-
-            ScrollUpLayout(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                scrollState = scrollState,
-            )
-
-            AppListAppBar(
-                scrollBehavior = scrollBehavior,
-                viewModel = viewModel,
-                themeSettings = viewModel.themeSettings,
-            )
         }
     }
 }
@@ -280,9 +274,7 @@ private fun ScrollUpLayout(
         derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
     }
     ScrollBackUp(
-        modifier = Modifier
-            .navigationBarsPadding()
-            .then(modifier),
+        modifier = modifier,
         enabled = showBackUpButton.value,
         onClicked = {
             scope.launch {

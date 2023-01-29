@@ -69,7 +69,6 @@ fun AppBar(
             modifier = modifier,
             navigationIcon = navigationIcon,
             actions = actions,
-            // colors = foregroundColors,
             scrollBehavior = scrollBehavior,
             title = {
                 Box(
@@ -166,14 +165,11 @@ fun NavigationBack(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-private fun Preview_AppBar(
-    appName: String = stringResource(id = R.string.app_name),
-    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
-) {
-    AppTheme(isSystemInDarkTheme()) {
+private fun Preview_AppBar() {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         AppBar(
-            title = { Text(appName) },
-            textState = textState
+            title = { Text(stringResource(id = R.string.app_name)) },
+            textState = MutableStateFlow(TextFieldValue(""))
         )
     }
 }

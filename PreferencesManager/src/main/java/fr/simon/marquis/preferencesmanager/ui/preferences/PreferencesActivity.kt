@@ -95,6 +95,7 @@ class PreferencesActivity : ComponentActivity() {
             val context = LocalContext.current
             val uiState = viewModel.uiState
 
+            val haptic = LocalHapticFeedback.current
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
             val pagerState = rememberPagerState()
@@ -142,12 +143,63 @@ class PreferencesActivity : ComponentActivity() {
 
             AppTheme(isDarkTheme = isDarkTheme) {
                 Surface {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        val haptic = LocalHapticFeedback.current
+                    Scaffold(
+                        topBar = {
+                            PreferencesAppBar(
+                                scrollBehavior = null,
+                                viewModel = viewModel,
+                                pkgTitle = uiState.pkgTitle,
+                                pkgName = uiState.pkgName,
+                                iconUri = uiState.pkgIcon,
+                                onBackPressed = {
+                                    onBackPressedDispatcher.onBackPressed()
+                                },
+                                onAddClicked = {
+                                    /* TODO */
+                                },
+                                onOverflowClicked = {
+                                    val currentPage = pagerState.currentPage
+                                    val currentTab = uiState.tabList[currentPage]
+                                    val file = currentTab.preferenceFile!!.file
+
+                                    when (it) {
+                                        EPreferencesOverflow.EDIT -> editFile(file)
+                                        EPreferencesOverflow.FAV -> {
+                                            val pkgName = uiState.pkgName
+                                            val favorite = Utils.isFavorite(pkgName)
+                                            Utils.setFavorite(pkgName, !favorite)
+                                        }
+
+                                        EPreferencesOverflow.BACKUP -> {
+                                            val pkgName = uiState.pkgName
+                                            viewModel.backupFile(context, pkgName, file)
+                                        }
+
+                                        EPreferencesOverflow.RESTORE -> {
+                                            viewModel.findFilesToRestore(
+                                                context,
+                                                file
+                                            ) { hasResult ->
+                                                if (hasResult) {
+                                                    restoreDialogState.show()
+                                                } else {
+                                                    context.showToast(res = R.string.empty_restore)
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                onSortClicked = {
+                                    PrefManager.keySortType = it.ordinal
+                                    viewModel.getTabsAndPreferences()
+                                },
+                            )
+                        }
+                    ) { paddingValues ->
                         TabLayout(
                             modifier = Modifier
-                                .statusBarsPadding()
-                                .padding(top = 64.dp), // TODO this can be measured
+                                .padding(paddingValues)
+                                .fillMaxSize(),
                             scrollBehavior = scrollBehavior,
                             pagerState = pagerState,
                             viewModel = viewModel,
@@ -158,54 +210,6 @@ class PreferencesActivity : ComponentActivity() {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 // TODO: Add cab selection again, or some multi select option.
                             }
-                        )
-
-                        PreferencesAppBar(
-                            scrollBehavior = null, // scrollBehavior,
-                            viewModel = viewModel,
-                            pkgTitle = uiState.pkgTitle,
-                            pkgName = uiState.pkgName,
-                            iconUri = uiState.pkgIcon,
-                            onBackPressed = {
-                                @Suppress("DEPRECATION")
-                                onBackPressed()
-                            },
-                            onAddClicked = {
-                                /* TODO */
-                            },
-                            onOverflowClicked = {
-                                val currentPage = pagerState.currentPage
-                                val currentTab = uiState.tabList[currentPage]
-                                val file = currentTab.preferenceFile!!.file
-
-                                when (it) {
-                                    EPreferencesOverflow.EDIT -> editFile(file)
-                                    EPreferencesOverflow.FAV -> {
-                                        val pkgName = uiState.pkgName
-                                        val favorite = Utils.isFavorite(pkgName)
-                                        Utils.setFavorite(pkgName, !favorite)
-                                    }
-
-                                    EPreferencesOverflow.BACKUP -> {
-                                        val pkgName = uiState.pkgName
-                                        viewModel.backupFile(context, pkgName, file)
-                                    }
-
-                                    EPreferencesOverflow.RESTORE -> {
-                                        viewModel.findFilesToRestore(context, file) { hasResult ->
-                                            if (hasResult) {
-                                                restoreDialogState.show()
-                                            } else {
-                                                context.showToast(res = R.string.empty_restore)
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            onSortClicked = {
-                                PrefManager.keySortType = it.ordinal
-                                viewModel.getTabsAndPreferences()
-                            },
                         )
                     }
                 }

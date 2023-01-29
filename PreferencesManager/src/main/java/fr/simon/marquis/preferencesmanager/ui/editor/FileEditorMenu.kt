@@ -173,13 +173,10 @@ fun FileEditorMenu(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-private fun Preview_FileEditorMenu(
-    appName: String = stringResource(id = R.string.app_name),
-    textState: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
-) {
-    AppTheme(isSystemInDarkTheme()) {
+private fun Preview_FileEditorMenu() {
+    AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         AppBar(
-            title = { Text(text = appName) },
+            title = { Text(text = stringResource(id = R.string.app_name)) },
             actions = {
                 FileEditorMenu(
                     onSave = {},
@@ -187,7 +184,7 @@ private fun Preview_FileEditorMenu(
                     onFontSize = {},
                 )
             },
-            textState = textState
+            textState = MutableStateFlow(TextFieldValue(""))
         )
     }
 }

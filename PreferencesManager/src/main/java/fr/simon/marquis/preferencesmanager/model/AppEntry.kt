@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2013 Simon Marquis (http://www.simon-marquis.fr)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -23,45 +23,19 @@ import android.text.TextUtils
 import fr.simon.marquis.preferencesmanager.util.Utils
 import java.io.File
 
-class AppEntry(val applicationInfo: ApplicationInfo, context: Context) {
+class AppEntry(
+    val applicationInfo: ApplicationInfo,
+    var headerChar: Char = ' ',
+    var iconUri: Uri? = null,
+    var label: String = "",
+    var sortingValue: String? = null,
+    private val mApkFile: File = File(applicationInfo.sourceDir),
+) {
 
-    /**
-     * File of the application
-     */
-    private val mApkFile: File
-
-    /**
-     * Label of the application
-     */
-    var label: String = ""
-        private set
-
-    /**
-     * Value used to sort the list of applications
-     */
-    var sortingValue: String? = null
-        private set
-
-    /**
-     * Detect if app is starred by user
-     */
     private var isFavorite: Boolean = false
 
-    /**
-     * Char value used by indexed ListView
-     */
-    var headerChar: Char = ' '
-        private set
-
-    /**
-     * Uri of the app icon
-     */
-    var iconUri: Uri? = null
-        private set
-
-    init {
+    constructor(applicationInfo: ApplicationInfo, context: Context) : this(applicationInfo) {
         isFavorite = Utils.isFavorite(applicationInfo.packageName)
-        mApkFile = File(applicationInfo.sourceDir)
         loadLabels(context)
         buildIconUri(applicationInfo)
     }
