@@ -141,8 +141,8 @@ class AppListActivity : ComponentActivity() {
             )
 
             // Theme check via preferences.
-            val theme = viewModel.themeSettings.themeStream.collectAsState()
-            val isDarkTheme = when (theme.value) {
+            val theme by viewModel.themeSettings.themeStream.collectAsState()
+            val isDarkTheme = when (theme) {
                 EAppTheme.AUTO -> isSystemInDarkTheme()
                 EAppTheme.DAY -> false
                 EAppTheme.NIGHT -> true
@@ -178,8 +178,8 @@ class AppListActivity : ComponentActivity() {
                     onLongClick = { entry ->
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
+                        val pkgName = entry.applicationInfo.packageName
                         val intent = Intent().apply {
-                            val pkgName = entry.applicationInfo.packageName
                             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                             addCategory(Intent.CATEGORY_DEFAULT)
                             addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)

@@ -75,7 +75,6 @@ const val KEY_FILE = "KEY_FILE"
 class PreferencesActivity : ComponentActivity() {
 
     private val viewModel: PreferencesViewModel by viewModels()
-    private var files: List<String>? = null
 
     private var resultFileEdit = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -98,12 +97,12 @@ class PreferencesActivity : ComponentActivity() {
         Timber.i("onCreate")
         setContent {
             val context = LocalContext.current
-            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             val pagerState = rememberPagerState(
                 initialPage = 0,
                 initialPageOffsetFraction = 0f,
-                pageCount = { uiState.value.tabList.size }
+                pageCount = { uiState.tabList.size }
             )
 
             LaunchedEffect(Unit) {
@@ -121,16 +120,16 @@ class PreferencesActivity : ComponentActivity() {
             var restoreDialogState by remember { mutableStateOf(false) }
             DialogRestore(
                 openDialog = restoreDialogState,
-                container = uiState.value.restoreData,
+                container = uiState.restoreData,
                 onNegative = { restoreDialogState = false },
                 onRestore = { fileName ->
-                    val pkgName = uiState.value.pkgName
+                    val pkgName = uiState.pkgName
                     viewModel.performFileRestore(context, fileName, pkgName)
                     restoreDialogState = false
                 },
                 onDelete = { fileName ->
                     val currentPage = pagerState.currentPage
-                    val currentTab = uiState.value.tabList[currentPage]
+                    val currentTab = uiState.tabList[currentPage]
                     val file = currentTab.preferenceFile!!.file
 
                     viewModel.deleteFile(context, fileName, file)
@@ -155,10 +154,7 @@ class PreferencesActivity : ComponentActivity() {
                         topBar = {
                             PreferencesAppBar(
                                 scrollBehavior = null,
-                                pkgTitle = uiState.value.pkgTitle,
-                                pkgName = uiState.value.pkgName,
-                                iconUri = uiState.value.pkgIcon,
-                                state = uiState.value,
+                                state = uiState,
                                 searchText = viewModel.searchText,
                                 onBackPressed = {
                                     onBackPressedDispatcher.onBackPressed()
@@ -168,19 +164,19 @@ class PreferencesActivity : ComponentActivity() {
                                 },
                                 onOverflowClicked = {
                                     val currentPage = pagerState.currentPage
-                                    val currentTab = uiState.value.tabList[currentPage]
+                                    val currentTab = uiState.tabList[currentPage]
                                     val file = currentTab.preferenceFile!!.file
 
                                     when (it) {
                                         EPreferencesOverflow.EDIT -> editFile(file)
                                         EPreferencesOverflow.FAV -> {
-                                            val pkgName = uiState.value.pkgName
+                                            val pkgName = uiState.pkgName
                                             val favorite = Utils.isFavorite(pkgName)
                                             Utils.setFavorite(pkgName, !favorite)
                                         }
 
                                         EPreferencesOverflow.BACKUP -> {
-                                            val pkgName = uiState.value.pkgName
+                                            val pkgName = uiState.pkgName
                                             viewModel.backupFile(context, pkgName, file)
                                             context.showToast(res = R.string.toast_backup_success)
                                         }
@@ -203,7 +199,7 @@ class PreferencesActivity : ComponentActivity() {
                                     PrefManager.keySortType = it.ordinal
                                     viewModel.getTabsAndPreferences()
                                 },
-                                onSearch = { viewModel::setIsSearching }
+                                onSearch = { viewModel.setIsSearching(it) }
                             )
                         }
                     ) { paddingValues ->
@@ -217,7 +213,7 @@ class PreferencesActivity : ComponentActivity() {
                                 .fillMaxSize(),
                             scrollBehavior = scrollBehavior,
                             pagerState = pagerState,
-                            state = uiState.value,
+                            state = uiState,
                             onClick = {
                                 /* TODO */
                             },
@@ -246,9 +242,6 @@ class PreferencesActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesAppBar(
-    iconUri: Uri?,
-    pkgName: String,
-    pkgTitle: String,
     scrollBehavior: TopAppBarScrollBehavior?,
     searchText: MutableStateFlow<TextFieldValue>,
     state: PreferencesState,
@@ -264,28 +257,28 @@ fun PreferencesAppBar(
             Row(modifier = Modifier.fillMaxWidth()) {
                 SubcomposeAsyncImage(
                     modifier = Modifier.size(48.dp),
-                    model = iconUri,
+                    model = state.pkgIcon,
                     contentDescription = null,
                     loading = {
                         CircularProgressIndicator()
                     },
                     error = {
                         Icon(
-                            Icons.Default.Settings,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(40.dp),
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null
                         )
                     }
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = pkgTitle,
+                        text = state.pkgTitle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = pkgName,
+                        text = state.pkgName,
                         maxLines = 1,
                         fontSize = 12.sp,
                         overflow = TextOverflow.Ellipsis

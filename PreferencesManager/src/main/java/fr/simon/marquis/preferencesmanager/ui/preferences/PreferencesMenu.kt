@@ -210,12 +210,13 @@ fun PreferencesMenu(
 private fun Preview_PreferencesMenu() {
     AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         PreferencesAppBar(
-            iconUri = null,
-            pkgName = "com.some.cool.app",
-            pkgTitle = "Some Cool App",
             scrollBehavior = null,
             searchText = MutableStateFlow(TextFieldValue("")),
-            state = PreferencesState(),
+            state = PreferencesState(
+                pkgIcon = null,
+                pkgName = "com.some.cool.app",
+                pkgTitle = "Some Cool App"
+            ),
             onAddClicked = {},
             onBackPressed = {},
             onOverflowClicked = {},

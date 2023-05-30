@@ -15,14 +15,15 @@ import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.Date
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 data class PreferencesState(
+    val isFavorite: Boolean = false,
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
-    val isFavorite: Boolean = false,
     val pkgIcon: Uri? = null,
     val pkgName: String = "",
     val pkgTitle: String = "",
@@ -37,6 +38,29 @@ class PreferencesViewModel : ViewModel() {
 
     private val _searchText = MutableStateFlow(TextFieldValue(""))
     val searchText: MutableStateFlow<TextFieldValue> = _searchText
+
+    init {
+        viewModelScope.launch {
+            searchText.collectLatest {
+                searchText(it.text)
+            }
+        }
+    }
+
+    private fun searchText(value: String) {
+//        val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
+//        val list = if (isSearching) {
+//            uiState.value.appList.filter {
+//                it.label
+//                    .lowercase(Locale.getDefault())
+//                    .contains(value.lowercase(Locale.getDefault()))
+//            }
+//        } else {
+//            uiState.value.appList
+//        }
+//
+//        _uiState.update { it.copy(filteredAppList = list) }
+    }
 
     fun setPackageInfo(pkgTitle: String, pkgName: String, pkgIcon: Uri?) {
         _uiState.update {

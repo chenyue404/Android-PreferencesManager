@@ -52,7 +52,7 @@ class AppListViewModel : ViewModel() {
     }
 
     fun setIsSearching(value: Boolean) {
-        _uiState.update { it.copy(isLoading = value) }
+        _uiState.update { it.copy(isSearching = value) }
     }
 
     fun checkRoot() {
