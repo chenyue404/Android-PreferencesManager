@@ -24,7 +24,7 @@ data class FileEditorState(
     val editText: String? = null,
     val fontSize: EFontSize = EFontSize.getBySize(PrefManager.keyFontSize),
     val fontTheme: EFontTheme = EFontTheme.getByTheme(PrefManager.keyFontTheme),
-    val xmlColorTheme: XmlColorTheme? = null,
+    val xmlColorTheme: XmlColorTheme? = null
 )
 
 class FileEditorViewModel : ViewModel() {

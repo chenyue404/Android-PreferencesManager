@@ -20,14 +20,14 @@ import java.util.Date
 
 data class BackupContainer(
     val pkgName: String,
-    val backupList: MutableList<BackupContainerInfo>,
+    val backupList: MutableList<BackupContainerInfo>
 )
 
 data class BackupContainerInfo(
     val backupDate: String, // Date of backup from millis
     val backupFile: String, // The path of the backup file
     val backupXmlName: String, // The xml file of the package backup
-    val size: Long, // Size of the file
+    val size: Long // Size of the file
 ) {
     fun timeSinceBackup(): String {
         val date = Date().apply {

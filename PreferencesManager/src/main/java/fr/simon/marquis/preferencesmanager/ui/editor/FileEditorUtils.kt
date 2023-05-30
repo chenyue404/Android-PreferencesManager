@@ -29,49 +29,49 @@ class XmlTransformation(private val theme: XmlColorTheme) : VisualTransformation
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.TAG)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
             generateSpan(TAG_END.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.TAG)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
             generateSpan(TAG_ATTRIBUTE_VALUE.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.ATTR_VALUE)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
             generateSpan(TAG_ATTRIBUTE_VALUE_2.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.ATTR_VALUE)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
             generateSpan(TAG_ATTRIBUTE_NAME.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.ATTR_NAME)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
             generateSpan(COMMENT_START.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.COMMENT)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
             generateSpan(COMMENT_END.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.COMMENT)),
                     start = start,
-                    end = end,
+                    end = end
                 )
             }
 

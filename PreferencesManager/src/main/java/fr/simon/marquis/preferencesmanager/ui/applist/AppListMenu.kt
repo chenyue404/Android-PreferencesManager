@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.res.Configuration
@@ -22,7 +20,7 @@ fun AppListMenu(
     onSearch: () -> Unit,
     onShowSystemApps: () -> Unit,
     onSwitchTheme: () -> Unit,
-    onAbout: () -> Unit,
+    onAbout: () -> Unit
 ) {
     var isMenuShowing by remember { mutableStateOf(false) }
 
@@ -82,6 +80,7 @@ fun AppListMenu(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable

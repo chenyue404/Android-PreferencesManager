@@ -37,7 +37,8 @@ class App : Application() {
 
         PrefManager.init(applicationContext)
 
-        if (BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+        }
     }
 }

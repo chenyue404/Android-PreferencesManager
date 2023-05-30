@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import android.content.res.Configuration
@@ -135,16 +133,18 @@ fun PreferencesMenu(
         )
         DropdownMenuItem(
             text = {
-                if (isFavorite)
+                if (isFavorite) {
                     Text(text = stringResource(id = R.string.action_unfav))
-                else
+                } else {
                     Text(text = stringResource(id = R.string.action_fav))
+                }
             },
             leadingIcon = {
-                if (isFavorite)
+                if (isFavorite) {
                     Icon(Icons.Default.FavoriteBorder, contentDescription = null)
-                else
+                } else {
                     Icon(Icons.Default.Favorite, contentDescription = null)
+                }
             },
             onClick = {
                 onOverflowClicked(EPreferencesOverflow.FAV)
@@ -202,6 +202,7 @@ fun PreferencesMenu(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
@@ -216,7 +217,7 @@ private fun Preview_PreferencesMenu() {
             onBackPressed = {},
             onAddClicked = {},
             onOverflowClicked = {},
-            onSortClicked = {},
+            onSortClicked = {}
         )
     }
 }

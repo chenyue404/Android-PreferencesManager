@@ -117,14 +117,16 @@ class FastXmlSerializer : XmlSerializer {
                 pos++
                 continue
             }
-            if (lastPos < pos)
+            if (lastPos < pos) {
                 append(string, lastPos, pos - lastPos)
+            }
             lastPos = pos + 1
             append(escape)
             pos++
         }
-        if (lastPos < pos)
+        if (lastPos < pos) {
             append(string, lastPos, pos - lastPos)
+        }
     }
 
     @Throws(IOException::class)
@@ -145,14 +147,16 @@ class FastXmlSerializer : XmlSerializer {
                 pos++
                 continue
             }
-            if (lastPos < pos)
+            if (lastPos < pos) {
                 append(buf, lastPos, pos - lastPos)
+            }
             lastPos = pos + 1
             append(escape)
             pos++
         }
-        if (lastPos < pos)
+        if (lastPos < pos) {
             append(buf, lastPos, pos - lastPos)
+        }
     }
 
     @Throws(IOException::class, IllegalArgumentException::class, IllegalStateException::class)
@@ -295,8 +299,9 @@ class FastXmlSerializer : XmlSerializer {
 
     @Throws(IOException::class, IllegalArgumentException::class, IllegalStateException::class)
     override fun setOutput(os: OutputStream?, encoding: String?) {
-        if (os == null)
+        if (os == null) {
             throw IllegalArgumentException()
+        }
         try {
             mCharset = Charset.forName(encoding).newEncoder()
         } catch (e: IllegalCharsetNameException) {

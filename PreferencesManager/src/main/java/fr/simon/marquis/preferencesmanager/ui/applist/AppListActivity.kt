@@ -13,10 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-
 package fr.simon.marquis.preferencesmanager.ui.applist
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -47,8 +46,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -57,7 +59,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
@@ -85,11 +86,13 @@ class AppListActivity : ComponentActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.run {
-            if (uiState.isRootGranted)
+            if (uiState.isRootGranted) {
                 startTask(this@AppListActivity)
+            }
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -99,8 +102,9 @@ class AppListActivity : ComponentActivity() {
 
         if (savedInstanceState == null || Utils.previousApps == null) {
             viewModel.run {
-                if (uiState.isRootGranted)
+                if (uiState.isRootGranted) {
                     startTask(this@AppListActivity)
+                }
             }
         }
 
@@ -115,8 +119,14 @@ class AppListActivity : ComponentActivity() {
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
-            val dialogNoRootState = rememberMaterialDialogState()
-            DialogNoRoot(dialogState = dialogNoRootState)
+            var dialogNoRootState by remember { mutableStateOf(false) }
+            DialogNoRoot(
+                openDialog = dialogNoRootState,
+                onPositive = {
+                    dialogNoRootState = false
+                    (context as Activity).finish()
+                }
+            )
 
             // Theme check via preferences.
             val theme = viewModel.themeSettings.themeStream.collectAsState()
@@ -129,7 +139,7 @@ class AppListActivity : ComponentActivity() {
             if (!uiState.isRootGranted) {
                 LaunchedEffect(Unit) {
                     scope.launch {
-                        dialogNoRootState.show()
+                        dialogNoRootState = true
                     }
                 }
             }
@@ -174,20 +184,37 @@ class AppListActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppListAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
-    themeSettings: ThemeSettings,
+    themeSettings: ThemeSettings
 ) {
     val context = LocalContext.current
     val uiState by viewModel::uiState
 
-    val dialogThemeState = rememberMaterialDialogState()
-    DialogTheme(dialogThemeState, PrefManager.themePreference, themeSettings)
+    var dialogThemeState by remember { mutableStateOf(false) }
+    DialogTheme(
+        openDialog = dialogThemeState,
+        initialSelection = PrefManager.themePreference,
+        negativeText = "Cancel",
+        onDismiss = { dialogThemeState = false },
+        onNegative = { dialogThemeState = false },
+        onPositive = {
+            themeSettings.theme = EAppTheme.getAppTheme(it)
+            PrefManager.themePreference = it
+            dialogThemeState = false
+        },
+        positiveText = "OK",
+        title = "Switch Theme"
+    )
 
-    val dialogAboutState = rememberMaterialDialogState()
-    DialogAbout(dialogState = dialogAboutState)
+    var dialogAboutState by remember { mutableStateOf(false) }
+    DialogAbout(
+        openDialog = dialogAboutState,
+        onPositive = { dialogAboutState = false }
+    )
 
     AppBar(
         scrollBehavior = scrollBehavior,
@@ -201,8 +228,8 @@ private fun AppListAppBar(
 
                     viewModel.startTask(context)
                 },
-                onSwitchTheme = { dialogThemeState.show() },
-                onAbout = { dialogAboutState.show() }
+                onSwitchTheme = { dialogThemeState = true },
+                onAbout = { dialogAboutState = true }
             )
         },
         textState = viewModel.searchText,
@@ -211,13 +238,14 @@ private fun AppListAppBar(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun AppListLayout(
     scrollState: LazyListState,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
     onClick: (entry: AppEntry) -> Unit,
-    onLongClick: (entry: AppEntry) -> Unit,
+    onLongClick: (entry: AppEntry) -> Unit
 ) {
     val uiState by viewModel::uiState
 
@@ -234,7 +262,7 @@ private fun AppListLayout(
                 AppListAppBar(
                     scrollBehavior = scrollBehavior,
                     viewModel = viewModel,
-                    themeSettings = viewModel.themeSettings,
+                    themeSettings = viewModel.themeSettings
                 )
             }
         ) { paddingValues ->
@@ -267,7 +295,7 @@ private fun AppListLayout(
 @Composable
 private fun ScrollUpLayout(
     modifier: Modifier = Modifier,
-    scrollState: LazyListState,
+    scrollState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
     val showBackUpButton = remember {

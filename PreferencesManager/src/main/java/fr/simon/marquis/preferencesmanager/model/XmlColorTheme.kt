@@ -52,7 +52,7 @@ class XmlColorTheme(
                         xmlEclipseAttributeValue,
                         xmlEclipseComment,
                         xmlEclipseValue,
-                        xmlEclipseDefault,
+                        xmlEclipseDefault
                     )
                 }
                 EFontTheme.GOOGLE -> {
@@ -62,7 +62,7 @@ class XmlColorTheme(
                         xmlGoogleAttributeValue,
                         xmlGoogleComment,
                         xmlGoogleValue,
-                        xmlGoogleDefault,
+                        xmlGoogleDefault
                     )
                 }
                 EFontTheme.ROBOTICKET -> {
@@ -72,7 +72,7 @@ class XmlColorTheme(
                         xmlRoboticketAttributeValue,
                         xmlRoboticketComment,
                         xmlRoboticketValue,
-                        xmlRoboticketDefault,
+                        xmlRoboticketDefault
                     )
                 }
                 EFontTheme.NOTEPAD -> {
@@ -82,7 +82,7 @@ class XmlColorTheme(
                         xmlNotepadAttributeValue,
                         xmlNotepadComment,
                         xmlNotepadValue,
-                        xmlNotepadDefault,
+                        xmlNotepadDefault
                     )
                 }
                 EFontTheme.NETBEANS -> {
@@ -92,7 +92,7 @@ class XmlColorTheme(
                         xmlNetbeansAttributeValue,
                         xmlNetbeansComment,
                         xmlNetbeansValue,
-                        xmlNetbeansDefault,
+                        xmlNetbeansDefault
                     )
                 }
             }

@@ -29,7 +29,7 @@ enum class EFontSize(val size: Int) {
 
 enum class ScrollButtonVisibility {
     Visible,
-    Gone,
+    Gone
 }
 
 enum class EPreferencesAdd {
@@ -46,7 +46,7 @@ enum class EPreferencesSort {
 
 enum class EPreferenceEditType(
     @StringRes val addTitle: Int,
-    @StringRes val editTitle: Int,
+    @StringRes val editTitle: Int
 ) {
     UNSUPPORTED(0, 0),
     BOOLEAN(R.string.title_add_boolean, R.string.title_edit_boolean),

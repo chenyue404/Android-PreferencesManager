@@ -21,7 +21,6 @@ fun AppTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-
     /* If were looking at edit previews, fool it and init preferences to render */
     val view = LocalView.current
     if (view.isInEditMode) {
@@ -32,10 +31,11 @@ fun AppTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (isDarkTheme)
+            if (isDarkTheme) {
                 dynamicDarkColorScheme(context)
-            else
+            } else {
                 dynamicLightColorScheme(context)
+            }
         }
         isDarkTheme -> darkColors
         else -> lightColors

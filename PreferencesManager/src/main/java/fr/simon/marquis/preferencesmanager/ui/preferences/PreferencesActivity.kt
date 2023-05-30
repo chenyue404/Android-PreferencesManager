@@ -13,8 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
-
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import android.content.Intent
@@ -24,14 +22,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -45,10 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import coil.compose.SubcomposeAsyncImage
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.*
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
@@ -79,6 +80,7 @@ class PreferencesActivity : ComponentActivity() {
         viewModel.getTabsAndPreferences()
     }
 
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -98,7 +100,11 @@ class PreferencesActivity : ComponentActivity() {
             val haptic = LocalHapticFeedback.current
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
-            val pagerState = rememberPagerState()
+            val pagerState = rememberPagerState(
+                initialPage = 0,
+                initialPageOffsetFraction = 0f,
+                pageCount = { uiState.tabList.size }
+            )
 
             LaunchedEffect(Unit) {
                 val pkgTitle = intent.getString(KEY_TITLE)!!
@@ -112,13 +118,15 @@ class PreferencesActivity : ComponentActivity() {
                 viewModel.clearRestoreData()
             }
 
-            val restoreDialogState = rememberMaterialDialogState()
+            var restoreDialogState by remember { mutableStateOf(false) }
             DialogRestore(
-                dialogState = restoreDialogState,
+                openDialog = restoreDialogState,
                 container = uiState.restoreData,
+                onNegative = { restoreDialogState = false },
                 onRestore = { fileName ->
                     val pkgName = uiState.pkgName
                     viewModel.performFileRestore(context, fileName, pkgName)
+                    restoreDialogState = false
                 },
                 onDelete = { fileName ->
                     val currentPage = pagerState.currentPage
@@ -173,6 +181,7 @@ class PreferencesActivity : ComponentActivity() {
                                         EPreferencesOverflow.BACKUP -> {
                                             val pkgName = uiState.pkgName
                                             viewModel.backupFile(context, pkgName, file)
+                                            context.showToast(res = R.string.toast_backup_success)
                                         }
 
                                         EPreferencesOverflow.RESTORE -> {
@@ -181,7 +190,7 @@ class PreferencesActivity : ComponentActivity() {
                                                 file
                                             ) { hasResult ->
                                                 if (hasResult) {
-                                                    restoreDialogState.show()
+                                                    restoreDialogState = true
                                                 } else {
                                                     context.showToast(res = R.string.empty_restore)
                                                 }
@@ -192,7 +201,7 @@ class PreferencesActivity : ComponentActivity() {
                                 onSortClicked = {
                                     PrefManager.keySortType = it.ordinal
                                     viewModel.getTabsAndPreferences()
-                                },
+                                }
                             )
                         }
                     ) { paddingValues ->
@@ -228,6 +237,7 @@ class PreferencesActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesAppBar(
     scrollBehavior: TopAppBarScrollBehavior?,
@@ -259,7 +269,7 @@ fun PreferencesAppBar(
                             contentDescription = null,
                             modifier = Modifier.size(40.dp)
                         )
-                    },
+                    }
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
@@ -299,6 +309,7 @@ fun PreferencesAppBar(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TabLayout(
     modifier: Modifier = Modifier,
@@ -316,7 +327,7 @@ fun TabLayout(
     ) {
         Column(
             modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
             val tabs = uiState.tabList
 
@@ -325,13 +336,13 @@ fun TabLayout(
             } else {
                 Tabs(
                     tabs = tabs,
-                    pagerState = pagerState,
+                    pagerState = pagerState
                 )
                 TabsContent(
                     tabs = tabs,
                     pagerState = pagerState,
                     onClick = onClick,
-                    onLongClick = onLongClick,
+                    onLongClick = onLongClick
                 )
             }
         }

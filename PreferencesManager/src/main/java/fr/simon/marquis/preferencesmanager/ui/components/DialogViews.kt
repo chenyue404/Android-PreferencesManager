@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package fr.simon.marquis.preferencesmanager.ui.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -59,7 +57,7 @@ internal fun CustomViewChoiceItem(
             },
             style = MaterialTheme.typography.body1,
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(
             modifier = Modifier
@@ -87,7 +85,7 @@ private fun DialogViewTextValue(
     editValue: String? = null,
     onUpdate: () -> Unit,
     onDelete: () -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
     if (isEdit && editKey == null && editValue == null) {
         throw NullPointerException("Preference KeyValue was null on edit")
@@ -142,7 +140,7 @@ internal fun DialogViewBooleanValue(
     editValue: Boolean? = null,
     onUpdate: () -> Unit,
     onDelete: () -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
     if (isEdit && editKey == null && editValue == null) {
         throw java.lang.NullPointerException("Preference KeyValue was null on edit")
@@ -219,7 +217,7 @@ private fun Preview_DialogViewStringValue_Edit() {
             editValue = "Some Cool Value",
             onUpdate = {},
             onDelete = {},
-            onCancel = {},
+            onCancel = {}
         )
     }
 }
@@ -232,7 +230,7 @@ private fun Preview_DialogViewStringValue_New() {
             isEdit = false,
             onUpdate = {},
             onDelete = {},
-            onCancel = {},
+            onCancel = {}
         )
     }
 }
@@ -247,7 +245,7 @@ private fun Preview_DialogViewBooleanValue_Edit() {
             editValue = true,
             onUpdate = {},
             onDelete = {},
-            onCancel = {},
+            onCancel = {}
         )
     }
 }
@@ -260,7 +258,7 @@ private fun Preview_DialogViewBooleanValue_New() {
             isEdit = false,
             onUpdate = {},
             onDelete = {},
-            onCancel = {},
+            onCancel = {}
         )
     }
 }

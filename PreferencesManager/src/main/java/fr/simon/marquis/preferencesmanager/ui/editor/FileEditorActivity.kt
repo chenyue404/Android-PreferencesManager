@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package fr.simon.marquis.preferencesmanager.ui.editor
 
 /*
@@ -27,6 +25,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +38,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.EFontTheme
@@ -55,6 +56,7 @@ class FileEditorActivity : ComponentActivity() {
 
     private val viewModel: FileEditorViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,9 +87,9 @@ class FileEditorActivity : ComponentActivity() {
                 viewModel.setPackageInfo(file, title, pkgName)
             }
 
-            val saveChangesState = rememberMaterialDialogState()
+            var saveChangesState by remember { mutableStateOf(false) }
             DialogSaveChanges(
-                saveChangesState = saveChangesState,
+                openDialog = saveChangesState,
                 onPositive = {
                     if (viewModel.saveChanges(this@FileEditorActivity)) {
                         showToast(R.string.save_success)
@@ -96,9 +98,14 @@ class FileEditorActivity : ComponentActivity() {
                     } else {
                         showToast(R.string.save_fail)
                     }
+                    saveChangesState = false
                 },
                 onNegative = {
                     onBackPressedDispatcher.onBackPressed()
+                    saveChangesState = false
+                },
+                onCancel = {
+                    saveChangesState = false
                 }
             )
 
@@ -123,7 +130,7 @@ class FileEditorActivity : ComponentActivity() {
                                 navigationIcon = {
                                     NavigationBack {
                                         if (uiState.textChanged) {
-                                            saveChangesState.show()
+                                            saveChangesState = true
                                             return@NavigationBack
                                         }
 
@@ -139,10 +146,11 @@ class FileEditorActivity : ComponentActivity() {
                                             }
 
                                             val saveChanges = viewModel.saveChanges(context)
-                                            if (saveChanges)
+                                            if (saveChanges) {
                                                 showToast(R.string.save_success)
-                                            else
+                                            } else {
                                                 showToast(R.string.save_fail)
+                                            }
                                         },
                                         onFontTheme = {
                                             viewModel.setFontTheme(it)
@@ -151,7 +159,7 @@ class FileEditorActivity : ComponentActivity() {
                                             viewModel.setFontSize(it)
                                         }
                                     )
-                                },
+                                }
                             )
                         }
                     ) { paddingValues ->
@@ -172,6 +180,7 @@ class FileEditorActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FileEditorLayout(
     modifier: Modifier = Modifier,
@@ -179,13 +188,13 @@ private fun FileEditorLayout(
     textSize: Int,
     scrollBehavior: TopAppBarScrollBehavior,
     text: String,
-    onValueChange: (String) -> Unit,
+    onValueChange: (String) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .imePadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
         TextField(
             modifier = Modifier.fillMaxSize(),
@@ -197,6 +206,7 @@ private fun FileEditorLayout(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun Preview_FileEditorLayout() {
@@ -210,7 +220,7 @@ private fun Preview_FileEditorLayout() {
             textSize = PrefManager.keyFontSize,
             scrollBehavior = scrollBehavior,
             text = stringResource(id = R.string.about_body),
-            onValueChange = {},
+            onValueChange = {}
         )
     }
 }

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.pm.ApplicationInfo
@@ -23,12 +21,13 @@ import coil.compose.SubcomposeAsyncImage
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppEntryItem(
     modifier: Modifier = Modifier,
     entry: AppEntry,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     ListItem(
         modifier = modifier
@@ -36,9 +35,9 @@ fun AppEntryItem(
             .fillMaxWidth(1f)
             .combinedClickable(
                 onClick = onClick,
-                onLongClick = onLongClick,
+                onLongClick = onLongClick
             ),
-        headlineText = {
+        headlineContent = {
             Text(
                 text = entry.label,
                 maxLines = 1,
@@ -59,7 +58,7 @@ fun AppEntryItem(
                         contentDescription = null,
                         modifier = Modifier.size(40.dp)
                     )
-                },
+                }
             )
         }
     )

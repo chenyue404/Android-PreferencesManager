@@ -29,7 +29,7 @@ class AppEntry(
     var iconUri: Uri? = null,
     var label: String = "",
     var sortingValue: String? = null,
-    private val mApkFile: File = File(applicationInfo.sourceDir),
+    private val mApkFile: File = File(applicationInfo.sourceDir)
 ) {
 
     private var isFavorite: Boolean = false
@@ -78,8 +78,9 @@ class AppEntry(
             label = label.replace("\\s".toRegex(), " ")
         }
 
-        if (sortingValue == null)
+        if (sortingValue == null) {
             sortingValue = (if (isFavorite) " " else "") + label
+        }
 
         headerChar = formatChar(label)
     }

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -19,14 +17,14 @@ import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.ui.theme.getColorFromObjet
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PreferencesEntryItem(
     modifier: Modifier = Modifier,
     item: KeyValueIndex,
     onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    onLongClick: () -> Unit = {}
 ) {
-    // Timber.d("Item: ${item.key}, ${item.value}")
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -34,8 +32,8 @@ fun PreferencesEntryItem(
             .heightIn(0.dp, 110.dp)
             .combinedClickable(
                 onClick = onClick,
-                onLongClick = onLongClick,
-            ),
+                onLongClick = onLongClick
+            )
     ) {
         Divider(
             modifier = Modifier
@@ -50,13 +48,13 @@ fun PreferencesEntryItem(
                 text = item.key.toString(),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = item.value.toString(),
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
+                maxLines = 2
             )
         }
     }

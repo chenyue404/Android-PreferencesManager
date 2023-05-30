@@ -28,7 +28,7 @@ import timber.log.Timber
 data class KeyValueIndex(
     var index: Int? = null,
     var key: Any,
-    var value: Any,
+    var value: Any
 )
 
 class PreferenceFile {

@@ -212,8 +212,9 @@ object Utils {
         Timber.d("Package Name: $packageName")
 
         fileDir?.listFiles()?.forEach {
-            if (it.isDirectory)
+            if (it.isDirectory) {
                 return@forEach
+            }
 
             val currentFile = it.name.split(" ")
             if (packageName.contains(currentFile[1]) && packageName.contains(currentFile[2])) {
@@ -276,7 +277,7 @@ object Utils {
         ctx: Context,
         preferenceFile: PreferenceFile?,
         file: String,
-        packageName: String,
+        packageName: String
     ): Boolean {
         Timber.tag(TAG).d("savePreferences(%s, %s)", file, packageName)
         if (preferenceFile == null) {

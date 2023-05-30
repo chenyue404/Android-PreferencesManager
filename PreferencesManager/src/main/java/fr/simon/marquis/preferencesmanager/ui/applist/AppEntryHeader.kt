@@ -30,7 +30,7 @@ fun AppEntryHeader(
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(
             modifier = Modifier

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package fr.simon.marquis.preferencesmanager.ui.editor
 
 import android.content.res.Configuration
@@ -22,7 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun FileEditorMenu(
     onSave: () -> Unit,
     onFontTheme: (color: EFontTheme) -> Unit,
-    onFontSize: (size: EFontSize) -> Unit,
+    onFontSize: (size: EFontSize) -> Unit
 ) {
     var isFontThemeShowing by remember { mutableStateOf(false) }
     var isFontSizeShowing by remember { mutableStateOf(false) }
@@ -170,6 +168,7 @@ fun FileEditorMenu(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
@@ -181,7 +180,7 @@ private fun Preview_FileEditorMenu() {
                 FileEditorMenu(
                     onSave = {},
                     onFontTheme = {},
-                    onFontSize = {},
+                    onFontSize = {}
                 )
             },
             textState = MutableStateFlow(TextFieldValue(""))

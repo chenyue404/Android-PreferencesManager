@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package fr.simon.marquis.preferencesmanager.ui.components
 
 import android.content.res.Configuration
@@ -53,6 +51,7 @@ private val slideUp = {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
     modifier: Modifier = Modifier,
@@ -76,14 +75,14 @@ fun AppBar(
                     contentAlignment = Alignment.CenterStart,
                     content = { title() }
                 )
-            },
+            }
         )
 
         if (textState != null) {
             AnimatedVisibility(
                 visible = isSearching,
                 enter = slideIn(),
-                exit = slideUp(),
+                exit = slideUp()
             ) {
                 SearchView(
                     backgroundColor = MaterialTheme.colorScheme.surface,
@@ -95,6 +94,7 @@ fun AppBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(
     backgroundColor: Color,
@@ -128,7 +128,7 @@ fun SearchView(
                 ) {
                     Icon(
                         Icons.Default.ArrowBack,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
             },
@@ -154,7 +154,7 @@ fun SearchView(
 
 @Composable
 fun NavigationBack(
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     IconButton(
         onClick = onClick,
@@ -162,6 +162,7 @@ fun NavigationBack(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable

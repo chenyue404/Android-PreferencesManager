@@ -161,7 +161,6 @@ object XmlUtils {
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
     fun writeByteArrayXml(byteArray: ByteArray?, name: String?, out: XmlSerializer) {
-
         if (byteArray == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
@@ -206,7 +205,6 @@ object XmlUtils {
      */
     @Throws(XmlPullParserException::class, java.io.IOException::class)
     fun writeIntArrayXml(value: IntArray?, name: String?, out: XmlSerializer) {
-
         if (value == null) {
             out.startTag(null, "null")
             out.endTag(null, "null")
@@ -460,7 +458,6 @@ object XmlUtils {
     @Suppress("Unused_Parameter")
     @Throws(XmlPullParserException::class, java.io.IOException::class)
     fun readThisIntArrayXml(parser: XmlPullParser, endTag: String, name: Array<String?>): IntArray {
-
         val num: Int
         try {
             num = Integer.parseInt(parser.getAttributeValue(null, "num"))

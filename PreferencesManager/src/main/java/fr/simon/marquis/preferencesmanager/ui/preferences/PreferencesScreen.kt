@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-
 package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import android.content.res.Configuration
@@ -22,11 +20,12 @@ import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PreferenceFragment(
     list: List<KeyValueIndex>,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
@@ -35,7 +34,7 @@ fun PreferenceFragment(
     Column(
         Modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
         Box(contentAlignment = Alignment.Center) {
             PreferenceEmptyView(isEmpty = list.isEmpty())

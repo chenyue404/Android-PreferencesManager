@@ -26,7 +26,7 @@ data class PreferencesState(
     val pkgName: String = "",
     val pkgTitle: String = "",
     val restoreData: BackupContainer? = null,
-    val tabList: List<TabItem> = listOf(),
+    val tabList: List<TabItem> = listOf()
 )
 
 class PreferencesViewModel : ViewModel() {
@@ -103,7 +103,7 @@ class PreferencesViewModel : ViewModel() {
     fun performFileRestore(
         ctx: Context,
         fileName: String,
-        packageName: String,
+        packageName: String
     ) {
         val result = Utils.restoreFile(ctx, fileName, packageName)
 
