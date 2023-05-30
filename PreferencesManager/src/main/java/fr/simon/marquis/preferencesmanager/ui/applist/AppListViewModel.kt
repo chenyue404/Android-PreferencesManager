@@ -1,9 +1,6 @@
 package fr.simon.marquis.preferencesmanager.ui.applist
 
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +13,7 @@ import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -35,8 +33,8 @@ class AppListViewModel : ViewModel() {
     var themeSettings: ThemeSettingsImpl = ThemeSettingsImpl()
         private set
 
-    var uiState by mutableStateOf(AppListState())
-        private set
+    private val _uiState = MutableStateFlow(AppListState())
+    val uiState = _uiState.asStateFlow()
 
     private val _searchText = MutableStateFlow(TextFieldValue(""))
     val searchText: MutableStateFlow<TextFieldValue> = _searchText
@@ -54,44 +52,46 @@ class AppListViewModel : ViewModel() {
     }
 
     fun setIsSearching(value: Boolean) {
-        uiState = uiState.copy(isSearching = value)
+        _uiState.update { it.copy(isLoading = value) }
     }
 
     fun checkRoot() {
-        uiState = uiState.copy(isRootGranted = Shell.isAppGrantedRoot() ?: false)
+        _uiState.update { it.copy(isRootGranted = Shell.isAppGrantedRoot() ?: false) }
 
-        Timber.i("Root access is ${uiState.isRootGranted}")
+        Timber.i("Root access is ${uiState.value.isRootGranted}")
     }
 
     private fun searchText(value: String) {
-        val isSearching = uiState.isSearching && searchText.value.text.isNotEmpty()
+        val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
         val list = if (isSearching) {
-            uiState.appList.filter {
+            uiState.value.appList.filter {
                 it.label
                     .lowercase(Locale.getDefault())
                     .contains(value.lowercase(Locale.getDefault()))
             }
         } else {
-            uiState.appList
+            uiState.value.appList
         }
 
-        uiState = uiState.copy(filteredAppList = list)
+        _uiState.update { it.copy(filteredAppList = list) }
     }
 
     fun startTask(context: Context) {
         viewModelScope.executeAsyncTask(
             onPreExecute = {
-                uiState = uiState.copy(isLoading = true)
+                _uiState.update { it.copy(isLoading = true) }
             },
             doInBackground = { _: suspend (progress: Int) -> Unit ->
                 Utils.getApplications(context)
             },
-            onPostExecute = {
-                uiState = uiState.copy(
-                    isLoading = false,
-                    appList = it,
-                    filteredAppList = it
-                )
+            onPostExecute = { list ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        appList = list,
+                        filteredAppList = list
+                    )
+                }
             },
             onProgressUpdate = {
             }

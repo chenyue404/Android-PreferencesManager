@@ -1,9 +1,6 @@
 package fr.simon.marquis.preferencesmanager.ui.editor
 
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.simon.marquis.preferencesmanager.model.EFontSize
@@ -13,6 +10,9 @@ import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
 import java.util.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -29,44 +29,46 @@ data class FileEditorState(
 
 class FileEditorViewModel : ViewModel() {
 
-    var uiState by mutableStateOf(FileEditorState())
-        private set
+    private val _uiState = MutableStateFlow(FileEditorState())
+    val uiState = _uiState.asStateFlow()
 
     init {
-        val xmlColorTheme = XmlColorTheme.createTheme(uiState.fontTheme)
-        uiState = uiState.copy(xmlColorTheme = xmlColorTheme)
+        val xmlColorTheme = XmlColorTheme.createTheme(uiState.value.fontTheme)
+        _uiState.update { it.copy(xmlColorTheme = xmlColorTheme) }
     }
 
     fun setTextChanged(value: String) {
-        uiState = uiState.copy(textChanged = true, editText = value)
+        _uiState.update { it.copy(textChanged = true, editText = value) }
     }
 
     fun setPackageInfo(file: String?, title: String?, pkgName: String?) {
-        uiState = uiState.copy(
-            file = file,
-            title = title,
-            pkgName = pkgName,
-            editText = Utils.readFile(file!!)
-        )
+        _uiState.update {
+            it.copy(
+                file = file,
+                title = title,
+                pkgName = pkgName,
+                editText = Utils.readFile(file!!)
+            )
+        }
     }
 
     fun setFontSize(value: EFontSize) {
-        uiState = uiState.copy(fontSize = value)
+        _uiState.update { it.copy(fontSize = value) }
 
-        PrefManager.keyFontSize = uiState.fontSize.size
+        PrefManager.keyFontSize = uiState.value.fontSize.size
     }
 
     fun setFontTheme(value: EFontTheme) {
         val xmlColorTheme = XmlColorTheme.createTheme(value)
-        uiState = uiState.copy(fontTheme = value, xmlColorTheme = xmlColorTheme)
+        _uiState.update { it.copy(fontTheme = value, xmlColorTheme = xmlColorTheme) }
 
-        PrefManager.keyFontTheme = uiState.fontTheme.ordinal
+        PrefManager.keyFontTheme = uiState.value.fontTheme.ordinal
     }
 
     fun saveChanges(context: Context): Boolean {
-        val file = uiState.file!!
-        val pkgName = uiState.pkgName!!
-        val pref = PreferenceFile.fromXml(uiState.editText ?: "")
+        val file = uiState.value.file!!
+        val pkgName = uiState.value.pkgName!!
+        val pref = PreferenceFile.fromXml(uiState.value.editText ?: "")
 
         backupFile(context, pkgName, file)
 

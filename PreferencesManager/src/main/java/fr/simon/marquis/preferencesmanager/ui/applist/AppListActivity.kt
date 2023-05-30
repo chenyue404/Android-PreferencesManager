@@ -60,6 +60,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.R
@@ -89,7 +90,7 @@ class AppListActivity : ComponentActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.run {
-            if (uiState.isRootGranted) {
+            if (uiState.value.isRootGranted) {
                 startTask(this@AppListActivity)
             }
         }
@@ -114,8 +115,8 @@ class AppListActivity : ComponentActivity() {
         viewModel.checkRoot()
 
         if (savedInstanceState == null || Utils.previousApps == null) {
-            viewModel.run {
-                if (uiState.isRootGranted) {
+            with(viewModel) {
+                if (uiState.value.isRootGranted) {
                     startTask(this@AppListActivity)
                 }
             }
@@ -123,11 +124,9 @@ class AppListActivity : ComponentActivity() {
 
         Timber.i("onCreate")
         setContent {
-            val uiState by viewModel::uiState
-
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val context = LocalContext.current
-            val haptic = LocalHapticFeedback.current
-            val scope = rememberCoroutineScope()
+
             val scrollState = rememberLazyListState()
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
@@ -151,13 +150,13 @@ class AppListActivity : ComponentActivity() {
 
             if (!uiState.isRootGranted) {
                 LaunchedEffect(Unit) {
-                    scope.launch {
-                        dialogNoRootState = true
-                    }
+                    dialogNoRootState = true
                 }
             }
 
             AppTheme(isDarkTheme = isDarkTheme) {
+                val haptic = LocalHapticFeedback.current
+
                 AppListLayout(
                     scrollState = scrollState,
                     scrollBehavior = scrollBehavior,
@@ -205,7 +204,7 @@ private fun AppListAppBar(
     themeSettings: ThemeSettings
 ) {
     val context = LocalContext.current
-    val uiState by viewModel::uiState
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var dialogThemeState by remember { mutableStateOf(false) }
     DialogTheme(
@@ -260,7 +259,7 @@ private fun AppListLayout(
     onClick: (entry: AppEntry) -> Unit,
     onLongClick: (entry: AppEntry) -> Unit
 ) {
-    val uiState by viewModel::uiState
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Surface {
         Scaffold(

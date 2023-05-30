@@ -45,10 +45,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.*
@@ -60,6 +62,7 @@ import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.getParcelable
+import kotlinx.coroutines.flow.MutableStateFlow
 import timber.log.Timber
 
 const val KEY_ICON_URI = "KEY_ICON_URI"
@@ -95,15 +98,12 @@ class PreferencesActivity : ComponentActivity() {
         Timber.i("onCreate")
         setContent {
             val context = LocalContext.current
-            val uiState = viewModel.uiState
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
-            val haptic = LocalHapticFeedback.current
-            val topBarState = rememberTopAppBarState()
-            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
             val pagerState = rememberPagerState(
                 initialPage = 0,
                 initialPageOffsetFraction = 0f,
-                pageCount = { uiState.tabList.size }
+                pageCount = { uiState.value.tabList.size }
             )
 
             LaunchedEffect(Unit) {
@@ -121,16 +121,16 @@ class PreferencesActivity : ComponentActivity() {
             var restoreDialogState by remember { mutableStateOf(false) }
             DialogRestore(
                 openDialog = restoreDialogState,
-                container = uiState.restoreData,
+                container = uiState.value.restoreData,
                 onNegative = { restoreDialogState = false },
                 onRestore = { fileName ->
-                    val pkgName = uiState.pkgName
+                    val pkgName = uiState.value.pkgName
                     viewModel.performFileRestore(context, fileName, pkgName)
                     restoreDialogState = false
                 },
                 onDelete = { fileName ->
                     val currentPage = pagerState.currentPage
-                    val currentTab = uiState.tabList[currentPage]
+                    val currentTab = uiState.value.tabList[currentPage]
                     val file = currentTab.preferenceFile!!.file
 
                     viewModel.deleteFile(context, fileName, file)
@@ -155,10 +155,11 @@ class PreferencesActivity : ComponentActivity() {
                         topBar = {
                             PreferencesAppBar(
                                 scrollBehavior = null,
-                                viewModel = viewModel,
-                                pkgTitle = uiState.pkgTitle,
-                                pkgName = uiState.pkgName,
-                                iconUri = uiState.pkgIcon,
+                                pkgTitle = uiState.value.pkgTitle,
+                                pkgName = uiState.value.pkgName,
+                                iconUri = uiState.value.pkgIcon,
+                                state = uiState.value,
+                                searchText = viewModel.searchText,
                                 onBackPressed = {
                                     onBackPressedDispatcher.onBackPressed()
                                 },
@@ -167,19 +168,19 @@ class PreferencesActivity : ComponentActivity() {
                                 },
                                 onOverflowClicked = {
                                     val currentPage = pagerState.currentPage
-                                    val currentTab = uiState.tabList[currentPage]
+                                    val currentTab = uiState.value.tabList[currentPage]
                                     val file = currentTab.preferenceFile!!.file
 
                                     when (it) {
                                         EPreferencesOverflow.EDIT -> editFile(file)
                                         EPreferencesOverflow.FAV -> {
-                                            val pkgName = uiState.pkgName
+                                            val pkgName = uiState.value.pkgName
                                             val favorite = Utils.isFavorite(pkgName)
                                             Utils.setFavorite(pkgName, !favorite)
                                         }
 
                                         EPreferencesOverflow.BACKUP -> {
-                                            val pkgName = uiState.pkgName
+                                            val pkgName = uiState.value.pkgName
                                             viewModel.backupFile(context, pkgName, file)
                                             context.showToast(res = R.string.toast_backup_success)
                                         }
@@ -201,17 +202,22 @@ class PreferencesActivity : ComponentActivity() {
                                 onSortClicked = {
                                     PrefManager.keySortType = it.ordinal
                                     viewModel.getTabsAndPreferences()
-                                }
+                                },
+                                onSearch = { viewModel::setIsSearching }
                             )
                         }
                     ) { paddingValues ->
+                        val haptic = LocalHapticFeedback.current
+                        val topBarState = rememberTopAppBarState()
+                        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
+
                         TabLayout(
                             modifier = Modifier
                                 .padding(paddingValues)
                                 .fillMaxSize(),
                             scrollBehavior = scrollBehavior,
                             pagerState = pagerState,
-                            viewModel = viewModel,
+                            state = uiState.value,
                             onClick = {
                                 /* TODO */
                             },
@@ -229,8 +235,8 @@ class PreferencesActivity : ComponentActivity() {
     private fun editFile(file: String) {
         val intent = Intent(this, FileEditorActivity::class.java).apply {
             putExtra(KEY_FILE, file)
-            putExtra(KEY_ICON_URI, viewModel.uiState.pkgIcon)
-            putExtra(KEY_PACKAGE_NAME, viewModel.uiState.pkgName)
+            putExtra(KEY_ICON_URI, viewModel.uiState.value.pkgIcon)
+            putExtra(KEY_PACKAGE_NAME, viewModel.uiState.value.pkgName)
         }
 
         resultFileEdit.launch(intent)
@@ -240,18 +246,18 @@ class PreferencesActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesAppBar(
-    scrollBehavior: TopAppBarScrollBehavior?,
-    viewModel: PreferencesViewModel,
-    pkgTitle: String,
-    pkgName: String,
     iconUri: Uri?,
-    onBackPressed: () -> Unit,
+    pkgName: String,
+    pkgTitle: String,
+    scrollBehavior: TopAppBarScrollBehavior?,
+    searchText: MutableStateFlow<TextFieldValue>,
+    state: PreferencesState,
     onAddClicked: (value: EPreferencesAdd) -> Unit,
+    onBackPressed: () -> Unit,
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
+    onSearch: (value: Boolean) -> Unit,
     onSortClicked: (value: EPreferencesSort) -> Unit
 ) {
-    val uiState by viewModel::uiState
-
     AppBar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -290,8 +296,8 @@ fun PreferencesAppBar(
         actions = {
             // TODO this is recomposing unnecessarily when swiped
             PreferencesMenu(
-                isFavorite = Utils.isFavorite(uiState.pkgName),
-                onSearch = { viewModel.setIsSearching(true) },
+                isFavorite = Utils.isFavorite(state.pkgName),
+                onSearch = { onSearch(true) },
                 onAddClicked = onAddClicked,
                 onOverflowClicked = onOverflowClicked,
                 onSortClicked = onSortClicked
@@ -303,9 +309,9 @@ fun PreferencesAppBar(
                 Icon(Icons.Default.ArrowBack, contentDescription = null)
             }
         },
-        textState = viewModel.searchText,
-        isSearching = uiState.isSearching,
-        onSearchClose = { viewModel.setIsSearching(false) }
+        textState = searchText,
+        isSearching = state.isSearching,
+        onSearchClose = { onSearch(false) }
     )
 }
 
@@ -313,14 +319,12 @@ fun PreferencesAppBar(
 @Composable
 fun TabLayout(
     modifier: Modifier = Modifier,
-    scrollBehavior: TopAppBarScrollBehavior,
     pagerState: PagerState,
-    viewModel: PreferencesViewModel,
+    scrollBehavior: TopAppBarScrollBehavior,
+    state: PreferencesState,
     onClick: (preferenceFile: PreferenceFile?) -> Unit,
     onLongClick: (preferenceFile: PreferenceFile?) -> Unit
 ) {
-    val uiState by viewModel::uiState
-
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -329,9 +333,9 @@ fun TabLayout(
             modifier = Modifier
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
-            val tabs = uiState.tabList
+            val tabs = state.tabList
 
-            if (tabs.isEmpty() && !uiState.isLoading) {
+            if (tabs.isEmpty() && !state.isLoading) {
                 PreferenceEmptyView()
             } else {
                 Tabs(
@@ -347,7 +351,7 @@ fun TabLayout(
             }
         }
 
-        if (uiState.isLoading) {
+        if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.size(92.dp))
         }
     }

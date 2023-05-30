@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.EFontTheme
@@ -70,7 +71,7 @@ class FileEditorActivity : ComponentActivity() {
 
         Timber.i("onCreate")
         setContent {
-            val uiState by viewModel::uiState
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             val context = LocalContext.current
             val topBarState = rememberTopAppBarState()

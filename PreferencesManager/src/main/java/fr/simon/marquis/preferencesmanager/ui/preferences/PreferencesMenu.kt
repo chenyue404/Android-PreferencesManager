@@ -7,14 +7,15 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.EPreferencesAdd
 import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
 import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun PreferencesMenu(
@@ -209,14 +210,16 @@ fun PreferencesMenu(
 private fun Preview_PreferencesMenu() {
     AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         PreferencesAppBar(
-            scrollBehavior = null,
-            viewModel = viewModel(),
-            pkgTitle = "Some Cool App",
-            pkgName = "com.some.cool.app",
             iconUri = null,
-            onBackPressed = {},
+            pkgName = "com.some.cool.app",
+            pkgTitle = "Some Cool App",
+            scrollBehavior = null,
+            searchText = MutableStateFlow(TextFieldValue("")),
+            state = PreferencesState(),
             onAddClicked = {},
+            onBackPressed = {},
             onOverflowClicked = {},
+            onSearch = {},
             onSortClicked = {}
         )
     }

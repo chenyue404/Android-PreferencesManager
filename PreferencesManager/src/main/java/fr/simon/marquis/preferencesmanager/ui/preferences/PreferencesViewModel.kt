@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Pair
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
@@ -15,6 +14,8 @@ import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.Date
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -31,35 +32,37 @@ data class PreferencesState(
 
 class PreferencesViewModel : ViewModel() {
 
-    var uiState by mutableStateOf(PreferencesState())
-        private set
+    private val _uiState = MutableStateFlow(PreferencesState())
+    val uiState = _uiState.asStateFlow()
 
     private val _searchText = MutableStateFlow(TextFieldValue(""))
     val searchText: MutableStateFlow<TextFieldValue> = _searchText
 
     fun setPackageInfo(pkgTitle: String, pkgName: String, pkgIcon: Uri?) {
-        uiState = uiState.copy(
-            pkgTitle = pkgTitle,
-            pkgName = pkgName,
-            pkgIcon = pkgIcon
-        )
+        _uiState.update {
+            it.copy(
+                pkgTitle = pkgTitle,
+                pkgName = pkgName,
+                pkgIcon = pkgIcon
+            )
+        }
     }
 
     fun setIsSearching(value: Boolean) {
-        uiState = uiState.copy(isSearching = value)
+        _uiState.update { it.copy(isSearching = value) }
     }
 
     fun clearRestoreData() {
-        uiState = uiState.copy(restoreData = null)
+        _uiState.update { it.copy(restoreData = null) }
     }
 
     fun getTabsAndPreferences() {
         viewModelScope.executeAsyncTask(
             onPreExecute = {
-                uiState = uiState.copy(isLoading = true)
+                _uiState.update { it.copy(isLoading = true) }
             },
             doInBackground = { _: suspend (progress: Int) -> Unit ->
-                val xmlFiles = Utils.findXmlFiles(uiState.pkgName)
+                val xmlFiles = Utils.findXmlFiles(uiState.value.pkgName)
                 val xmlPreferences = xmlFiles.map { file ->
                     val content = Utils.readFile(file)
                     PreferenceFile.fromXml(content, file)
@@ -67,11 +70,11 @@ class PreferencesViewModel : ViewModel() {
 
                 Pair(xmlFiles, xmlPreferences)
             },
-            onPostExecute = {
-                val tabList = it.first.mapIndexed { index, string ->
-                    TabItem(pkgName = string, preferenceFile = it.second[index])
+            onPostExecute = { pair ->
+                val tabList = pair.first.mapIndexed { index, string ->
+                    TabItem(pkgName = string, preferenceFile = pair.second[index])
                 }
-                uiState = uiState.copy(tabList = tabList, isLoading = false)
+                _uiState.update { it.copy(tabList = tabList, isLoading = false) }
             },
             onProgressUpdate = {
             }
@@ -95,7 +98,7 @@ class PreferencesViewModel : ViewModel() {
 
         Timber.d("Restore has ${container.backupList.size} items")
 
-        uiState = uiState.copy(restoreData = container)
+        _uiState.update { it.copy(restoreData = container) }
 
         hasResult(container.backupList.isNotEmpty())
     }

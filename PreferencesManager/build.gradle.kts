@@ -56,7 +56,7 @@ android {
         }
     }
     tasks {
-        project.tasks.preBuild.dependsOn("ktlintCheck")
+        project.tasks.preBuild.dependsOn("ktlintFormat")
     }
 }
 
@@ -76,10 +76,11 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
 
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.activity:activity-compose:1.7.1")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha01")
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha02")
     implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.preference:preference-ktx:1.2.0")
