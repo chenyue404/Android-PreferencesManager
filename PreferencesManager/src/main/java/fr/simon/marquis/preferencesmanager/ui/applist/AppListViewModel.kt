@@ -14,6 +14,7 @@ import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -27,6 +28,9 @@ data class AppListState(
 )
 
 class AppListViewModel : ViewModel() {
+
+    private var _showSplashScreen = MutableStateFlow(true)
+    val showSplashScreen = _showSplashScreen.asStateFlow()
 
     var themeSettings: ThemeSettingsImpl = ThemeSettingsImpl()
         private set
@@ -43,6 +47,10 @@ class AppListViewModel : ViewModel() {
                 searchText(it.text)
             }
         }
+    }
+
+    fun isLoadingComplete() {
+        _showSplashScreen.value = false
     }
 
     fun setIsSearching(value: Boolean) {
