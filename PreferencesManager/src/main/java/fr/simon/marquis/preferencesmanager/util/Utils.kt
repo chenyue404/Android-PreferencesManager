@@ -181,7 +181,7 @@ object Utils {
     }
 
     fun findXmlFiles(packageName: String): List<String> {
-        Timber.tag(TAG).d(packageName, "findXmlFiles(%s)")
+        Timber.tag(TAG).d("findXmlFiles(%s)", packageName)
 
         val stdout: List<String> = ArrayList()
         val stderr: List<String> = ArrayList()
@@ -191,7 +191,7 @@ object Utils {
     }
 
     fun readFile(file: String): String {
-        Timber.tag(TAG).d(file, "readFile(%s)")
+        Timber.tag(TAG).d("readFile(%s)", file)
         val sb = StringBuilder()
         val lines = ArrayList<String>()
         Shell.cmd(String.format(CMD_CAT_FILE, file)).to(lines).exec()

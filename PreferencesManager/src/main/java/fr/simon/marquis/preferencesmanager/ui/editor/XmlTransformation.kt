@@ -12,62 +12,62 @@ import fr.simon.marquis.preferencesmanager.model.XmlColorTheme.ColorTagEnum
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-private val COMMENT_END = Pattern.compile("-->")
-private val COMMENT_START = Pattern.compile("<!--")
-private val TAG_ATTRIBUTE_NAME = Pattern.compile("\\s(\\w*)\\=")
-private val TAG_ATTRIBUTE_VALUE = Pattern.compile("[a-z\\-]*\\=(\"[^\"]*\")")
-private val TAG_ATTRIBUTE_VALUE_2 = Pattern.compile("[a-z\\-]*\\=(\'[^\']*\')")
-private val TAG_END = Pattern.compile("\\??/?>")
-private val TAG_START = Pattern.compile("</?[-\\w\\?]+", Pattern.CASE_INSENSITIVE)
+private val commentEnd = Pattern.compile("-->")
+private val commentStart = Pattern.compile("<!--")
+private val tagAttributeName = Pattern.compile("\\s(\\w*)\\=")
+private val tagAttributeValue = Pattern.compile("[a-z\\-]*\\=(\"[^\"]*\")")
+private val tagAttributeValue2 = Pattern.compile("[a-z\\-]*\\=(\'[^\']*\')")
+private val tagEnd = Pattern.compile("\\??/?>")
+private val tagStart = Pattern.compile("</?[-\\w\\?]+", Pattern.CASE_INSENSITIVE)
 
 class XmlTransformation(private val theme: XmlColorTheme) : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val builder = AnnotatedString.Builder()
 
-        builder.run {
-            generateSpan(TAG_START.matcher(text)) { start, end ->
+        with(builder) {
+            generateSpan(tagStart.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.TAG)),
                     start = start,
                     end = end
                 )
             }
-            generateSpan(TAG_END.matcher(text)) { start, end ->
+            generateSpan(tagEnd.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.TAG)),
                     start = start,
                     end = end
                 )
             }
-            generateSpan(TAG_ATTRIBUTE_VALUE.matcher(text)) { start, end ->
+            generateSpan(tagAttributeValue.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.ATTR_VALUE)),
                     start = start,
                     end = end
                 )
             }
-            generateSpan(TAG_ATTRIBUTE_VALUE_2.matcher(text)) { start, end ->
+            generateSpan(tagAttributeValue2.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.ATTR_VALUE)),
                     start = start,
                     end = end
                 )
             }
-            generateSpan(TAG_ATTRIBUTE_NAME.matcher(text)) { start, end ->
+            generateSpan(tagAttributeName.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.ATTR_NAME)),
                     start = start,
                     end = end
                 )
             }
-            generateSpan(COMMENT_START.matcher(text)) { start, end ->
+            generateSpan(commentStart.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.COMMENT)),
                     start = start,
                     end = end
                 )
             }
-            generateSpan(COMMENT_END.matcher(text)) { start, end ->
+            generateSpan(commentEnd.matcher(text)) { start, end ->
                 addStyle(
                     style = SpanStyle(color = theme.getColor(ColorTagEnum.COMMENT)),
                     start = start,
@@ -78,14 +78,11 @@ class XmlTransformation(private val theme: XmlColorTheme) : VisualTransformation
             append(text)
         }
 
-        return TransformedText(
-            builder.toAnnotatedString(),
-            OffsetMapping.Identity
-        )
+        return TransformedText(builder.toAnnotatedString(), OffsetMapping.Identity)
     }
 }
 
-fun generateSpan(matcher: Matcher, applySpan: (start: Int, end: Int) -> Unit) {
+private fun generateSpan(matcher: Matcher, applySpan: (start: Int, end: Int) -> Unit) {
     var start: Int
     var end: Int
     while (matcher.find()) {
