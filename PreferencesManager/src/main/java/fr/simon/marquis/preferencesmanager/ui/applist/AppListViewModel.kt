@@ -9,20 +9,19 @@ import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.ThemeSettingsImpl
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
-import java.util.Locale
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 data class AppListState(
     val isLoading: Boolean = false,
     val isRootGranted: Boolean = false,
     val isSearching: Boolean = false,
     val appList: List<AppEntry> = listOf(),
-    val filteredAppList: List<AppEntry> = listOf()
+    val filteredAppList: Map<Char, List<AppEntry>> = mapOf()
 )
 
 class AppListViewModel : ViewModel() {
@@ -47,33 +46,36 @@ class AppListViewModel : ViewModel() {
         }
     }
 
-    fun isLoadingComplete() {
-        _showSplashScreen.value = false
+    fun getShell(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val hasShell = Shell.getShell()
+            _showSplashScreen.value = !hasShell.isRoot
+
+            val hasRoot = Shell.isAppGrantedRoot() ?: false
+            _uiState.update { it.copy(isRootGranted = hasRoot) }
+
+            if (hasRoot) {
+                startTask(context)
+            }
+        }
     }
 
     fun setIsSearching(value: Boolean) {
         _uiState.update { it.copy(isSearching = value) }
     }
 
-    fun checkRoot() {
-        _uiState.update { it.copy(isRootGranted = Shell.isAppGrantedRoot() ?: false) }
-
-        Timber.i("Root access is ${uiState.value.isRootGranted}")
-    }
-
     private fun searchText(value: String) {
         val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
         val list = if (isSearching) {
             uiState.value.appList.filter {
-                it.label
-                    .lowercase(Locale.getDefault())
-                    .contains(value.lowercase(Locale.getDefault()))
+                it.label.contains(value, true) || it.packageName.contains(value, true)
             }
         } else {
             uiState.value.appList
         }
 
-        _uiState.update { it.copy(filteredAppList = list) }
+        val groupedList = list.groupBy { it.headerChar }
+        _uiState.update { it.copy(filteredAppList = groupedList) }
     }
 
     fun startTask(context: Context) {
@@ -85,11 +87,12 @@ class AppListViewModel : ViewModel() {
                 Utils.getApplications(context)
             },
             onPostExecute = { list ->
+                val groupedList = list.groupBy { it.headerChar }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         appList = list,
-                        filteredAppList = list
+                        filteredAppList = groupedList
                     )
                 }
             },

@@ -28,6 +28,7 @@ class AppEntry(
     var headerChar: Char = ' ',
     var iconUri: Uri? = null,
     var label: String = "",
+    var packageName: String = "",
     var sortingValue: String? = null,
     private val mApkFile: File = File(applicationInfo.sourceDir)
 ) {
@@ -76,6 +77,7 @@ class AppEntry(
 
             // replace false spaces O_o
             label = label.replace("\\s".toRegex(), " ")
+            packageName = applicationInfo.packageName
         }
 
         if (sortingValue == null) {

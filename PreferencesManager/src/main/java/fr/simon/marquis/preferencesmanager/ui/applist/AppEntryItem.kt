@@ -26,20 +26,27 @@ import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 fun AppEntryItem(
     modifier: Modifier = Modifier,
     entry: AppEntry,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onClick: (entry: AppEntry) -> Unit,
+    onLongClick: (entry: AppEntry) -> Unit
 ) {
     ListItem(
         modifier = modifier
             .height(72.dp)
             .fillMaxWidth(1f)
             .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
+                onClick = { onClick(entry) },
+                onLongClick = { onLongClick(entry) }
             ),
         headlineContent = {
             Text(
                 text = entry.label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        supportingContent = {
+            Text(
+                text = entry.applicationInfo.packageName,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -69,7 +76,7 @@ fun AppEntryItem(
 @Composable
 private fun Preview_AppEntryItem() {
     val appInfo = ApplicationInfo().apply {
-        packageName = "Some Cool App"
+        packageName = "some.cool.app"
         name = "Some Cool App"
         sourceDir = ""
     }

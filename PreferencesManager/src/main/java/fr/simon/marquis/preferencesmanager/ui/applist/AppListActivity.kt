@@ -61,8 +61,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
@@ -78,7 +76,6 @@ import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_TITLE
 import fr.simon.marquis.preferencesmanager.ui.preferences.PreferencesActivity
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
-import fr.simon.marquis.preferencesmanager.util.Utils
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -101,26 +98,12 @@ class AppListActivity : ComponentActivity() {
         installSplashScreen().setKeepOnScreenCondition {
             viewModel.showSplashScreen.value
         }
-        lifecycleScope.launch {
-            val shell = Shell.getShell()
-            if (shell.isRoot) {
-                viewModel.isLoadingComplete()
-            }
-        }
+
+        viewModel.getShell(this@AppListActivity)
 
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        viewModel.checkRoot()
-
-        if (savedInstanceState == null || Utils.previousApps == null) {
-            with(viewModel) {
-                if (uiState.value.isRootGranted) {
-                    startTask(this@AppListActivity)
-                }
-            }
-        }
 
         Timber.i("onCreate")
         setContent {
@@ -165,30 +148,26 @@ class AppListActivity : ComponentActivity() {
                         if (!uiState.isRootGranted) {
                             Timber.e("We don't have root to continue!")
                         } else {
-                            val intent = Intent(context, PreferencesActivity::class.java).apply {
+                            Intent(context, PreferencesActivity::class.java).apply {
                                 val pkgName = entry.applicationInfo.packageName
                                 putExtra(KEY_ICON_URI, entry.iconUri)
                                 putExtra(KEY_PACKAGE_NAME, pkgName)
                                 putExtra(KEY_TITLE, entry.label)
-                            }
-
-                            activityResult.launch(intent)
+                            }.also { intent -> activityResult.launch(intent) }
                         }
                     },
                     onLongClick = { entry ->
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
                         val pkgName = entry.applicationInfo.packageName
-                        val intent = Intent().apply {
+                        Intent().apply {
                             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            data = Uri.fromParts("package", pkgName, null)
                             addCategory(Intent.CATEGORY_DEFAULT)
                             addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                            data = Uri.fromParts("package", pkgName, null)
-                        }
-
-                        activityResult.launch(intent)
+                        }.also { intent -> activityResult.launch(intent) }
                     }
                 )
             }
@@ -211,15 +190,15 @@ private fun AppListAppBar(
         openDialog = dialogThemeState,
         initialSelection = PrefManager.themePreference,
         negativeText = "Cancel",
+        positiveText = "OK",
+        title = "Switch Theme",
         onDismiss = { dialogThemeState = false },
         onNegative = { dialogThemeState = false },
         onPositive = {
             themeSettings.theme = EAppTheme.getAppTheme(it)
             PrefManager.themePreference = it
             dialogThemeState = false
-        },
-        positiveText = "OK",
-        title = "Switch Theme"
+        }
     )
 
     var dialogAboutState by remember { mutableStateOf(false) }
@@ -285,8 +264,7 @@ private fun AppListLayout(
                 state = scrollState,
                 contentPadding = PaddingValues(bottom = 112.dp)
             ) {
-                val items = uiState.filteredAppList.groupBy { it.headerChar }
-                items.forEach { (letter, item) ->
+                uiState.filteredAppList.forEach { (letter, item) ->
                     stickyHeader {
                         AppEntryHeader(letter = letter)
                     }
@@ -294,8 +272,8 @@ private fun AppListLayout(
                         AppEntryItem(
                             modifier = Modifier.animateItemPlacement(),
                             entry = entry,
-                            onClick = { onClick(entry) },
-                            onLongClick = { onLongClick(entry) }
+                            onClick = onClick,
+                            onLongClick = onLongClick
                         )
                     }
                 }
