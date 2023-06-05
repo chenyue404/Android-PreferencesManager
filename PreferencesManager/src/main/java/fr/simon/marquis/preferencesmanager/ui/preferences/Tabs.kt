@@ -7,7 +7,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,7 +55,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
         selectedTabIndex = pagerState.currentPage,
         containerColor = MaterialTheme.colorScheme.surface,
         indicator = { tabPositions ->
-            TabRowDefaults.Indicator(Modifier.pagerTabIndicatorOffset(pagerState, tabPositions))
+            SecondaryIndicator(Modifier.pagerTabIndicatorOffset(pagerState, tabPositions))
         }
     ) {
         tabs.mapIndexed { index, tabItem ->
