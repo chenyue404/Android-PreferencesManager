@@ -22,9 +22,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -36,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +46,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,13 +58,14 @@ import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.*
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
 import fr.simon.marquis.preferencesmanager.ui.components.DialogRestore
-import fr.simon.marquis.preferencesmanager.ui.components.showToast
+import fr.simon.marquis.preferencesmanager.ui.components.EmptyView
 import fr.simon.marquis.preferencesmanager.ui.editor.FileEditorActivity
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.getParcelable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 const val KEY_ICON_URI = "KEY_ICON_URI"
@@ -70,19 +73,19 @@ const val KEY_PACKAGE_NAME = "KEY_PACKAGE_NAME"
 const val KEY_TITLE = "KEY_TITLE"
 const val KEY_FILE = "KEY_FILE"
 
-// TODO: Add columns to list if either a tablet or landscape mode.
-
 class PreferencesActivity : ComponentActivity() {
 
     private val viewModel: PreferencesViewModel by viewModels()
 
-    private var resultFileEdit = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
+    private val contract = ActivityResultContracts.StartActivityForResult()
+    private var resultFileEdit = registerForActivityResult(contract) {
         viewModel.getTabsAndPreferences()
     }
 
-    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+    @OptIn(
+        ExperimentalFoundationApi::class,
+        ExperimentalMaterial3Api::class
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -96,8 +99,19 @@ class PreferencesActivity : ComponentActivity() {
 
         Timber.i("onCreate")
         setContent {
+            // TODO: Add columns to list if either a tablet or landscape mode.
+            // val windowSizeClass = calculateWindowSizeClass(this)
+
             val context = LocalContext.current
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+            val snackbarHostState = remember { SnackbarHostState() }
+            val scope = rememberCoroutineScope()
+            fun showSnackBar(@StringRes id: Int) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(getString(id))
+                }
+            }
 
             val pagerState = rememberPagerState(
                 initialPage = 0,
@@ -126,21 +140,16 @@ class PreferencesActivity : ComponentActivity() {
                     val pkgName = uiState.pkgName
                     viewModel.performFileRestore(context, fileName, pkgName)
                     restoreDialogState = false
+                    showSnackBar(R.string.file_restored)
                 },
                 onDelete = { fileName ->
                     val currentPage = pagerState.currentPage
                     val currentTab = uiState.tabList[currentPage]
-                    val file = currentTab.preferenceFile!!.file
+                    // val file = currentTab.preferenceFile!!.file
 
-                    viewModel.deleteFile(context, fileName, file)
+                    viewModel.deleteFile(context, fileName, currentTab)
                 }
             )
-
-            // val editDialogState = rememberMaterialDialogState()
-            // DialogEditPreference(
-            //     dialogState = editDialogState,
-            //     preferenceFile =
-            // )
 
             val isDarkTheme = when (EAppTheme.getAppTheme(PrefManager.themePreference)) {
                 EAppTheme.AUTO -> isSystemInDarkTheme()
@@ -151,6 +160,7 @@ class PreferencesActivity : ComponentActivity() {
             AppTheme(isDarkTheme = isDarkTheme) {
                 Surface {
                     Scaffold(
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
                             PreferencesAppBar(
                                 scrollBehavior = null,
@@ -161,14 +171,15 @@ class PreferencesActivity : ComponentActivity() {
                                 },
                                 onAddClicked = {
                                     /* TODO */
+                                    Timber.d("Type: $it")
                                 },
                                 onOverflowClicked = {
                                     val currentPage = pagerState.currentPage
                                     val currentTab = uiState.tabList[currentPage]
-                                    val file = currentTab.preferenceFile!!.file
+                                    // val file = currentTab.preferenceFile!!.file
 
                                     when (it) {
-                                        EPreferencesOverflow.EDIT -> editFile(file)
+                                        EPreferencesOverflow.EDIT -> editFile(currentTab)
                                         EPreferencesOverflow.FAV -> {
                                             val pkgName = uiState.pkgName
                                             val favorite = Utils.isFavorite(pkgName)
@@ -177,19 +188,16 @@ class PreferencesActivity : ComponentActivity() {
 
                                         EPreferencesOverflow.BACKUP -> {
                                             val pkgName = uiState.pkgName
-                                            viewModel.backupFile(context, pkgName, file)
-                                            context.showToast(res = R.string.toast_backup_success)
+                                            viewModel.backupFile(context, pkgName, currentTab)
+                                            showSnackBar(R.string.toast_backup_success)
                                         }
 
                                         EPreferencesOverflow.RESTORE -> {
-                                            viewModel.findFilesToRestore(
-                                                context,
-                                                file
-                                            ) { hasResult ->
-                                                if (hasResult) {
+                                            viewModel.findFilesToRestore(context, currentTab) { r ->
+                                                if (r) {
                                                     restoreDialogState = true
                                                 } else {
-                                                    context.showToast(res = R.string.empty_restore)
+                                                    showSnackBar(R.string.empty_restore)
                                                 }
                                             }
                                         }
@@ -287,7 +295,6 @@ fun PreferencesAppBar(
             }
         },
         actions = {
-            // TODO this is recomposing unnecessarily when swiped
             PreferencesMenu(
                 isFavorite = Utils.isFavorite(state.pkgName),
                 onSearch = { onSearch(true) },
@@ -297,7 +304,6 @@ fun PreferencesAppBar(
             )
         },
         navigationIcon = {
-            // TODO this is recomposing unnecessarily when swiped
             IconButton(onClick = onBackPressed) {
                 Icon(Icons.Default.ArrowBack, contentDescription = null)
             }
@@ -315,53 +321,67 @@ fun TabLayout(
     pagerState: PagerState,
     scrollBehavior: TopAppBarScrollBehavior,
     state: PreferencesState,
-    onClick: (preferenceFile: PreferenceFile?) -> Unit,
-    onLongClick: (preferenceFile: PreferenceFile?) -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-        ) {
-            val tabs = state.tabList
-
-            if (tabs.isEmpty() && !state.isLoading) {
-                PreferenceEmptyView()
+        Column(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
+            val scope = rememberCoroutineScope()
+            if (state.tabList.isEmpty() && !state.isLoading) {
+                EmptyView(
+                    isEmpty = true,
+                    emptyMessage = stringResource(id = R.string.empty_preference_application)
+                )
             } else {
-                Tabs(
-                    tabs = tabs,
-                    pagerState = pagerState
-                )
-                TabsContent(
-                    tabs = tabs,
-                    pagerState = pagerState,
-                    onClick = onClick,
-                    onLongClick = onLongClick
-                )
+                // Tabs
+                ScrollableTabRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedTabIndex = pagerState.currentPage,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    indicator = { tabPositions ->
+                        TabRowDefaults.SecondaryIndicator(
+                            modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                        )
+                    }
+                ) {
+                    state.tabList.forEachIndexed { index, tabItem ->
+                        Tab(
+                            text = {
+                                val pkgName = tabItem.substringAfterLast("/")
+                                val text = if (pkgName.length > 30) {
+                                    "…${pkgName.takeLast(30)}"
+                                } else {
+                                    pkgName
+                                }
+                                Text(text = text)
+                            },
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            }
+                        )
+                    }
+                }
+
+                // Tab Content
+                HorizontalPager(state = pagerState) { page ->
+                    PreferenceFragment(
+                        preferencePath = state.tabList[page],
+                        pkgName = state.pkgName,
+                        onClick = onClick,
+                        onLongClick = onLongClick
+                    )
+                }
             }
         }
 
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.size(92.dp))
         }
-    }
-}
-
-@Composable
-fun PreferenceEmptyView() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.empty_view),
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(text = stringResource(id = R.string.empty_preference_application))
     }
 }

@@ -13,17 +13,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import fr.simon.marquis.preferencesmanager.model.KeyValueIndex
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.ui.theme.getColorFromObjet
+import java.util.AbstractMap
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PreferencesEntryItem(
     modifier: Modifier = Modifier,
-    item: KeyValueIndex,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {}
+    item: MutableMap.MutableEntry<String, Any>,
+    onClick: (item: MutableMap.MutableEntry<String, Any>) -> Unit,
+    onLongClick: (item: MutableMap.MutableEntry<String, Any>) -> Unit
 ) {
     Card(
         modifier = modifier
@@ -31,8 +31,8 @@ fun PreferencesEntryItem(
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
             .heightIn(0.dp, 110.dp)
             .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
+                onClick = { onClick(item) },
+                onLongClick = { onLongClick(item) }
             )
     ) {
         Divider(
@@ -45,7 +45,7 @@ fun PreferencesEntryItem(
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = item.key.toString(),
+                text = item.key,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 fontWeight = FontWeight.Bold
@@ -63,16 +63,16 @@ fun PreferencesEntryItem(
 @Preview
 @Composable
 private fun Preview_PreferencesEntryItem() {
-    val preferences = listOf(
-        KeyValueIndex(
-            key = "Hello World",
-            value = "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh"
+    val list: MutableList<MutableMap.MutableEntry<String, Any>> = mutableListOf(
+        AbstractMap.SimpleEntry(
+            "Hello World",
+            "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh"
         )
     )
 
     AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            PreferencesEntryItem(item = preferences.first())
+            PreferencesEntryItem(item = list.first(), onClick = {}, onLongClick = {})
         }
     }
 }

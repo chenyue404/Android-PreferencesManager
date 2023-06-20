@@ -68,7 +68,7 @@ class FileEditorViewModel : ViewModel() {
     fun saveChanges(context: Context): Boolean {
         val file = uiState.value.file!!
         val pkgName = uiState.value.pkgName!!
-        val pref = PreferenceFile.fromXml(uiState.value.editText ?: "")
+        val pref = PreferenceFile.fromXml(uiState.value.editText ?: "", file)
 
         backupFile(context, pkgName, file)
 

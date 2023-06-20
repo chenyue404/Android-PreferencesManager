@@ -48,15 +48,22 @@ class AppListViewModel : ViewModel() {
 
     fun getShell(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
+            // Call the shell, this will prompt for Root Access if we haven't got it yet
             val hasShell = Shell.getShell()
             _showSplashScreen.value = !hasShell.isRoot
 
-            val hasRoot = Shell.isAppGrantedRoot() ?: false
-            _uiState.update { it.copy(isRootGranted = hasRoot) }
-
-            if (hasRoot) {
-                startTask(context)
+            if (hasShell.isRoot) {
+                getIsRoot(context)
             }
+        }
+    }
+
+    private fun getIsRoot(context: Context) {
+        // Verify we have root.
+        _uiState.update { it.copy(isRootGranted = Shell.isAppGrantedRoot() ?: false) }
+
+        if (uiState.value.isRootGranted) {
+            startTask(context)
         }
     }
 

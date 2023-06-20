@@ -45,9 +45,6 @@ fun PreferencesMenu(
     ) {
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_int)) },
-            leadingIcon = {
-                Icon(Icons.Default.Add, contentDescription = null)
-            },
             onClick = {
                 onAddClicked(EPreferencesAdd.INTEGER)
                 isAddMenuShowing = false
@@ -55,9 +52,6 @@ fun PreferencesMenu(
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_string)) },
-            leadingIcon = {
-                Icon(Icons.Default.Add, contentDescription = null)
-            },
             onClick = {
                 onAddClicked(EPreferencesAdd.STRING)
                 isAddMenuShowing = false
@@ -65,9 +59,6 @@ fun PreferencesMenu(
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_boolean)) },
-            leadingIcon = {
-                Icon(Icons.Default.Add, contentDescription = null)
-            },
             onClick = {
                 onAddClicked(EPreferencesAdd.BOOLEAN)
                 isAddMenuShowing = false
@@ -75,9 +66,6 @@ fun PreferencesMenu(
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_float)) },
-            leadingIcon = {
-                Icon(Icons.Default.Add, contentDescription = null)
-            },
             onClick = {
                 onAddClicked(EPreferencesAdd.FLOAT)
                 isAddMenuShowing = false
@@ -85,9 +73,6 @@ fun PreferencesMenu(
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_long)) },
-            leadingIcon = {
-                Icon(Icons.Default.Add, contentDescription = null)
-            },
             onClick = {
                 onAddClicked(EPreferencesAdd.LONG)
                 isAddMenuShowing = false
@@ -95,9 +80,6 @@ fun PreferencesMenu(
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_stringset)) },
-            leadingIcon = {
-                Icon(Icons.Default.Add, contentDescription = null)
-            },
             onClick = {
                 onAddClicked(EPreferencesAdd.STRINGSET)
                 isAddMenuShowing = false

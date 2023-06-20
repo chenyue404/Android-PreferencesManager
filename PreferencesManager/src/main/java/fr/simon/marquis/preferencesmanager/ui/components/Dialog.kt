@@ -34,7 +34,6 @@ import de.charlex.compose.HtmlText
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
 import fr.simon.marquis.preferencesmanager.model.BackupContainerInfo
-import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 
 @Composable
 fun DialogTheme(
@@ -60,7 +59,7 @@ fun DialogTheme(
     )
 
     var selectedItem by remember {
-        mutableStateOf(initialSelection)
+        mutableIntStateOf(initialSelection)
     }
 
     AlertDialog(
@@ -266,14 +265,6 @@ fun DialogRestore(
             }
         }
     )
-}
-
-@Composable
-fun DialogEditPreference(
-    openDialog: Boolean,
-    preferenceFile: PreferenceFile
-) {
-    /* TODO */
 }
 
 @Composable

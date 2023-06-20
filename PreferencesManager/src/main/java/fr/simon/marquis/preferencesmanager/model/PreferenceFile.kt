@@ -17,48 +17,29 @@ package fr.simon.marquis.preferencesmanager.model
 
 import android.text.TextUtils
 import fr.simon.marquis.preferencesmanager.util.PrefManager
-import fr.simon.marquis.preferencesmanager.util.XmlUtils
+import fr.simon.marquis.preferencesmanager.util.XmlUtils.readMapXml
+import fr.simon.marquis.preferencesmanager.util.XmlUtils.writeMapXml
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
 import org.xmlpull.v1.XmlPullParserException
-import timber.log.Timber
 
-data class KeyValueIndex(
-    var index: Int? = null,
-    var key: Any,
-    var value: Any
-)
+class PreferenceFile(val file: String) {
 
-class PreferenceFile {
+    private var preferences: MutableMap<String, Any> = hashMapOf()
 
-    private var mPreferences: MutableMap<Any, Any>? = null
-    private var mList: MutableList<KeyValueIndex>? = null
-    lateinit var file: String
+    var list: MutableList<MutableMap.MutableEntry<String, Any>> = mutableListOf()
+        private set
 
-    var list: MutableList<KeyValueIndex>
-        get() {
-            if (mList == null) {
-                mList = ArrayList()
-            }
-            return mList!!
-        }
-        set(mList) {
-            this.mList = mList
-            this.mPreferences = HashMap()
-
-            mList.map {
-                mPreferences!![it.key] = it.value
-            }
-
-            updateSort()
-        }
+    var isValidPreferenceFile = true
+        private set
 
     val isValid: Boolean
         get() {
             try {
-                XmlUtils.readMapXml(ByteArrayInputStream(toXml().toByteArray()))
+                readMapXml(ByteArrayInputStream(toXml().toByteArray()))
             } catch (e: Exception) {
                 return false
             }
@@ -66,84 +47,73 @@ class PreferenceFile {
             return true
         }
 
-    init {
-        mPreferences = HashMap()
-    }
-
-    private fun setPreferences(map: HashMap<Any, Any>?) {
-        mPreferences = map
-        mList = map?.map {
-            KeyValueIndex(key = it.key, value = it.value)
-        }?.toMutableList()
+    private fun setPreferences(map: MutableMap<String, Any>) {
+        preferences = map
+        list = ArrayList(preferences.entries)
         updateSort()
     }
 
     fun toXml(): String {
         val out = ByteArrayOutputStream()
+
         try {
-            XmlUtils.writeMapXml(mPreferences, out)
-        } catch (exception: XmlPullParserException) {
-            Timber.e(exception)
-        } catch (exception: IOException) {
-            Timber.e(exception)
+            writeMapXml(preferences, out)
+        } catch (ignored: XmlPullParserException) {
+            // Ignored
+        } catch (ignored: IOException) {
+            // Ignored
         }
 
         return out.toString()
     }
 
-    private fun updateValue(key: String, value: Any) {
-        for (entry in mList!!) {
-            if (entry.key == key) {
-                entry.value = value
-
-                break
-            }
+    fun setList(mList: MutableList<MutableMap.MutableEntry<String, Any>>) {
+        this.list = mList
+        preferences = HashMap()
+        for ((key, value) in mList) {
+            preferences[key] = value
         }
-
-        mPreferences!![key] = value
         updateSort()
     }
 
-    private fun removeValue(key: String) {
-        mPreferences!!.remove(key)
+    private fun updateValue(key: String, value: Any) {
+        list.find { it.key == key }?.setValue(value)
+        preferences[key] = value
+        updateSort()
+    }
 
-        for (entry in mList!!) {
-            if (entry.key == key) {
-                mList!!.remove(entry)
-
-                break
-            }
-        }
+    fun removeValue(key: String) {
+        preferences.remove(key)
+        list.find { it.key == key }?.let { list.remove(it) }
     }
 
     private fun createAndAddValue(key: String, value: Any) {
-        mList!!.add(0, KeyValueIndex(key = key, value = value))
-        mPreferences!![key] = value
-
+        list.add(0, AbstractMap.SimpleEntry(key, value))
+        preferences[key] = value
         updateSort()
     }
 
-    fun add(previousKey: String?, newKey: String?, value: Any?, editMode: Boolean) {
-        if (newKey.isNullOrBlank()) {
+    fun add(previousKey: String, newKey: String, value: Any, editMode: Boolean) {
+        if (TextUtils.isEmpty(newKey)) {
             return
         }
 
         if (!editMode) {
-            if (mPreferences!!.containsKey(newKey)) {
-                updateValue(newKey, value!!)
+            if (preferences.containsKey(newKey)) {
+                updateValue(newKey, value)
             } else {
-                createAndAddValue(newKey, value!!)
+                createAndAddValue(newKey, value)
             }
         } else {
             if (newKey == previousKey) {
-                updateValue(newKey, value!!)
+                updateValue(newKey, value)
             } else {
-                removeValue(previousKey!!)
+                removeValue(previousKey)
 
-                if (mPreferences!!.containsKey(newKey)) {
-                    updateValue(newKey, value!!)
+                if (preferences.containsKey(newKey)) {
+                    updateValue(newKey, value)
                 } else {
-                    createAndAddValue(newKey, value!!)
+                    createAndAddValue(newKey, value)
                 }
             }
         }
@@ -152,35 +122,37 @@ class PreferenceFile {
     private fun updateSort() {
         val sortType = PrefManager.keySortType
         val comparator = PreferenceComparator(EPreferencesSort.values()[sortType])
-
         Collections.sort(list, comparator)
     }
 
     companion object {
-
-        fun fromXml(xml: String, file: String = ""): PreferenceFile {
-            val preferenceFile = PreferenceFile()
-
-            preferenceFile.file = file
+        /**
+         * @param xml The xml content as a string
+         * @param file The file path of that xml preference file
+         */
+        fun fromXml(xml: String, file: String): PreferenceFile {
+            val preferenceFile = PreferenceFile(file)
 
             // Check for empty files
-            if (TextUtils.isEmpty(xml) || xml.trim { it <= ' ' }.isEmpty()) {
+            if (TextUtils.isEmpty(xml) || xml.trim().isEmpty()) {
                 return preferenceFile
             }
 
             try {
-                val bais = ByteArrayInputStream(xml.toByteArray())
-                val map = XmlUtils.readMapXml(bais)
-                bais.close()
-
-                preferenceFile.setPreferences(map)
-
-                return preferenceFile
-            } catch (exception: XmlPullParserException) {
-                Timber.e(exception)
-            } catch (exception: IOException) {
-                Timber.e(exception)
+                val inputStream: InputStream = ByteArrayInputStream(xml.toByteArray())
+                val map = readMapXml(inputStream)
+                inputStream.close()
+                if (map != null) {
+                    preferenceFile.setPreferences(map)
+                    return preferenceFile
+                }
+            } catch (ignored: XmlPullParserException) {
+                // Ignored
+            } catch (ignored: IOException) {
+                // Ignored
             }
+
+            preferenceFile.isValidPreferenceFile = false
 
             return preferenceFile
         }

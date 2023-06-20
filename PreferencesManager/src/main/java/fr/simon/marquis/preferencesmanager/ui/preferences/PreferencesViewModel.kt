@@ -2,14 +2,10 @@ package fr.simon.marquis.preferencesmanager.ui.preferences
 
 import android.content.Context
 import android.net.Uri
-import android.util.Pair
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
-import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.Date
@@ -28,7 +24,7 @@ data class PreferencesState(
     val pkgName: String = "",
     val pkgTitle: String = "",
     val restoreData: BackupContainer? = null,
-    val tabList: List<TabItem> = listOf()
+    val tabList: List<String> = listOf()
 )
 
 class PreferencesViewModel : ViewModel() {
@@ -47,6 +43,7 @@ class PreferencesViewModel : ViewModel() {
         }
     }
 
+    // TODO search
     private fun searchText(value: String) {
 //        val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
 //        val list = if (isSearching) {
@@ -86,19 +83,10 @@ class PreferencesViewModel : ViewModel() {
                 _uiState.update { it.copy(isLoading = true) }
             },
             doInBackground = { _: suspend (progress: Int) -> Unit ->
-                val xmlFiles = Utils.findXmlFiles(uiState.value.pkgName)
-                val xmlPreferences = xmlFiles.map { file ->
-                    val content = Utils.readFile(file)
-                    PreferenceFile.fromXml(content, file)
-                }
-
-                Pair(xmlFiles, xmlPreferences)
+                Utils.findXmlFiles(uiState.value.pkgName)
             },
-            onPostExecute = { pair ->
-                val tabList = pair.first.mapIndexed { index, string ->
-                    TabItem(pkgName = string, preferenceFile = pair.second[index])
-                }
-                _uiState.update { it.copy(tabList = tabList, isLoading = false) }
+            onPostExecute = { list ->
+                _uiState.update { it.copy(tabList = list, isLoading = false) }
             },
             onProgressUpdate = {
             }

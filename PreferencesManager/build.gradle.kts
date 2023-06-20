@@ -5,7 +5,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
-    id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
+    id("org.jlleitschuh.gradle.ktlint") version "11.4.0"
 }
 
 android {
@@ -69,7 +69,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material")
+    implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui")
@@ -77,7 +77,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
 
     implementation("androidx.activity:activity-compose:1.7.2")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha02")
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
@@ -85,8 +84,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.preference:preference-ktx:1.2.0")
 
+    // https://jitpack.io/#Hospes/headed-lazy-grid
+    implementation("com.github.Hospes:headed-lazy-grid:0.8.0")
+
     // https://mvnrepository.com/artifact/com.google.accompanist/accompanist-systemuicontroller
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.2-alpha")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.3-beta")
 
     // https://mvnrepository.com/artifact/de.charlex.compose/html-text
     implementation("de.charlex.compose:html-text:1.4.1")

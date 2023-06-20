@@ -17,18 +17,30 @@ package fr.simon.marquis.preferencesmanager.model
  */
 
 internal class PreferenceComparator(
-    private val mType: EPreferencesSort
-) : Comparator<KeyValueIndex> {
+    type: EPreferencesSort
+) : Comparator<Map.Entry<String?, Any?>?> {
 
-    override fun compare(lhs: KeyValueIndex?, rhs: KeyValueIndex?): Int {
-        if (mType == EPreferencesSort.TYPE_AND_ALPHANUMERIC) {
-            val l = lhs?.value?.javaClass?.name ?: ""
-            val r = rhs?.value?.javaClass?.name ?: ""
+    private var mType: EPreferencesSort = EPreferencesSort.ALPHANUMERIC
+
+    init {
+        mType = type
+    }
+
+    override fun compare(lhs: Map.Entry<String?, Any?>?, rhs: Map.Entry<String?, Any?>?): Int {
+        if (mType === EPreferencesSort.TYPE_AND_ALPHANUMERIC) {
+            val l =
+                if (lhs == null) "" else if (lhs.value == null) "" else lhs.value!!.javaClass.name
+            val r =
+                if (rhs == null) "" else if (rhs.value == null) "" else rhs.value!!.javaClass.name
             val res = l.compareTo(r, ignoreCase = true)
             if (res != 0) {
                 return res
             }
         }
-        return (lhs?.key ?: "").toString().compareTo((rhs?.key ?: "") as String, ignoreCase = true)
+
+        return (if (lhs == null) "" else lhs.key)!!.compareTo(
+            (if (rhs == null) "" else rhs.key)!!,
+            ignoreCase = true
+        )
     }
 }

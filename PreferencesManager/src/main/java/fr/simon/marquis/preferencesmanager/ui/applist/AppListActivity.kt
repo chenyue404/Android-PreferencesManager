@@ -24,16 +24,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -42,11 +37,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,6 +77,9 @@ import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import ua.hospes.lazygrid.LazyGridState
+import ua.hospes.lazygrid.items
+import ua.hospes.lazygrid.rememberLazyGridState
 
 class AppListActivity : ComponentActivity() {
 
@@ -93,7 +95,7 @@ class AppListActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().setKeepOnScreenCondition {
             viewModel.showSplashScreen.value
@@ -107,14 +109,18 @@ class AppListActivity : ComponentActivity() {
 
         Timber.i("onCreate")
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
+
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val context = LocalContext.current
 
-            val scrollState = rememberLazyListState()
+            val scrollState = rememberLazyGridState()
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
-            var dialogNoRootState by remember { mutableStateOf(false) }
+            var dialogNoRootState by remember(uiState.isRootGranted) {
+                mutableStateOf(!uiState.isRootGranted)
+            }
             DialogNoRoot(
                 openDialog = dialogNoRootState,
                 onPositive = {
@@ -131,29 +137,24 @@ class AppListActivity : ComponentActivity() {
                 EAppTheme.NIGHT -> true
             }
 
-            if (!uiState.isRootGranted) {
-                LaunchedEffect(Unit) {
-                    dialogNoRootState = true
-                }
-            }
-
             AppTheme(isDarkTheme = isDarkTheme) {
                 val haptic = LocalHapticFeedback.current
 
                 AppListLayout(
+                    windowSizeClass = windowSizeClass,
                     scrollState = scrollState,
                     scrollBehavior = scrollBehavior,
                     viewModel = viewModel,
                     onClick = { entry ->
-                        if (!uiState.isRootGranted) {
-                            Timber.e("We don't have root to continue!")
-                        } else {
+                        if (uiState.isRootGranted) {
                             Intent(context, PreferencesActivity::class.java).apply {
                                 val pkgName = entry.applicationInfo.packageName
                                 putExtra(KEY_ICON_URI, entry.iconUri)
                                 putExtra(KEY_PACKAGE_NAME, pkgName)
                                 putExtra(KEY_TITLE, entry.label)
                             }.also { intent -> activityResult.launch(intent) }
+                        } else {
+                            Timber.e("We don't have root to continue!")
                         }
                     },
                     onLongClick = { entry ->
@@ -229,16 +230,29 @@ private fun AppListAppBar(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppListLayout(
-    scrollState: LazyListState,
+    windowSizeClass: WindowSizeClass,
+    scrollState: LazyGridState,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AppListViewModel,
     onClick: (entry: AppEntry) -> Unit,
     onLongClick: (entry: AppEntry) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Set the grid size if were Phone, Tablet, or Expanded.
+    val gridSize by remember(windowSizeClass.widthSizeClass) {
+        val size = when (windowSizeClass.widthSizeClass) {
+            WindowWidthSizeClass.Compact -> 1
+            WindowWidthSizeClass.Medium,
+            WindowWidthSizeClass.Expanded -> 2
+
+            else -> 1
+        }
+        mutableIntStateOf(size)
+    }
 
     Surface {
         Scaffold(
@@ -257,11 +271,12 @@ private fun AppListLayout(
                 )
             }
         ) { paddingValues ->
-            LazyColumn(
+            ua.hospes.lazygrid.LazyVerticalGrid(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxWidth(),
                 state = scrollState,
+                columns = ua.hospes.lazygrid.GridCells.Fixed(gridSize),
                 contentPadding = PaddingValues(bottom = 112.dp)
             ) {
                 uiState.filteredAppList.forEach { (letter, item) ->
@@ -285,7 +300,7 @@ private fun AppListLayout(
 @Composable
 private fun ScrollUpLayout(
     modifier: Modifier = Modifier,
-    scrollState: LazyListState
+    scrollState: LazyGridState
 ) {
     val scope = rememberCoroutineScope()
     val showBackUpButton = remember {

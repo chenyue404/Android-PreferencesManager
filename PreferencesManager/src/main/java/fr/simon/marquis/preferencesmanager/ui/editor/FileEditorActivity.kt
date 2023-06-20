@@ -20,14 +20,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -46,11 +49,11 @@ import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
 import fr.simon.marquis.preferencesmanager.ui.components.DialogSaveChanges
 import fr.simon.marquis.preferencesmanager.ui.components.NavigationBack
-import fr.simon.marquis.preferencesmanager.ui.components.showToast
 import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_FILE
 import fr.simon.marquis.preferencesmanager.ui.preferences.KEY_PACKAGE_NAME
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class FileEditorActivity : ComponentActivity() {
@@ -73,6 +76,14 @@ class FileEditorActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+            val snackbarHostState = remember { SnackbarHostState() }
+            val scope = rememberCoroutineScope()
+            fun showSnackBar(@StringRes id: Int) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(getString(id))
+                }
+            }
+
             val context = LocalContext.current
             val topBarState = rememberTopAppBarState()
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
@@ -84,7 +95,6 @@ class FileEditorActivity : ComponentActivity() {
                     file.substring(file.lastIndexOf(fileSeparator!!) + 1)
                 }
                 val pkgName = intent.getString(KEY_PACKAGE_NAME)
-
                 viewModel.setPackageInfo(file, title, pkgName)
             }
 
@@ -93,11 +103,11 @@ class FileEditorActivity : ComponentActivity() {
                 openDialog = saveChangesState,
                 onPositive = {
                     if (viewModel.saveChanges(this@FileEditorActivity)) {
-                        showToast(R.string.save_success)
+                        showSnackBar(R.string.save_success)
                         setResult(RESULT_OK)
                         finish()
                     } else {
-                        showToast(R.string.save_fail)
+                        showSnackBar(R.string.save_fail)
                     }
                     saveChangesState = false
                 },
@@ -118,12 +128,13 @@ class FileEditorActivity : ComponentActivity() {
             AppTheme(isDarkTheme = isDarkTheme) {
                 Surface {
                     Scaffold(
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
                             AppBar(
                                 scrollBehavior = scrollBehavior,
                                 title = {
                                     Text(
-                                        text = uiState.title ?: "[Empty Package Name]",
+                                        text = uiState.title.orEmpty(),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -142,23 +153,19 @@ class FileEditorActivity : ComponentActivity() {
                                     FileEditorMenu(
                                         onSave = {
                                             if (!uiState.textChanged) {
-                                                showToast(R.string.toast_no_changes)
+                                                showSnackBar(R.string.toast_no_changes)
                                                 return@FileEditorMenu
                                             }
 
                                             val saveChanges = viewModel.saveChanges(context)
                                             if (saveChanges) {
-                                                showToast(R.string.save_success)
+                                                showSnackBar(R.string.save_success)
                                             } else {
-                                                showToast(R.string.save_fail)
+                                                showSnackBar(R.string.save_fail)
                                             }
                                         },
-                                        onFontTheme = {
-                                            viewModel.setFontTheme(it)
-                                        },
-                                        onFontSize = {
-                                            viewModel.setFontSize(it)
-                                        }
+                                        onFontTheme = viewModel::setFontTheme,
+                                        onFontSize = viewModel::setFontSize
                                     )
                                 }
                             )
@@ -169,10 +176,8 @@ class FileEditorActivity : ComponentActivity() {
                             scrollBehavior = scrollBehavior,
                             xmlColorTheme = uiState.xmlColorTheme!!,
                             textSize = uiState.fontSize.size,
-                            text = uiState.editText ?: "[This should not be empty!]",
-                            onValueChange = {
-                                viewModel.setTextChanged(it)
-                            }
+                            text = uiState.editText.orEmpty(),
+                            onValueChange = viewModel::setTextChanged
                         )
                     }
                 }
@@ -191,20 +196,15 @@ private fun FileEditorLayout(
     text: String,
     onValueChange: (String) -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-    ) {
-        TextField(
-            modifier = Modifier.fillMaxSize(),
-            textStyle = TextStyle.Default.copy(fontSize = textSize.sp),
-            value = text,
-            onValueChange = onValueChange,
-            visualTransformation = XmlTransformation(xmlColorTheme)
-        )
-    }
+    // TODO this has a wierd padding at the bottom when IME is open
+    // NOTE: there is a bug that when there is a lot of text, the performance tanks
+    BasicTextField(
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        textStyle = TextStyle.Default.copy(fontSize = textSize.sp),
+        value = text,
+        onValueChange = onValueChange,
+        visualTransformation = XmlTransformation(xmlColorTheme)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
