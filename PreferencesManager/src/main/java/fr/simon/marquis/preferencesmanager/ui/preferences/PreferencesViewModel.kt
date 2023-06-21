@@ -6,9 +6,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.simon.marquis.preferencesmanager.model.BackupContainer
+import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.util.Utils
-import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import java.util.Date
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -24,7 +25,8 @@ data class PreferencesState(
     val pkgName: String = "",
     val pkgTitle: String = "",
     val restoreData: BackupContainer? = null,
-    val tabList: List<String> = listOf()
+    val tabList: List<String> = listOf(),
+    val currentPage: PreferenceFile? = null
 )
 
 class PreferencesViewModel : ViewModel() {
@@ -78,19 +80,18 @@ class PreferencesViewModel : ViewModel() {
     }
 
     fun getTabsAndPreferences() {
-        viewModelScope.executeAsyncTask(
-            onPreExecute = {
-                _uiState.update { it.copy(isLoading = true) }
-            },
-            doInBackground = { _: suspend (progress: Int) -> Unit ->
-                Utils.findXmlFiles(uiState.value.pkgName)
-            },
-            onPostExecute = { list ->
-                _uiState.update { it.copy(tabList = list, isLoading = false) }
-            },
-            onProgressUpdate = {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val list = Utils.findXmlFiles(uiState.value.pkgName)
+
+            _uiState.update {
+                it.copy(
+                    tabList = list,
+                    isLoading = false
+                )
             }
-        )
+        }
     }
 
     fun backupFile(context: Context, pkgName: String, file: String) {
@@ -131,5 +132,9 @@ class PreferencesViewModel : ViewModel() {
 
         Timber.d("File Delete: $result")
         findFilesToRestore(context, pkgName)
+    }
+
+    fun currentPage(page: PreferenceFile) {
+        _uiState.update { it.copy(currentPage = page) }
     }
 }

@@ -70,8 +70,6 @@ fun <P, R> CoroutineScope.executeAsyncTask(
 
 object Utils {
 
-    private val TAG: String = Utils::class.java.simpleName
-
     private const val CMD_FIND_XML_FILES = "find /data/data/%s -type f -name \\*.xml"
     private const val CMD_CHOWN = "chown %s.%s \"%s\""
     private const val CMD_CAT_FILE = "cat \"%s\""
@@ -124,12 +122,12 @@ object Utils {
             Collections.sort(entries, comparator)
             previousApps = ArrayList(entries)
         }
-        Timber.tag(TAG).d("Applications: %s", previousApps!!.toTypedArray().contentToString())
+        Timber.d("Applications: %s", previousApps!!.toTypedArray().contentToString())
         return previousApps!!
     }
 
     private fun updateApplicationInfo(packageName: String, favorite: Boolean) {
-        Timber.tag(TAG).d("updateApplicationInfo(%s, %s)", packageName, favorite)
+        Timber.d("updateApplicationInfo(%s, %s)", packageName, favorite)
         previousApps?.forEach { app ->
             if (app.applicationInfo.packageName == packageName) {
                 app.setFavorite(favorite)
@@ -139,7 +137,7 @@ object Utils {
     }
 
     fun setFavorite(packageName: String, favorite: Boolean) {
-        Timber.tag(TAG).d("setFavorite(%s, %s)", packageName, favorite)
+        Timber.d("setFavorite(%s, %s)", packageName, favorite)
         initFavorites()
 
         if (favorite) {
@@ -174,14 +172,14 @@ object Utils {
                         favorites!!.add(array.optString(i))
                     }
                 } catch (e: JSONException) {
-                    Timber.tag(TAG).e(e, "error parsing JSON")
+                    Timber.e(e, "error parsing JSON")
                 }
             }
         }
     }
 
     fun findXmlFiles(packageName: String): List<String> {
-        Timber.tag(TAG).d("findXmlFiles(%s)", packageName)
+        Timber.d("findXmlFiles(%s)", packageName)
 
         val stdout: List<String> = ArrayList()
         val stderr: List<String> = ArrayList()
@@ -191,7 +189,7 @@ object Utils {
     }
 
     fun readFile(file: String): String {
-        Timber.tag(TAG).d("readFile(%s)", file)
+        Timber.d("readFile(%s)", file)
         val sb = StringBuilder()
         val lines = ArrayList<String>()
         Shell.cmd(String.format(CMD_CAT_FILE, file)).to(lines).exec()
@@ -237,32 +235,32 @@ object Utils {
         val name = fileName.substringAfterLast("/")
         val destination = File(fileDir, "$date $pkgName $name")
 
-        Timber.tag(TAG).d("backupFile(%s, %s)", date, name)
+        Timber.d("backupFile(%s, %s)", date, name)
         val job = Shell.cmd(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
 
-        Timber.tag(TAG).d("backupFile --> %s", destination)
+        Timber.d("backupFile --> %s", destination)
         return job.isSuccess
     }
 
     fun restoreFile(ctx: Context, fileName: String, packageName: String): Boolean {
-        Timber.tag(TAG).d("restoreFile(%s, %s)", fileName, packageName)
+        Timber.d("restoreFile(%s, %s)", fileName, packageName)
         val backupFile = File(fileName)
         val job = Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
-            Timber.tag(TAG).e("Error fixUserAndGroupId")
+            Timber.e("Error fixUserAndGroupId")
             return false
         }
 
         (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
             .killBackgroundProcesses(packageName)
 
-        Timber.tag(TAG).d("restoreFile --> $fileName")
+        Timber.d("restoreFile --> $fileName")
         return job.isSuccess
     }
 
     fun deleteFile(fileName: String): Boolean {
-        Timber.tag(TAG).d("deleteFile(%s)", fileName)
+        Timber.d("deleteFile(%s)", fileName)
         val deleteFile = File(fileName)
 
         if (deleteFile.isDirectory) {
@@ -279,20 +277,20 @@ object Utils {
         file: String,
         packageName: String
     ): Boolean {
-        Timber.tag(TAG).d("savePreferences(%s, %s)", file, packageName)
+        Timber.d("savePreferences(%s, %s)", file, packageName)
         if (preferenceFile == null) {
-            Timber.tag(TAG).e("Error preferenceFile is null")
+            Timber.e("Error preferenceFile is null")
             return false
         }
 
         if (!preferenceFile.isValid) {
-            Timber.tag(TAG).e("Error preferenceFile is not valid")
+            Timber.e("Error preferenceFile is not valid")
             return false
         }
 
         val preferences = preferenceFile.toXml()
         if (TextUtils.isEmpty(preferences)) {
-            Timber.tag(TAG).e("Error preferences is empty")
+            Timber.e("Error preferences is empty")
             return false
         }
 
@@ -303,25 +301,25 @@ object Utils {
             outputStreamWriter.write(preferences)
             outputStreamWriter.close()
         } catch (e: IOException) {
-            Timber.tag(TAG).e(e, "Error writing temporary file")
+            Timber.e(e, "Error writing temporary file")
             return false
         }
 
         Shell.cmd(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
 
         if (!fixUserAndGroupId(ctx, file, packageName)) {
-            Timber.tag(TAG).e("Error fixUserAndGroupId")
+            Timber.e("Error fixUserAndGroupId")
             return false
         }
 
         if (!tmpFile.delete()) {
-            Timber.tag(TAG).e("Error deleting temporary file")
+            Timber.e("Error deleting temporary file")
         }
 
         (ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
             .killBackgroundProcesses(packageName)
 
-        Timber.tag(TAG).d("Preferences correctly updated")
+        Timber.d("Preferences correctly updated")
         return true
     }
 
@@ -334,7 +332,7 @@ object Utils {
      * @return true if success
      */
     private fun fixUserAndGroupId(ctx: Context, file: String, packageName: String): Boolean {
-        Timber.tag(TAG).d("fixUserAndGroupId(%s, %s)", file, packageName)
+        Timber.d("fixUserAndGroupId(%s, %s)", file, packageName)
         val uid: String
         val pm = ctx.packageManager ?: return false
         try {
@@ -347,12 +345,12 @@ object Utils {
             }
             uid = appInfo.uid.toString()
         } catch (e: PackageManager.NameNotFoundException) {
-            Timber.tag(TAG).e(e, "error while getting uid")
+            Timber.e(e, "error while getting uid")
             return false
         }
 
         if (TextUtils.isEmpty(uid)) {
-            Timber.tag(TAG).d("uid is undefined")
+            Timber.d("uid is undefined")
             return false
         }
 

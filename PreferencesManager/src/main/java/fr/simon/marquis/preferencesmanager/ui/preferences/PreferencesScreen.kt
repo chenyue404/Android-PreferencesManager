@@ -18,56 +18,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.PreferenceFile
-import fr.simon.marquis.preferencesmanager.model.PreferenceType
-import fr.simon.marquis.preferencesmanager.ui.components.DialogPreference
 import fr.simon.marquis.preferencesmanager.ui.components.EmptyView
 import fr.simon.marquis.preferencesmanager.util.Utils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PreferenceFragment(
-    preferencePath: String,
-    pkgName: String,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit
+    preferenceFile: String,
+    onPage: (page: PreferenceFile) -> Unit,
+    onClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit,
+    onLongClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit
 ) {
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val scrollState = rememberLazyListState()
-    val context = LocalContext.current
 
-    val preference by remember(preferencePath) {
-        val content = Utils.readFile(preferencePath)
-        val file = PreferenceFile.fromXml(content, preferencePath)
+    val preference by remember {
+        val content = Utils.readFile(preferenceFile)
+        val file = PreferenceFile.fromXml(content, preferenceFile)
+        onPage(file) // Meh.
         mutableStateOf(file)
     }
-
-    // TODO implement edit dialogs
-    var preferenceItemDialog by remember { mutableStateOf(false) }
-    var preferenceItemType by remember { mutableStateOf(PreferenceType.UNSUPPORTED) }
-    DialogPreference(
-        openDialog = preferenceItemDialog,
-        preferenceType = preferenceItemType,
-        confirmButton = { key, value ->
-            preferenceItemDialog = false
-        },
-        deleteButton = { key ->
-            // TODO crashes since the list size changed. Hoist more of the work higher.
-            preference.removeValue(key)
-            Utils.savePreferences(context, preference, preference.file, pkgName)
-            preferenceItemDialog = false
-        },
-        dismissButton = {
-        }
-    )
 
     Column(
         Modifier
@@ -89,19 +66,8 @@ fun PreferenceFragment(
                     PreferencesEntryItem(
                         modifier = Modifier.animateItemPlacement(),
                         item = item,
-                        onClick = {
-                            // onClick
-                            val type = PreferenceType.fromObject(it.value).apply {
-                                key = it.key
-                                value = it.value
-                                isEdit = true
-                            }
-                            preferenceItemType = type
-                            preferenceItemDialog = true
-                        },
-                        onLongClick = {
-                            // onLongClick
-                        }
+                        onClick = { onClick(it, preference) },
+                        onLongClick = { onLongClick(it, preference) }
                     )
                 }
             }

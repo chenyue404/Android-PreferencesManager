@@ -23,7 +23,7 @@ import timber.log.Timber
 fun DialogPreference(
     openDialog: Boolean,
     preferenceType: PreferenceType,
-    confirmButton: (key: String, value: Any?) -> Unit,
+    confirmButton: (previousKey: String, newKey: String, value: Any, editMode: Boolean) -> Unit,
     deleteButton: (key: String) -> Unit,
     dismissButton: () -> Unit
 ) {
@@ -31,33 +31,52 @@ fun DialogPreference(
         return
     }
 
-    var newKey by remember(preferenceType) {
-        mutableStateOf(preferenceType.key)
+    var newKey by remember {
+        mutableStateOf(if (!preferenceType.isEdit) "" else preferenceType.key)
     }
-    var newValue by remember(preferenceType) {
-        val typeValue = when (preferenceType.value) {
-            is Boolean -> preferenceType.value
-            is Float,
-            is Int,
-            is Long,
-            is String -> preferenceType.value as String
-
-            is Set<*> -> {
-                if ((preferenceType.value as Set<*>).all { it is String }) {
-                    (preferenceType.value as Set<*>).joinToString(separator = ", ")
+    var newValue by remember(newKey) {
+        mutableStateOf(
+            with(preferenceType) {
+                if (!isEdit) {
+                    when (value) {
+                        is Boolean -> false
+                        is Float,
+                        is Int,
+                        is Long,
+                        is String -> ""
+                        is Set<*> -> setOf<String>()
+                        else -> throw IllegalArgumentException(
+                            "Unknown Value type: ${preferenceType.value}"
+                        )
+                    }
                 } else {
-                    throw IllegalArgumentException("Unknown StringSet type.")
+                    when (value) {
+                        is Boolean -> value
+                        is Float,
+                        is Int,
+                        is Long,
+                        is String -> value.toString()
+                        is Set<*> -> if ((value as Set<*>).all { it is String }) {
+                            (value as Set<*>).joinToString(separator = ", ")
+                        } else {
+                            throw IllegalArgumentException("Unknown StringSet type.")
+                        }
+                        else -> throw IllegalArgumentException(
+                            "Unknown Value type: ${preferenceType.value}"
+                        )
+                    }
                 }
             }
-
-            else -> throw IllegalArgumentException("Unknown Value type.")
-        }
-        mutableStateOf(typeValue)
+        )
     }
-    val isValidPreference by remember(newKey, newValue) {
-        val isValid = (newValue as? String)?.isNotEmpty() ?: (newValue as? Boolean)
-            ?: throw IllegalArgumentException("This shouldn't throw, but a bad value was set") // :)
-        mutableStateOf(isValid)
+    val isValidPreference: Boolean by remember {
+        mutableStateOf(
+            when (newValue) {
+                is String -> (newValue as String).isNotEmpty()
+                is Boolean -> true
+                else -> throw IllegalArgumentException("Couldn't validate valid preference value")
+            }
+        )
     }
     var confirmDelete by remember {
         mutableStateOf(false)
@@ -125,7 +144,14 @@ fun DialogPreference(
         confirmButton = {
             TextButton(
                 enabled = isValidPreference,
-                onClick = { confirmButton(newKey, newValue) }
+                onClick = {
+                    confirmButton(
+                        preferenceType.key,
+                        newKey,
+                        newValue!!,
+                        preferenceType.isEdit
+                    )
+                }
             ) {
                 val text = with(preferenceType) {
                     if (isEdit) R.string.dialog_update else R.string.dialog_add
@@ -168,7 +194,7 @@ private fun Preview_DialogPreferenceTextValue() {
                     value = "sajkhaffjlh"
                     isEdit = false
                 },
-                confirmButton = { _, _ -> },
+                confirmButton = { _, _, _, _ -> },
                 dismissButton = { },
                 deleteButton = { }
             )
@@ -188,7 +214,7 @@ private fun Preview_DialogPreferenceBoolean() {
                     value = true
                     isEdit = true
                 },
-                confirmButton = { _, _ -> },
+                confirmButton = { _, _, _, _ -> },
                 dismissButton = { },
                 deleteButton = { }
             )

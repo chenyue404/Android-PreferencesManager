@@ -57,6 +57,7 @@ import coil.compose.SubcomposeAsyncImage
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.*
 import fr.simon.marquis.preferencesmanager.ui.components.AppBar
+import fr.simon.marquis.preferencesmanager.ui.components.DialogPreference
 import fr.simon.marquis.preferencesmanager.ui.components.DialogRestore
 import fr.simon.marquis.preferencesmanager.ui.components.EmptyView
 import fr.simon.marquis.preferencesmanager.ui.editor.FileEditorActivity
@@ -115,7 +116,6 @@ class PreferencesActivity : ComponentActivity() {
 
             val pagerState = rememberPagerState(
                 initialPage = 0,
-                initialPageOffsetFraction = 0f,
                 pageCount = { uiState.tabList.size }
             )
 
@@ -131,26 +131,6 @@ class PreferencesActivity : ComponentActivity() {
                 viewModel.clearRestoreData()
             }
 
-            var restoreDialogState by remember { mutableStateOf(false) }
-            DialogRestore(
-                openDialog = restoreDialogState,
-                container = uiState.restoreData,
-                onNegative = { restoreDialogState = false },
-                onRestore = { fileName ->
-                    val pkgName = uiState.pkgName
-                    viewModel.performFileRestore(context, fileName, pkgName)
-                    restoreDialogState = false
-                    showSnackBar(R.string.file_restored)
-                },
-                onDelete = { fileName ->
-                    val currentPage = pagerState.currentPage
-                    val currentTab = uiState.tabList[currentPage]
-                    // val file = currentTab.preferenceFile!!.file
-
-                    viewModel.deleteFile(context, fileName, currentTab)
-                }
-            )
-
             val isDarkTheme = when (EAppTheme.getAppTheme(PrefManager.themePreference)) {
                 EAppTheme.AUTO -> isSystemInDarkTheme()
                 EAppTheme.DAY -> false
@@ -158,6 +138,58 @@ class PreferencesActivity : ComponentActivity() {
             }
 
             AppTheme(isDarkTheme = isDarkTheme) {
+                var restoreDialogState by remember { mutableStateOf(false) }
+                DialogRestore(
+                    openDialog = restoreDialogState,
+                    container = uiState.restoreData,
+                    onNegative = { restoreDialogState = false },
+                    onRestore = { fileName ->
+                        val pkgName = uiState.pkgName
+                        viewModel.performFileRestore(context, fileName, pkgName)
+                        restoreDialogState = false
+                        showSnackBar(R.string.file_restored)
+                    },
+                    onDelete = { fileName ->
+                        val currentPage = pagerState.currentPage
+                        val currentTab = uiState.tabList[currentPage]
+                        viewModel.deleteFile(context, fileName, currentTab)
+                    }
+                )
+
+                // Y'know, it works, so I'm okay with it for now... Could be better
+                var preferenceDialogVisible by remember { mutableStateOf(false) }
+                var preferenceItem: PreferenceFile? by remember { mutableStateOf(null) }
+                var preferenceItemType by remember { mutableStateOf(PreferenceType.UNSUPPORTED) }
+                DialogPreference(
+                    openDialog = preferenceDialogVisible,
+                    preferenceType = preferenceItemType,
+                    confirmButton = { prevKey, newKey, value, editMode ->
+                        preferenceItem?.add(prevKey, newKey, value, editMode)
+                        Utils.savePreferences(
+                            ctx = context,
+                            preferenceFile = preferenceItem,
+                            file = preferenceItem!!.file,
+                            packageName = uiState.pkgName
+                        )
+                        preferenceDialogVisible = false
+                        viewModel.getTabsAndPreferences()
+                    },
+                    deleteButton = { key ->
+                        preferenceItem?.removeValue(key)
+                        Utils.savePreferences(
+                            ctx = context,
+                            preferenceFile = preferenceItem,
+                            file = preferenceItem!!.file,
+                            packageName = uiState.pkgName
+                        )
+                        preferenceDialogVisible = false
+                        viewModel.getTabsAndPreferences()
+                    },
+                    dismissButton = {
+                        preferenceDialogVisible = false
+                    }
+                )
+
                 Surface {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -170,13 +202,15 @@ class PreferencesActivity : ComponentActivity() {
                                     onBackPressedDispatcher.onBackPressed()
                                 },
                                 onAddClicked = {
-                                    /* TODO */
-                                    Timber.d("Type: $it")
+                                    preferenceItemType = it.apply {
+                                        isEdit = false // It seems to retain data
+                                    }
+                                    preferenceItem = uiState.currentPage
+                                    preferenceDialogVisible = true
                                 },
                                 onOverflowClicked = {
                                     val currentPage = pagerState.currentPage
                                     val currentTab = uiState.tabList[currentPage]
-                                    // val file = currentTab.preferenceFile!!.file
 
                                     when (it) {
                                         EPreferencesOverflow.EDIT -> editFile(currentTab)
@@ -222,10 +256,19 @@ class PreferencesActivity : ComponentActivity() {
                             scrollBehavior = scrollBehavior,
                             pagerState = pagerState,
                             state = uiState,
-                            onClick = {
-                                /* TODO */
+                            onPage = {
+                                viewModel.currentPage(it)
                             },
-                            onLongClick = {
+                            onClick = { item, preference ->
+                                preferenceItemType = PreferenceType.fromObject(item.value).apply {
+                                    key = item.key
+                                    value = item.value
+                                    isEdit = true
+                                }
+                                preferenceItem = preference
+                                preferenceDialogVisible = true
+                            },
+                            onLongClick = { item, preference ->
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 // TODO: Add cab selection again, or some multi select option.
                             }
@@ -253,7 +296,7 @@ fun PreferencesAppBar(
     scrollBehavior: TopAppBarScrollBehavior?,
     searchText: MutableStateFlow<TextFieldValue>,
     state: PreferencesState,
-    onAddClicked: (value: EPreferencesAdd) -> Unit,
+    onAddClicked: (value: PreferenceType) -> Unit,
     onBackPressed: () -> Unit,
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
     onSearch: (value: Boolean) -> Unit,
@@ -321,8 +364,9 @@ fun TabLayout(
     pagerState: PagerState,
     scrollBehavior: TopAppBarScrollBehavior,
     state: PreferencesState,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onPage: (page: PreferenceFile) -> Unit,
+    onClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit,
+    onLongClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit
 ) {
     Box(
         modifier = modifier,
@@ -337,42 +381,71 @@ fun TabLayout(
                 )
             } else {
                 // Tabs
-                ScrollableTabRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedTabIndex = pagerState.currentPage,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
-                        )
+
+                // TODO: Investigate?
+                // Note:
+                //  This if statement is a bit arbitrary...
+                //  There is an idle game I play with well over 600 preferences. (whyyy)
+                //  This composable will crash.
+                //  So, let's kinda hack something together to render the 'tab' were in
+                if (state.tabList.size < 500) {
+                    ScrollableTabRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedTabIndex = pagerState.currentPage,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.pagerTabIndicatorOffset(
+                                    pagerState,
+                                    tabPositions
+                                )
+                            )
+                        }
+                    ) {
+                        state.tabList.forEachIndexed { index, tabItem ->
+                            Tab(
+                                text = {
+                                    val pkgName = tabItem.substringAfterLast("/")
+                                    val text = if (pkgName.length > 30) {
+                                        "…${pkgName.takeLast(30)}"
+                                    } else {
+                                        pkgName
+                                    }
+                                    Text(text = text)
+                                },
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                }
+                            )
+                        }
                     }
-                ) {
-                    state.tabList.forEachIndexed { index, tabItem ->
-                        Tab(
-                            text = {
-                                val pkgName = tabItem.substringAfterLast("/")
-                                val text = if (pkgName.length > 30) {
-                                    "…${pkgName.takeLast(30)}"
-                                } else {
-                                    pkgName
-                                }
-                                Text(text = text)
-                            },
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
+                } else {
+                    Tab(
+                        text = {
+                            val pkgName = state.tabList[pagerState.currentPage].substringAfterLast(
+                                "/"
+                            )
+                            val text = if (pkgName.length > 30) {
+                                "…${pkgName.takeLast(30)}"
+                            } else {
+                                pkgName
                             }
-                        )
-                    }
+                            Text(text = text)
+                        },
+                        selected = true,
+                        onClick = {}
+                    )
                 }
 
                 // Tab Content
-                HorizontalPager(state = pagerState) { page ->
+                HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { page ->
+                    val currentPage = state.tabList[page]
                     PreferenceFragment(
-                        preferencePath = state.tabList[page],
-                        pkgName = state.pkgName,
+                        preferenceFile = currentPage,
+                        onPage = onPage,
                         onClick = onClick,
                         onLongClick = onLongClick
                     )
