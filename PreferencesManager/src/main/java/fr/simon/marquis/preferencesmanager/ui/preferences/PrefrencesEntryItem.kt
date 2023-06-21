@@ -13,17 +13,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fr.simon.marquis.preferencesmanager.model.PreferenceItem
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.ui.theme.getColorFromObjet
-import java.util.AbstractMap
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PreferencesEntryItem(
     modifier: Modifier = Modifier,
-    item: MutableMap.MutableEntry<String, Any>,
-    onClick: (item: MutableMap.MutableEntry<String, Any>) -> Unit,
-    onLongClick: (item: MutableMap.MutableEntry<String, Any>) -> Unit
+    item: PreferenceItem,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Card(
         modifier = modifier
@@ -31,8 +31,8 @@ fun PreferencesEntryItem(
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
             .heightIn(0.dp, 110.dp)
             .combinedClickable(
-                onClick = { onClick(item) },
-                onLongClick = { onLongClick(item) }
+                onClick = onClick,
+                onLongClick = onLongClick
             )
     ) {
         Divider(
@@ -63,16 +63,14 @@ fun PreferencesEntryItem(
 @Preview
 @Composable
 private fun Preview_PreferencesEntryItem() {
-    val list: MutableList<MutableMap.MutableEntry<String, Any>> = mutableListOf(
-        AbstractMap.SimpleEntry(
-            "Hello World",
-            "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh"
-        )
+    val list = PreferenceItem(
+        "Hello World",
+        "38lghsdfjlkghsfdljghsdfljkhsdflkjghsdflkjghsdlfkjghdsfkjhldfksghdfslkjgh"
     )
 
     AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            PreferencesEntryItem(item = list.first(), onClick = {}, onLongClick = {})
+            PreferencesEntryItem(item = list, onClick = {}, onLongClick = {})
         }
     }
 }

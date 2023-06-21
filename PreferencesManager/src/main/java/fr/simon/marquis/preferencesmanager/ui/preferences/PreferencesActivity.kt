@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -66,6 +67,7 @@ import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
 import fr.simon.marquis.preferencesmanager.util.getParcelable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -260,16 +262,16 @@ class PreferencesActivity : ComponentActivity() {
                             onPage = {
                                 viewModel.currentPage(it)
                             },
-                            onClick = { item, preference ->
+                            onClick = { item ->
                                 preferenceItemType = PreferenceType.fromObject(item.value).apply {
                                     key = item.key
                                     value = item.value
                                     isEdit = true
                                 }
-                                preferenceItem = preference
+                                preferenceItem = uiState.currentPage
                                 preferenceDialogVisible = true
                             },
-                            onLongClick = { item, preference ->
+                            onLongClick = { item ->
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 // TODO: Add cab selection again, or some multi select option.
                             }
@@ -367,8 +369,8 @@ fun TabLayout(
     scrollBehavior: TopAppBarScrollBehavior,
     state: PreferencesState,
     onPage: (page: PreferenceFile) -> Unit,
-    onClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit,
-    onLongClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit
+    onClick: (item: PreferenceItem) -> Unit,
+    onLongClick: (item: PreferenceItem) -> Unit
 ) {
     Box(
         modifier = modifier,
@@ -444,12 +446,27 @@ fun TabLayout(
 
                 // Tab Content
                 HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { page ->
-                    val currentPage = state.tabList[page]
+                    var file by remember(page) {
+                        mutableStateOf(PreferenceFile(""))
+                    }
+                    LaunchedEffect(Unit) {
+                        // https://stackoverflow.com/questions/68521885/
+                        snapshotFlow {
+                            pagerState.currentPage
+                        }.distinctUntilChanged().collect {
+                            val currentPage = state.tabList[it]
+                            val content = Utils.readFile(currentPage)
+                            file = PreferenceFile.fromXml(content, currentPage)
+                            onPage(file)
+                        }
+                    }
+                    // TODO this still isn't right
+
+                    val list = file.filteredList.collectAsStateWithLifecycle()
                     PreferenceFragment(
-                        preferenceFile = currentPage,
-                        onPage = onPage,
-                        onClick = onClick,
-                        onLongClick = onLongClick
+                        list = list.value,
+                        onClick = { onClick(it) },
+                        onLongClick = { onLongClick(it) }
                     )
                 }
             }

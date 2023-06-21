@@ -16,35 +16,24 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import fr.simon.marquis.preferencesmanager.R
-import fr.simon.marquis.preferencesmanager.model.PreferenceFile
+import fr.simon.marquis.preferencesmanager.model.PreferenceItem
 import fr.simon.marquis.preferencesmanager.ui.components.EmptyView
-import fr.simon.marquis.preferencesmanager.util.Utils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PreferenceFragment(
-    preferenceFile: String,
-    onPage: (page: PreferenceFile) -> Unit,
-    onClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit,
-    onLongClick: (item: MutableMap.MutableEntry<String, Any>, file: PreferenceFile) -> Unit
+    list: List<PreferenceItem>,
+    onClick: (item: PreferenceItem) -> Unit,
+    onLongClick: (item: PreferenceItem) -> Unit
 ) {
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val scrollState = rememberLazyListState()
-
-    val preference by remember {
-        val content = Utils.readFile(preferenceFile)
-        val file = PreferenceFile.fromXml(content, preferenceFile)
-        onPage(file) // Meh.
-        mutableStateOf(file)
-    }
 
     Column(
         Modifier
@@ -53,7 +42,7 @@ fun PreferenceFragment(
     ) {
         Box(contentAlignment = Alignment.Center) {
             EmptyView(
-                isEmpty = preference.list.isEmpty(),
+                isEmpty = list.isEmpty(),
                 emptyMessage = stringResource(id = R.string.empty_preference_file_valid)
             )
 
@@ -62,12 +51,12 @@ fun PreferenceFragment(
                 state = scrollState,
                 contentPadding = WindowInsets.navigationBars.asPaddingValues()
             ) {
-                items(items = preference.list, key = { it.key }) { item ->
+                items(items = list, key = { it.key }) { item ->
                     PreferencesEntryItem(
                         modifier = Modifier.animateItemPlacement(),
                         item = item,
-                        onClick = { onClick(it, preference) },
-                        onLongClick = { onLongClick(it, preference) }
+                        onClick = { onClick(item) },
+                        onLongClick = { onLongClick(item) }
                     )
                 }
             }

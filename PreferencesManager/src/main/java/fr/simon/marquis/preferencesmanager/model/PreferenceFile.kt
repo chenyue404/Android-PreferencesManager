@@ -24,14 +24,24 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.xmlpull.v1.XmlPullParserException
+
+data class PreferenceItem(
+    val key: String,
+    var value: Any,
+    val isSelected: Boolean = false
+)
 
 class PreferenceFile(val file: String) {
 
-    private var preferences: MutableMap<String, Any> = hashMapOf()
-
-    var list: MutableList<MutableMap.MutableEntry<String, Any>> = mutableListOf()
+    var list = mutableListOf<PreferenceItem>()
         private set
+
+    private val _filteredList = MutableStateFlow(mutableListOf<PreferenceItem>())
+    val filteredList = _filteredList.asStateFlow()
 
     var isValidPreferenceFile = true
         private set
@@ -47,9 +57,11 @@ class PreferenceFile(val file: String) {
             return true
         }
 
-    private fun setPreferences(map: MutableMap<String, Any>) {
-        preferences = map
-        list = ArrayList(preferences.entries)
+    private fun setPreferences(map: List<PreferenceItem>?) {
+        list = map.orEmpty().toMutableList()
+        _filteredList.update {
+            list
+        } // Set the filtered list too.
         updateSort()
     }
 
@@ -57,7 +69,7 @@ class PreferenceFile(val file: String) {
         val out = ByteArrayOutputStream()
 
         try {
-            writeMapXml(preferences, out)
+            writeMapXml(list.associate { it.key to it.value }, out)
         } catch (ignored: XmlPullParserException) {
             // Ignored
         } catch (ignored: IOException) {
@@ -67,29 +79,22 @@ class PreferenceFile(val file: String) {
         return out.toString()
     }
 
-    fun setList(mList: MutableList<MutableMap.MutableEntry<String, Any>>) {
-        this.list = mList
-        preferences = HashMap()
-        for ((key, value) in mList) {
-            preferences[key] = value
-        }
+    fun setList(list: List<PreferenceItem>) {
+        _filteredList.update { list.toMutableList() }
         updateSort()
     }
 
     private fun updateValue(key: String, value: Any) {
-        list.find { it.key == key }?.setValue(value)
-        preferences[key] = value
+        list.find { it.key == key }?.value = value
         updateSort()
     }
 
     fun removeValue(key: String) {
-        preferences.remove(key)
-        list.find { it.key == key }?.let { list.remove(it) }
+        list.removeIf { it.key == key }
     }
 
     private fun createAndAddValue(key: String, value: Any) {
-        list.add(0, AbstractMap.SimpleEntry(key, value))
-        preferences[key] = value
+        list.add(PreferenceItem(key, value))
         updateSort()
     }
 
@@ -99,7 +104,7 @@ class PreferenceFile(val file: String) {
         }
 
         if (!editMode) {
-            if (preferences.containsKey(newKey)) {
+            if (list.any { it.key == newKey }) {
                 updateValue(newKey, value)
             } else {
                 createAndAddValue(newKey, value)
@@ -110,7 +115,7 @@ class PreferenceFile(val file: String) {
             } else {
                 removeValue(previousKey)
 
-                if (preferences.containsKey(newKey)) {
+                if (list.any { it.key == newKey }) {
                     updateValue(newKey, value)
                 } else {
                     createAndAddValue(newKey, value)
@@ -121,8 +126,16 @@ class PreferenceFile(val file: String) {
 
     private fun updateSort() {
         val sortType = PrefManager.keySortType
-        val comparator = PreferenceComparator(EPreferencesSort.values()[sortType])
-        Collections.sort(list, comparator)
+        when (EPreferencesSort.values()[sortType]) {
+            EPreferencesSort.ALPHANUMERIC -> {
+                list.sortBy { it.key }
+            }
+            EPreferencesSort.TYPE_AND_ALPHANUMERIC -> {
+                list.sortWith(
+                    compareBy({ it.value.javaClass.name }, { it.key })
+                )
+            }
+        }
     }
 
     companion object {
@@ -140,7 +153,9 @@ class PreferenceFile(val file: String) {
 
             try {
                 val inputStream: InputStream = ByteArrayInputStream(xml.toByteArray())
-                val map = readMapXml(inputStream)
+                val map = readMapXml(inputStream)?.map {
+                    PreferenceItem(it.key, it.value)
+                }
                 inputStream.close()
                 if (map != null) {
                     preferenceFile.setPreferences(map)

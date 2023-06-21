@@ -47,18 +47,16 @@ class PreferencesViewModel : ViewModel() {
 
     // TODO search
     private fun searchText(value: String) {
-//        val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
-//        val list = if (isSearching) {
-//            uiState.value.appList.filter {
-//                it.label
-//                    .lowercase(Locale.getDefault())
-//                    .contains(value.lowercase(Locale.getDefault()))
-//            }
-//        } else {
-//            uiState.value.appList
-//        }
-//
-//        _uiState.update { it.copy(filteredAppList = list) }
+        val isSearching = uiState.value.isSearching && searchText.value.text.isNotEmpty()
+        if (isSearching) {
+            val list = uiState.value.currentPage?.list?.filter {
+                it.key.lowercase().contains(value.lowercase()) ||
+                    it.value.toString().lowercase().contains(value.lowercase())
+            }
+            _uiState.value.currentPage?.setList(list.orEmpty())
+        } else {
+            uiState.value.currentPage?.list.orEmpty()
+        }
     }
 
     fun setPackageInfo(pkgTitle: String, pkgName: String, pkgIcon: Uri?) {
