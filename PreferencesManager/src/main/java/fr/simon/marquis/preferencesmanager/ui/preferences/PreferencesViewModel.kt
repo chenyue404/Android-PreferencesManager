@@ -71,8 +71,12 @@ class PreferencesViewModel : ViewModel() {
         }
     }
 
-    fun setIsSearching(value: Boolean) {
-        _uiState.update { it.copy(isSearching = value) }
+    fun isSearching() {
+        _uiState.update { it.copy(isSearching = true) }
+    }
+
+    fun isNotSearching() {
+        _uiState.update { it.copy(isSearching = false) }
     }
 
     fun clearRestoreData() {

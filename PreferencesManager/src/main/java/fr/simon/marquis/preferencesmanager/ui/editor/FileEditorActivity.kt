@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -60,7 +61,7 @@ class FileEditorActivity : ComponentActivity() {
 
     private val viewModel: FileEditorViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -126,54 +127,64 @@ class FileEditorActivity : ComponentActivity() {
                 EAppTheme.NIGHT -> true
             }
             AppTheme(isDarkTheme = isDarkTheme) {
-                Surface {
-                    Scaffold(
-                        snackbarHost = { SnackbarHost(snackbarHostState) },
-                        topBar = {
-                            AppBar(
-                                scrollBehavior = scrollBehavior,
-                                title = {
-                                    Text(
-                                        text = uiState.title.orEmpty(),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                navigationIcon = {
-                                    NavigationBack {
-                                        if (uiState.textChanged) {
-                                            saveChangesState = true
-                                            return@NavigationBack
+                Scaffold(
+                    modifier = Modifier.imePadding(),
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                    topBar = {
+                        AppBar(
+                            scrollBehavior = scrollBehavior,
+                            title = {
+                                Text(
+                                    text = uiState.title.orEmpty(),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
+                            navigationIcon = {
+                                NavigationBack {
+                                    if (uiState.textChanged) {
+                                        saveChangesState = true
+                                        return@NavigationBack
+                                    }
+
+                                    onBackPressedDispatcher.onBackPressed()
+                                }
+                            },
+                            actions = {
+                                FileEditorMenu(
+                                    onSave = {
+                                        if (!uiState.textChanged) {
+                                            showSnackBar(R.string.toast_no_changes)
+                                            return@FileEditorMenu
                                         }
 
-                                        onBackPressedDispatcher.onBackPressed()
-                                    }
-                                },
-                                actions = {
-                                    FileEditorMenu(
-                                        onSave = {
-                                            if (!uiState.textChanged) {
-                                                showSnackBar(R.string.toast_no_changes)
-                                                return@FileEditorMenu
-                                            }
-
-                                            val saveChanges = viewModel.saveChanges(context)
-                                            if (saveChanges) {
-                                                showSnackBar(R.string.save_success)
-                                            } else {
-                                                showSnackBar(R.string.save_fail)
-                                            }
-                                        },
-                                        onFontTheme = viewModel::setFontTheme,
-                                        onFontSize = viewModel::setFontSize
-                                    )
-                                }
-                            )
-                        }
-                    ) { paddingValues ->
+                                        val saveChanges = viewModel.saveChanges(context)
+                                        if (saveChanges) {
+                                            showSnackBar(R.string.save_success)
+                                        } else {
+                                            showSnackBar(R.string.save_fail)
+                                        }
+                                    },
+                                    onFontTheme = viewModel::setFontTheme,
+                                    onFontSize = viewModel::setFontSize
+                                )
+                            }
+                        )
+                    }
+                ) { paddingValues ->
+                    // Weird bottom padding workaround:
+                    // https://issuetracker.google.com/issues/249727298
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .consumeWindowInsets(paddingValues)
+                            .systemBarsPadding(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
                         FileEditorLayout(
-                            modifier = Modifier.padding(paddingValues),
-                            scrollBehavior = scrollBehavior,
+                            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                             xmlColorTheme = uiState.xmlColorTheme!!,
                             textSize = uiState.fontSize.size,
                             text = uiState.editText.orEmpty(),
@@ -186,20 +197,17 @@ class FileEditorActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FileEditorLayout(
     modifier: Modifier = Modifier,
     xmlColorTheme: XmlColorTheme,
     textSize: Int,
-    scrollBehavior: TopAppBarScrollBehavior,
     text: String,
     onValueChange: (String) -> Unit
 ) {
-    // TODO this has a wierd padding at the bottom when IME is open
     // NOTE: there is a bug that when there is a lot of text, the performance tanks
     BasicTextField(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier,
         textStyle = TextStyle.Default.copy(fontSize = textSize.sp),
         value = text,
         onValueChange = onValueChange,
@@ -207,19 +215,15 @@ private fun FileEditorLayout(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun Preview_FileEditorLayout() {
-    val topBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val xmlColorTheme = XmlColorTheme.createTheme(EFontTheme.ECLIPSE)
 
     AppTheme(isDarkTheme = isSystemInDarkTheme()) {
         FileEditorLayout(
             xmlColorTheme = xmlColorTheme,
             textSize = PrefManager.keyFontSize,
-            scrollBehavior = scrollBehavior,
             text = stringResource(id = R.string.about_body),
             onValueChange = {}
         )

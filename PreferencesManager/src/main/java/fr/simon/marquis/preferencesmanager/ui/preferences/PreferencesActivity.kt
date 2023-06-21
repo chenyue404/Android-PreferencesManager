@@ -241,7 +241,8 @@ class PreferencesActivity : ComponentActivity() {
                                     PrefManager.keySortType = it.ordinal
                                     viewModel.getTabsAndPreferences()
                                 },
-                                onSearch = { viewModel.setIsSearching(it) }
+                                onIsSearching = viewModel::isSearching,
+                                onIsNotSearching = viewModel::isNotSearching
                             )
                         }
                     ) { paddingValues ->
@@ -299,7 +300,8 @@ fun PreferencesAppBar(
     onAddClicked: (value: PreferenceType) -> Unit,
     onBackPressed: () -> Unit,
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
-    onSearch: (value: Boolean) -> Unit,
+    onIsSearching: () -> Unit,
+    onIsNotSearching: () -> Unit,
     onSortClicked: (value: EPreferencesSort) -> Unit
 ) {
     AppBar(
@@ -340,7 +342,7 @@ fun PreferencesAppBar(
         actions = {
             PreferencesMenu(
                 isFavorite = Utils.isFavorite(state.pkgName),
-                onSearch = { onSearch(true) },
+                onSearch = onIsSearching,
                 onAddClicked = onAddClicked,
                 onOverflowClicked = onOverflowClicked,
                 onSortClicked = onSortClicked
@@ -353,7 +355,7 @@ fun PreferencesAppBar(
         },
         textState = searchText,
         isSearching = state.isSearching,
-        onSearchClose = { onSearch(false) }
+        onSearchClose = onIsNotSearching
     )
 }
 

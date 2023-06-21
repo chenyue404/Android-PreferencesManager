@@ -10,9 +10,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import fr.simon.marquis.preferencesmanager.R
-import fr.simon.marquis.preferencesmanager.model.EPreferencesAdd
 import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
 import fr.simon.marquis.preferencesmanager.model.EPreferencesSort
+import fr.simon.marquis.preferencesmanager.model.PreferenceType
 import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun PreferencesMenu(
     isFavorite: Boolean,
     onSearch: () -> Unit,
-    onAddClicked: (value: EPreferencesAdd) -> Unit,
+    onAddClicked: (value: PreferenceType) -> Unit,
     onOverflowClicked: (value: EPreferencesOverflow) -> Unit,
     onSortClicked: (value: EPreferencesSort) -> Unit
 ) {
@@ -46,42 +46,42 @@ fun PreferencesMenu(
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_int)) },
             onClick = {
-                onAddClicked(EPreferencesAdd.INTEGER)
+                onAddClicked(PreferenceType.INT)
                 isAddMenuShowing = false
             }
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_string)) },
             onClick = {
-                onAddClicked(EPreferencesAdd.STRING)
+                onAddClicked(PreferenceType.STRING)
                 isAddMenuShowing = false
             }
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_boolean)) },
             onClick = {
-                onAddClicked(EPreferencesAdd.BOOLEAN)
+                onAddClicked(PreferenceType.BOOLEAN)
                 isAddMenuShowing = false
             }
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_float)) },
             onClick = {
-                onAddClicked(EPreferencesAdd.FLOAT)
+                onAddClicked(PreferenceType.FLOAT)
                 isAddMenuShowing = false
             }
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_long)) },
             onClick = {
-                onAddClicked(EPreferencesAdd.LONG)
+                onAddClicked(PreferenceType.LONG)
                 isAddMenuShowing = false
             }
         )
         DropdownMenuItem(
             text = { Text(text = stringResource(id = R.string.action_add_stringset)) },
             onClick = {
-                onAddClicked(EPreferencesAdd.STRINGSET)
+                onAddClicked(PreferenceType.STRINGSET)
                 isAddMenuShowing = false
             }
         )
@@ -202,7 +202,8 @@ private fun Preview_PreferencesMenu() {
             onAddClicked = {},
             onBackPressed = {},
             onOverflowClicked = {},
-            onSearch = {},
+            onIsSearching = {},
+            onIsNotSearching = {},
             onSortClicked = {}
         )
     }
