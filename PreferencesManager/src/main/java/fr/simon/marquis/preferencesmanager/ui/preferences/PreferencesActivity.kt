@@ -384,64 +384,32 @@ fun TabLayout(
                     emptyMessage = stringResource(id = R.string.empty_preference_application)
                 )
             } else {
-                // Tabs
-
-                // TODO: Investigate?
-                // Note:
-                //  This if statement is a bit arbitrary...
-                //  There is an idle game I play with well over 600 preferences. (whyyy)
-                //  This composable will crash.
-                //  So, let's kinda hack something together to render the 'tab' were in
-                if (state.tabList.size < 500) {
-                    ScrollableTabRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        selectedTabIndex = pagerState.currentPage,
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        indicator = { tabPositions ->
-                            TabRowDefaults.SecondaryIndicator(
-                                modifier = Modifier.pagerTabIndicatorOffset(
-                                    pagerState,
-                                    tabPositions
-                                )
-                            )
-                        }
-                    ) {
-                        state.tabList.forEachIndexed { index, tabItem ->
-                            Tab(
-                                text = {
-                                    val pkgName = tabItem.substringAfterLast("/")
-                                    val text = if (pkgName.length > 30) {
-                                        "…${pkgName.takeLast(30)}"
-                                    } else {
-                                        pkgName
-                                    }
-                                    Text(text = text)
-                                },
-                                selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
+                // Tabs, this can crash if there are lots of tabs.
+                ScrollableTabRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedTabIndex = pagerState.currentPage,
+                    edgePadding = 0.dp
+                ) {
+                    // ifEmpty a bit of a hack since it loads an empty list first?!
+                    state.tabList.ifEmpty { listOf("") }.forEachIndexed { index, tabItem ->
+                        Tab(
+                            text = {
+                                val pkgName = tabItem.substringAfterLast("/")
+                                val text = if (pkgName.length > 30) {
+                                    "…${pkgName.takeLast(30)}"
+                                } else {
+                                    pkgName
                                 }
-                            )
-                        }
-                    }
-                } else {
-                    Tab(
-                        text = {
-                            val pkgName = state.tabList[pagerState.currentPage].substringAfterLast(
-                                "/"
-                            )
-                            val text = if (pkgName.length > 30) {
-                                "…${pkgName.takeLast(30)}"
-                            } else {
-                                pkgName
+                                Text(text = text)
+                            },
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
                             }
-                            Text(text = text)
-                        },
-                        selected = true,
-                        onClick = {}
-                    )
+                        )
+                    }
                 }
 
                 // Tab Content
@@ -460,8 +428,8 @@ fun TabLayout(
                             onPage(file)
                         }
                     }
-                    // TODO this still isn't right
 
+                    // TODO this still isn't right
                     val list = file.filteredList.collectAsStateWithLifecycle()
                     PreferenceFragment(
                         list = list.value,

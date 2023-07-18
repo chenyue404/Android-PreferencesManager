@@ -45,7 +45,7 @@ android {
     }
     composeOptions {
         // https://developer.android.com/jetpack/androidx/releases/compose#declaring_dependencies
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.4.8"
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
@@ -61,10 +61,10 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22")
 
     // https://developer.android.com/jetpack/androidx/releases/compose
-    val composeBom = platform("androidx.compose:compose-bom:2023.05.01")
+    val composeBom = platform("androidx.compose:compose-bom:2023.06.01")
     implementation(composeBom)
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.animation:animation")
@@ -85,10 +85,10 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.0")
 
     // https://jitpack.io/#Hospes/headed-lazy-grid
-    implementation("com.github.Hospes:headed-lazy-grid:0.8.0")
+    implementation("com.github.Hospes:headed-lazy-grid:0.8.1")
 
     // https://mvnrepository.com/artifact/com.google.accompanist/accompanist-systemuicontroller
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.3-beta")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.5-beta")
 
     // https://mvnrepository.com/artifact/de.charlex.compose/html-text
     implementation("de.charlex.compose:html-text:1.4.1")
