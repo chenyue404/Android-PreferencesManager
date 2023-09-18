@@ -23,7 +23,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -126,7 +125,7 @@ class PreferenceFile(val file: String) {
 
     private fun updateSort() {
         val sortType = PrefManager.keySortType
-        when (EPreferencesSort.values()[sortType]) {
+        when (EPreferencesSort.entries[sortType]) {
             EPreferencesSort.ALPHANUMERIC -> {
                 list.sortBy { it.key }
             }

@@ -9,7 +9,7 @@ import fr.simon.marquis.preferencesmanager.model.PreferenceFile
 import fr.simon.marquis.preferencesmanager.model.XmlColorTheme
 import fr.simon.marquis.preferencesmanager.util.PrefManager
 import fr.simon.marquis.preferencesmanager.util.Utils
-import java.util.*
+import java.util.Date
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

@@ -7,7 +7,6 @@ trim_trailing_whitespace = true
 
 [*.{kt,kts}]
 indent_size = 4
-ktlint_disabled_rules=no-wildcard-imports
-
-[*.{yml,yaml}]
-indent_size = 2
+ij_kotlin_packages_to_use_import_on_demand = fr.simon.marquis.preferencesmanager.ui.theme.*
+ij_kotlin_name_count_to_use_star_import = 999
+ij_kotlin_name_count_to_use_star_import_for_members = 999

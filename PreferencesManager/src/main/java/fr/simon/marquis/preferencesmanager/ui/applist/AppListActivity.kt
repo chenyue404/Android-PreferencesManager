@@ -21,7 +21,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -51,6 +53,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -58,8 +62,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
@@ -85,9 +91,8 @@ class AppListActivity : ComponentActivity() {
 
     private val viewModel: AppListViewModel by viewModels()
 
-    private val activityResult = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
+    private val contract = ActivityResultContracts.StartActivityForResult()
+    private val activityResult = registerForActivityResult(contract) {
         viewModel.run {
             if (uiState.value.isRootGranted) {
                 startTask(this@AppListActivity)
@@ -105,7 +110,12 @@ class AppListActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge(
+            navigationBarStyle = SystemBarStyle.auto(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            )
+        )
 
         Timber.i("onCreate")
         setContent {
@@ -152,7 +162,7 @@ class AppListActivity : ComponentActivity() {
                                 putExtra(KEY_ICON_URI, entry.iconUri)
                                 putExtra(KEY_PACKAGE_NAME, pkgName)
                                 putExtra(KEY_TITLE, entry.label)
-                            }.also { intent -> activityResult.launch(intent) }
+                            }.also(activityResult::launch)
                         } else {
                             Timber.e("We don't have root to continue!")
                         }
@@ -168,7 +178,7 @@ class AppListActivity : ComponentActivity() {
                             addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                        }.also { intent -> activityResult.launch(intent) }
+                        }.also(activityResult::launch)
                     }
                 )
             }
@@ -254,6 +264,19 @@ private fun AppListLayout(
         mutableIntStateOf(size)
     }
 
+    val context = LocalContext.current
+    val imageLoader = ImageLoader.Builder(context)
+        .memoryCache {
+            MemoryCache.Builder(context)
+                .maxSizePercent(0.25)
+                .build()
+        }.diskCache {
+            DiskCache.Builder()
+                .directory(context.cacheDir.resolve("image_cache"))
+                .maxSizePercent(1.0)
+                .build()
+        }.build()
+
     Surface {
         Scaffold(
             modifier = Modifier
@@ -286,6 +309,7 @@ private fun AppListLayout(
                     items(item) { entry ->
                         AppEntryItem(
                             modifier = Modifier.animateItemPlacement(),
+                            imageLoader = imageLoader,
                             entry = entry,
                             onClick = onClick,
                             onLongClick = onLongClick

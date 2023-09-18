@@ -4,7 +4,7 @@ enum class EAppTheme {
     AUTO, DAY, NIGHT;
 
     companion object {
-        fun getAppTheme(value: Int): EAppTheme = values().find { it.ordinal == value }!!
+        fun getAppTheme(value: Int): EAppTheme = entries.find { it.ordinal == value }!!
     }
 }
 
@@ -12,7 +12,7 @@ enum class EFontTheme {
     ECLIPSE, GOOGLE, ROBOTICKET, NOTEPAD, NETBEANS;
 
     companion object {
-        fun getByTheme(value: Int): EFontTheme = values().find { it.ordinal == value }!!
+        fun getByTheme(value: Int): EFontTheme = entries.find { it.ordinal == value }!!
     }
 }
 
@@ -20,7 +20,7 @@ enum class EFontSize(val size: Int) {
     EXTRA_SMALL(10), SMALL(13), MEDIUM(16), LARGE(20), EXTRA_LARGE(24);
 
     companion object {
-        fun getBySize(value: Int): EFontSize = values().find { it.size == value }!!
+        fun getBySize(value: Int): EFontSize = entries.find { it.size == value }!!
     }
 }
 

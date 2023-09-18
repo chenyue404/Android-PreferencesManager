@@ -32,7 +32,7 @@ import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.text.Collator
-import java.util.*
+import java.util.Collections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -77,7 +77,7 @@ object Utils {
     private const val TMP_FILE = ".temp"
     private val LINE_SEPARATOR = System.getProperty("line.separator")
 
-    var previousApps: ArrayList<AppEntry>? = null
+    private var previousApps: ArrayList<AppEntry>? = null
         private set
 
     private var favorites: HashSet<String>? = null
