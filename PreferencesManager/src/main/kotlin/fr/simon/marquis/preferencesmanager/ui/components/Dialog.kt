@@ -129,7 +129,6 @@ fun DialogAbout(
         val flags = PackageManager.PackageInfoFlags.of(0L)
         context.packageManager.getPackageInfo(context.packageName, flags).versionName
     } else {
-        @Suppress("DEPRECATION")
         context.packageManager.getPackageInfo(context.packageName, 0).versionName
     }
     val appTitle = stringResource(R.string.app_name_and_version, appVersion)

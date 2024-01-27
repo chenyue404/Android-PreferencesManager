@@ -77,7 +77,7 @@ class FileEditorActivity : ComponentActivity() {
 
     private val viewModel: FileEditorViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

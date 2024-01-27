@@ -50,24 +50,6 @@ fun <T : Any> getParcelable(intent: Bundle, key: String?, clazz: Class<T>): T? {
     }
 }
 
-fun <P, R> CoroutineScope.executeAsyncTask(
-    onPreExecute: () -> Unit,
-    doInBackground: suspend (suspend (P) -> Unit) -> R,
-    onPostExecute: (R) -> Unit,
-    onProgressUpdate: (P) -> Unit
-) = launch {
-    onPreExecute()
-
-    val result = withContext(Dispatchers.IO) {
-        doInBackground {
-            withContext(Dispatchers.Main) {
-                onProgressUpdate(it)
-            }
-        }
-    }
-    onPostExecute(result)
-}
-
 object Utils {
 
     private const val CMD_FIND_XML_FILES = "find /data/data/%s -type f -name \\*.xml"
@@ -78,7 +60,6 @@ object Utils {
     private val LINE_SEPARATOR = System.getProperty("line.separator")
 
     private var previousApps: ArrayList<AppEntry>? = null
-        private set
 
     private var favorites: HashSet<String>? = null
 
@@ -92,7 +73,6 @@ object Utils {
                 val flags = ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
                 pm.getInstalledApplications(flags)
             } else {
-                @Suppress("DEPRECATION")
                 pm.getInstalledApplications(0)
             }
 
@@ -183,7 +163,9 @@ object Utils {
 
         val stdout: List<String> = ArrayList()
         val stderr: List<String> = ArrayList()
-        Shell.cmd(String.format(CMD_FIND_XML_FILES, packageName)).to(stdout, stderr).exec()
+
+        val command = String.format(CMD_FIND_XML_FILES, packageName)
+        Shell.cmd(command).to(stdout, stderr).exec()
 
         return stdout
     }
@@ -192,7 +174,9 @@ object Utils {
         Timber.d("readFile(%s)", file)
         val sb = StringBuilder()
         val lines = ArrayList<String>()
-        Shell.cmd(String.format(CMD_CAT_FILE, file)).to(lines).exec()
+
+        val command = String.format(CMD_CAT_FILE, file)
+        Shell.cmd(command).to(lines).exec()
 
         lines.forEach { line ->
             sb.append(line)
@@ -236,7 +220,9 @@ object Utils {
         val destination = File(fileDir, "$date $pkgName $name")
 
         Timber.d("backupFile(%s, %s)", date, name)
-        val job = Shell.cmd(String.format(CMD_CP, fileName, destination.absolutePath)).exec()
+
+        val command = String.format(CMD_CP, fileName, destination.absolutePath)
+        val job = Shell.cmd(command).exec()
 
         Timber.d("backupFile --> %s", destination)
         return job.isSuccess
@@ -244,8 +230,10 @@ object Utils {
 
     fun restoreFile(ctx: Context, fileName: String, packageName: String): Boolean {
         Timber.d("restoreFile(%s, %s)", fileName, packageName)
+
         val backupFile = File(fileName)
-        val job = Shell.cmd(String.format(CMD_CP, backupFile.absolutePath, fileName)).exec()
+        val command = String.format(CMD_CP, backupFile.absolutePath, fileName)
+        val job = Shell.cmd(command).exec()
 
         if (!fixUserAndGroupId(ctx, fileName, packageName)) {
             Timber.e("Error fixUserAndGroupId")
@@ -296,8 +284,8 @@ object Utils {
 
         val tmpFile = File(ctx.filesDir, TMP_FILE)
         try {
-            val outputStreamWriter =
-                OutputStreamWriter(ctx.openFileOutput(TMP_FILE, Context.MODE_PRIVATE))
+            val fos = ctx.openFileOutput(TMP_FILE, Context.MODE_PRIVATE)
+            val outputStreamWriter = OutputStreamWriter(fos)
             outputStreamWriter.write(preferences)
             outputStreamWriter.close()
         } catch (e: IOException) {
@@ -305,7 +293,8 @@ object Utils {
             return false
         }
 
-        Shell.cmd(String.format(CMD_CP, tmpFile.absolutePath, file)).exec()
+        val command = String.format(CMD_CP, tmpFile.absolutePath, file)
+        Shell.cmd(command).exec()
 
         if (!fixUserAndGroupId(ctx, file, packageName)) {
             Timber.e("Error fixUserAndGroupId")
@@ -340,7 +329,6 @@ object Utils {
                 val flags = ApplicationInfoFlags.of(0)
                 pm.getApplicationInfo(packageName, flags)
             } else {
-                @Suppress("DEPRECATION")
                 pm.getApplicationInfo(packageName, 0)
             }
             uid = appInfo.uid.toString()
@@ -354,7 +342,8 @@ object Utils {
             return false
         }
 
-        Shell.cmd(String.format(CMD_CHOWN, uid, uid, file)).exec()
+        val command = String.format(CMD_CHOWN, uid, uid, file)
+        Shell.cmd(command).exec()
         return true
     }
 }

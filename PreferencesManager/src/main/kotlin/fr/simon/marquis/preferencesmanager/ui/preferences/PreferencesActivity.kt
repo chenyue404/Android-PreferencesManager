@@ -40,7 +40,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,7 +57,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,12 +78,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
 import coil.request.ImageRequest
 import com.skydoves.landscapist.coil.CoilImage
-import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.EAppTheme
 import fr.simon.marquis.preferencesmanager.model.EPreferencesOverflow
@@ -144,6 +139,9 @@ class PreferencesActivity : ComponentActivity() {
         setContent {
             // TODO: Add columns to list if either a tablet or landscape mode.
             // val windowSizeClass = calculateWindowSizeClass(this)
+
+            val topBarState = rememberTopAppBarState()
+            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topBarState)
 
             val context = LocalContext.current
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -232,26 +230,12 @@ class PreferencesActivity : ComponentActivity() {
                     }
                 )
 
-                val context = LocalContext.current
-                val imageLoader = ImageLoader.Builder(context)
-                    .memoryCache {
-                        MemoryCache.Builder(context)
-                            .maxSizePercent(0.25)
-                            .build()
-                    }.diskCache {
-                        DiskCache.Builder()
-                            .directory(context.cacheDir.resolve("image_cache"))
-                            .maxSizePercent(1.0)
-                            .build()
-                    }.build()
-
                 Surface {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
                             PreferencesAppBar(
-                                scrollBehavior = null,
-                                imageLoader = imageLoader,
+                                scrollBehavior = scrollBehavior,
                                 state = uiState,
                                 searchText = viewModel.searchText,
                                 onBackPressed = {
@@ -303,8 +287,6 @@ class PreferencesActivity : ComponentActivity() {
                         }
                     ) { paddingValues ->
                         val haptic = LocalHapticFeedback.current
-                        val topBarState = rememberTopAppBarState()
-                        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
                         TabLayout(
                             modifier = Modifier
@@ -351,7 +333,6 @@ class PreferencesActivity : ComponentActivity() {
 @Composable
 fun PreferencesAppBar(
     scrollBehavior: TopAppBarScrollBehavior?,
-    imageLoader: ImageLoader,
     searchText: MutableStateFlow<TextFieldValue>,
     state: PreferencesState,
     onAddClicked: (value: PreferenceType) -> Unit,
@@ -366,29 +347,27 @@ fun PreferencesAppBar(
         title = {
             Row(modifier = Modifier.fillMaxWidth()) {
                 val context = LocalContext.current
-                CompositionLocalProvider(LocalCoilImageLoader provides imageLoader) {
-                    CoilImage(
-                        modifier = Modifier.size(48.dp),
-                        imageRequest = {
-                            ImageRequest.Builder(context)
-                                .data(state.pkgIcon)
-                                .placeholder(R.drawable.empty_view)
-                                .crossfade(true)
-                                .build()
-                        },
-                        previewPlaceholder = R.drawable.empty_view,
-                        loading = {
-                            CircularProgressIndicator()
-                        },
-                        failure = {
-                            Icon(
-                                modifier = Modifier.size(40.dp),
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = null
-                            )
-                        }
-                    )
-                }
+                CoilImage(
+                    modifier = Modifier.size(48.dp),
+                    imageRequest = {
+                        ImageRequest.Builder(context)
+                            .data(state.pkgIcon)
+                            .placeholder(R.drawable.empty_view)
+                            .crossfade(true)
+                            .build()
+                    },
+                    previewPlaceholder = R.drawable.empty_view,
+                    loading = {
+                        CircularProgressIndicator()
+                    },
+                    failure = {
+                        Icon(
+                            modifier = Modifier.size(40.dp),
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null
+                        )
+                    }
+                )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
@@ -416,7 +395,7 @@ fun PreferencesAppBar(
         },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {
-                Icon(Icons.Default.ArrowBack, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
             }
         },
         textState = searchText,

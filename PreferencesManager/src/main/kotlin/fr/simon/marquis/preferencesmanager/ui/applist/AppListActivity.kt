@@ -126,7 +126,7 @@ class AppListActivity : ComponentActivity() {
 
             val scrollState = rememberLazyGridState()
             val topBarState = rememberTopAppBarState()
-            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
+            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topBarState)
 
             var dialogNoRootState by remember(uiState.isRootGranted) {
                 mutableStateOf(!uiState.isRootGranted)
@@ -264,19 +264,6 @@ private fun AppListLayout(
         mutableIntStateOf(size)
     }
 
-    val context = LocalContext.current
-    val imageLoader = ImageLoader.Builder(context)
-        .memoryCache {
-            MemoryCache.Builder(context)
-                .maxSizePercent(0.25)
-                .build()
-        }.diskCache {
-            DiskCache.Builder()
-                .directory(context.cacheDir.resolve("image_cache"))
-                .maxSizePercent(1.0)
-                .build()
-        }.build()
-
     Surface {
         Scaffold(
             modifier = Modifier
@@ -309,7 +296,6 @@ private fun AppListLayout(
                     items(item) { entry ->
                         AppEntryItem(
                             modifier = Modifier.animateItemPlacement(),
-                            imageLoader = imageLoader,
                             entry = entry,
                             onClick = onClick,
                             onLongClick = onLongClick

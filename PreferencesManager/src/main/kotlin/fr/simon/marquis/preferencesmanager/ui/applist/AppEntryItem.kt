@@ -15,25 +15,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
 import coil.request.ImageRequest
 import com.skydoves.landscapist.coil.CoilImage
-import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import fr.simon.marquis.preferencesmanager.R
 import fr.simon.marquis.preferencesmanager.model.AppEntry
-import fr.simon.marquis.preferencesmanager.ui.theme.AppTheme
+import fr.simon.marquis.preferencesmanager.ui.theme.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppEntryItem(
     modifier: Modifier = Modifier,
-    imageLoader: ImageLoader,
     entry: AppEntry,
     onClick: (entry: AppEntry) -> Unit,
     onLongClick: (entry: AppEntry) -> Unit
@@ -62,29 +58,27 @@ fun AppEntryItem(
         },
         leadingContent = {
             val context = LocalContext.current
-            CompositionLocalProvider(LocalCoilImageLoader provides imageLoader) {
-                CoilImage(
-                    modifier = Modifier.size(40.dp),
-                    imageRequest = {
-                        ImageRequest.Builder(context)
-                            .data(entry.iconUri)
-                            .placeholder(R.drawable.empty_view)
-                            .crossfade(true)
-                            .build()
-                    },
-                    previewPlaceholder = R.drawable.empty_view,
-                    loading = {
-                        CircularProgressIndicator()
-                    },
-                    failure = {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-                )
-            }
+            CoilImage(
+                modifier = Modifier.size(40.dp),
+                imageRequest = {
+                    ImageRequest.Builder(context)
+                        .data(entry.iconUri)
+                        .placeholder(R.drawable.empty_view)
+                        .crossfade(true)
+                        .build()
+                },
+                previewPlaceholder = R.drawable.empty_view,
+                loading = {
+                    CircularProgressIndicator()
+                },
+                failure = {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            )
         }
     )
 }
@@ -106,7 +100,6 @@ private fun Preview_AppEntryItem() {
             entry = entry,
             onClick = {},
             onLongClick = {},
-            imageLoader = ImageLoader(context)
         )
     }
 }

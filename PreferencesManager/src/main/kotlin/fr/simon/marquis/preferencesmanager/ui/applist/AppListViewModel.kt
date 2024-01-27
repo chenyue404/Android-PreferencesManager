@@ -8,7 +8,6 @@ import com.topjohnwu.superuser.Shell
 import fr.simon.marquis.preferencesmanager.model.AppEntry
 import fr.simon.marquis.preferencesmanager.model.ThemeSettingsImpl
 import fr.simon.marquis.preferencesmanager.util.Utils
-import fr.simon.marquis.preferencesmanager.util.executeAsyncTask
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -86,25 +85,18 @@ class AppListViewModel : ViewModel() {
     }
 
     fun startTask(context: Context) {
-        viewModelScope.executeAsyncTask(
-            onPreExecute = {
-                _uiState.update { it.copy(isLoading = true) }
-            },
-            doInBackground = { _: suspend (progress: Int) -> Unit ->
-                Utils.getApplications(context)
-            },
-            onPostExecute = { list ->
-                val groupedList = list.groupBy { it.headerChar }
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        appList = list,
-                        filteredAppList = groupedList
-                    )
-                }
-            },
-            onProgressUpdate = {
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            val list = Utils.getApplications(context)
+
+            val groupedList = list.groupBy { it.headerChar }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    appList = list,
+                    filteredAppList = groupedList
+                )
             }
-        )
+        }
     }
 }

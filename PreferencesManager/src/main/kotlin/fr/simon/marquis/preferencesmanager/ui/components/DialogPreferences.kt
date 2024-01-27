@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -108,7 +108,7 @@ fun DialogPreference(
         onDismissRequest = dismissButton,
         icon = {
             val icon = with(preferenceType) {
-                if (isEdit) Icons.Default.Edit else Icons.Default.PlaylistAdd
+                if (isEdit) Icons.Default.Edit else Icons.AutoMirrored.Filled.PlaylistAdd
             }
             Icon(imageVector = icon, contentDescription = null)
         },
